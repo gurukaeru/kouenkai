@@ -546,8 +546,12 @@
 
     <form id="entry-form" class="reveal bg-white border border-ink/10 p-6 sm:p-10 space-y-5" novalidate>
 
+      <!-- スパム対策ハニーポット（人間には見えない。入力があれば送信しない） -->
+      <input type="text" name="website" id="hp-field" tabindex="-1" autocomplete="off" aria-hidden="true"
+        style="position:absolute; left:-9999px; width:1px; height:1px; opacity:0;">
+
       <div class="field">
-        <input type="text" id="name" name="name" placeholder=" " required
+        <input type="text" id="name" name="name" placeholder=" " required autocomplete="name"
           class="w-full border border-ink/15 px-4 py-3.5 text-ink placeholder-transparent focus:outline-none focus:border-tetsu transition-colors bg-white">
         <label for="name">お名前 <span class="text-shu">*</span></label>
         <p class="error-msg hidden text-xs text-shu mt-1.5">お名前を入力してください。</p>
@@ -560,17 +564,21 @@
         <p class="error-msg hidden text-xs text-shu mt-1.5">ふりがなを入力してください。</p>
       </div>
 
+      <!-- 連絡先：メール or 電話のどちらか一方が必須（判定はJS側） -->
+      <p class="text-xs text-gray1 leading-relaxed pt-1">ご連絡先は、メールアドレスまたは電話番号の<span class="text-tetsu font-medium">どちらか一方</span>をご入力ください。</p>
+
       <div class="field">
-        <input type="email" id="email" name="email" placeholder=" " required
+        <input type="email" id="email" name="email" placeholder=" " autocomplete="email"
           class="w-full border border-ink/15 px-4 py-3.5 text-ink placeholder-transparent focus:outline-none focus:border-tetsu transition-colors bg-white">
-        <label for="email">メールアドレス <span class="text-shu">*</span></label>
+        <label for="email">メールアドレス</label>
         <p class="error-msg hidden text-xs text-shu mt-1.5">正しいメールアドレスを入力してください。</p>
       </div>
 
       <div class="field">
-        <input type="tel" id="tel" name="tel" placeholder=" "
+        <input type="tel" id="tel" name="tel" placeholder=" " autocomplete="tel"
           class="w-full border border-ink/15 px-4 py-3.5 text-ink placeholder-transparent focus:outline-none focus:border-tetsu transition-colors bg-white">
         <label for="tel">電話番号</label>
+        <p class="error-msg hidden text-xs text-shu mt-1.5">メールアドレスまたは電話番号のどちらかをご入力ください。</p>
       </div>
 
       <div class="field">
@@ -723,7 +731,20 @@
     });
   }
 
-  // --- 6. フォームバリデーション ---
+  // --- 6. フォームバリデーション & Googleフォーム送信 ---
+  // 送信先：Googleフォーム（回答は連携スプレッドシートに記録・メール通知あり）
+  // フォームの質問を変更した場合は entry 番号の取り直しが必要（CLAUDE.md参照）
+  const GFORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSewAe1S4AcxnzBwJ1lwnn-Drfjhmihl-Zkynptyhj41EpYiAQ/formResponse';
+  const GFORM_ENTRY = {
+    'name': 'entry.696038457',          // お名前
+    'kana': 'entry.652090922',          // ふりがな
+    'email': 'entry.1254037581',        // メールアドレス
+    'tel': 'entry.1434206353',          // 電話番号
+    'org': 'entry.1285990048',          // 会社名・団体名
+    'address': 'entry.1534633733',      // ご住所
+    'message-text': 'entry.38901183',   // その他追記事項
+  };
+
   const form = document.getElementById('entry-form');
   if (form) {
     form.addEventListener('submit', function (e) {
@@ -743,16 +764,25 @@
         }
       });
 
+      // 連絡先：メールまたは電話のどちらか一方が必須。メールは入力がある場合のみ形式チェック
       const email = document.getElementById('email');
+      const tel = document.getElementById('tel');
       const emailErr = email.closest('.field').querySelector('.error-msg');
+      const telErr = tel.closest('.field').querySelector('.error-msg');
       const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailPattern.test(email.value.trim())) {
+      emailErr.classList.add('hidden');
+      telErr.classList.add('hidden');
+      email.classList.remove('border-shu');
+      tel.classList.remove('border-shu');
+      if (!email.value.trim() && !tel.value.trim()) {
+        telErr.classList.remove('hidden');
+        email.classList.add('border-shu');
+        tel.classList.add('border-shu');
+        valid = false;
+      } else if (email.value.trim() && !emailPattern.test(email.value.trim())) {
         emailErr.classList.remove('hidden');
         email.classList.add('border-shu');
         valid = false;
-      } else {
-        emailErr.classList.add('hidden');
-        email.classList.remove('border-shu');
       }
 
       const privacy = document.getElementById('privacy');
@@ -764,11 +794,39 @@
         privacyErr.classList.add('hidden');
       }
 
-      if (valid) {
-        // ここに実際の送信処理（API連携など）を実装してください
+      if (!valid) return;
+
+      // ハニーポットに入力があればスパムとみなし送信しない（見た目は成功にする）
+      if (document.getElementById('hp-field').value) {
         document.getElementById('form-success').classList.remove('hidden');
         form.reset();
+        return;
       }
+
+      // 送信中はボタンを無効化（二重送信防止）
+      const btn = form.querySelector('button[type="submit"]');
+      const btnOrig = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = '送信中…';
+
+      const fd = new FormData();
+      Object.keys(GFORM_ENTRY).forEach((id) => {
+        const el = document.getElementById(id);
+        if (el) fd.append(GFORM_ENTRY[id], el.value.trim());
+      });
+
+      fetch(GFORM_URL, { method: 'POST', mode: 'no-cors', body: fd })
+        .then(() => {
+          document.getElementById('form-success').classList.remove('hidden');
+          form.reset();
+        })
+        .catch(() => {
+          alert('送信に失敗しました。お手数ですが、時間をおいて再度お試しください。');
+        })
+        .finally(() => {
+          btn.disabled = false;
+          btn.textContent = btnOrig;
+        });
     });
   }
 </script>
