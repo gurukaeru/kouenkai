@@ -1,0 +1,1629 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>七日間の審判 ― クリーンに戦って、勝て。</title>
+<style>
+:root{
+  --washi:#F5F1E6;
+  --washi-deep:#EDE7D6;
+  --sumi:#23211C;
+  --sumi-soft:#5A5648;
+  --shu:#C0392B;
+  --shu-deep:#96281B;
+  --ai:#2B4A6F;
+  --kin:#B8933D;
+  --line:#D8D0BC;
+  --ok:#3E7C4F;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{-webkit-text-size-adjust:100%;}
+body{
+  background:var(--washi);
+  background-image:
+    radial-gradient(rgba(0,0,0,.018) 1px, transparent 1px),
+    radial-gradient(rgba(255,255,255,.35) 1px, transparent 1px);
+  background-size:7px 7px, 11px 11px;
+  color:var(--sumi);
+  font-family:"Hiragino Kaku Gothic ProN","Yu Gothic","Noto Sans JP",sans-serif;
+  line-height:1.65;
+  min-height:100vh;
+}
+.serif{font-family:"Hiragino Mincho ProN","Yu Mincho","Noto Serif JP",serif;}
+
+/* ── 紅白幕 ── */
+.kouhaku{
+  height:26px;
+  background:repeating-linear-gradient(90deg,
+    var(--shu) 0 44px, #FBF8F0 44px 88px);
+  border-bottom:3px solid var(--sumi);
+  position:relative;
+}
+.kouhaku::after{
+  content:"";position:absolute;left:0;right:0;bottom:-9px;height:6px;
+  background:repeating-linear-gradient(90deg, transparent 0 40px, rgba(0,0,0,.06) 40px 88px);
+}
+
+.wrap{max-width:760px;margin:0 auto;padding:0 14px 90px;}
+
+/* ── ステータスバー ── */
+#statusbar{
+  position:sticky;top:0;z-index:50;
+  background:rgba(245,241,230,.96);
+  backdrop-filter:blur(3px);
+  border-bottom:2px solid var(--sumi);
+  padding:8px 10px 7px;
+  display:none;
+}
+#statusbar.on{display:block;}
+.sb-inner{max-width:760px;margin:0 auto;display:flex;gap:10px;align-items:center;}
+.sb-daruma{flex:0 0 46px;}
+.sb-stats{flex:1;display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px 12px;}
+.sb-row{display:flex;align-items:center;gap:6px;font-size:11px;}
+.sb-row .lbl{width:3.2em;color:var(--sumi-soft);letter-spacing:.05em;flex:none;}
+.bar{flex:1;height:8px;background:var(--washi-deep);border:1px solid var(--line);border-radius:4px;overflow:hidden;}
+.bar i{display:block;height:100%;border-radius:3px;transition:width .5s ease;}
+.bar .nin{background:var(--shu);}
+.bar .jib{background:var(--ai);}
+.bar .sei{background:var(--ok);}
+.bar .tai{background:var(--kin);}
+.bar .shin{background:#8A5FA0;}
+.sb-money{grid-column:1/-1;display:flex;justify-content:space-between;font-size:12px;font-weight:700;}
+.sb-money .kin-v{font-variant-numeric:tabular-nums;}
+.sb-turn{font-size:11px;color:var(--sumi-soft);}
+
+/* ── 画面共通 ── */
+.screen{padding:26px 4px 10px;animation:fadein .45s ease;}
+@keyframes fadein{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
+h1.title{
+  font-size:clamp(38px,9vw,64px);
+  letter-spacing:.12em;text-align:center;line-height:1.25;
+  margin:18px 0 4px;font-weight:700;
+}
+h1.title .shu-c{color:var(--shu);}
+.subtitle{text-align:center;color:var(--sumi-soft);letter-spacing:.28em;font-size:13px;margin-bottom:26px;}
+h2.ph{
+  font-size:22px;letter-spacing:.1em;font-weight:700;
+  border-left:6px solid var(--shu);padding-left:12px;margin-bottom:4px;
+}
+.ph-sub{color:var(--sumi-soft);font-size:13px;margin-bottom:18px;padding-left:18px;}
+.card{
+  background:#FCFAF3;border:1.5px solid var(--sumi);border-radius:6px;
+  padding:16px 18px;margin-bottom:14px;
+  box-shadow:3px 3px 0 rgba(35,33,28,.12);
+}
+.card h3{font-size:15px;margin-bottom:6px;letter-spacing:.06em;}
+.note{font-size:12.5px;color:var(--sumi-soft);}
+.tag{display:inline-block;font-size:10.5px;border:1px solid currentColor;border-radius:3px;padding:0 6px;margin-right:5px;letter-spacing:.08em;}
+.tag.shu{color:var(--shu-deep);}
+.tag.ai{color:var(--ai);}
+.tag.ok{color:var(--ok);}
+.tag.kin{color:#8a6d23;}
+
+/* ── アクションボタン ── */
+.acts{display:grid;grid-template-columns:1fr;gap:9px;margin-top:12px;}
+@media(min-width:560px){.acts{grid-template-columns:1fr 1fr;}}
+button{font-family:inherit;}
+.act{
+  text-align:left;background:#FCFAF3;border:1.5px solid var(--sumi);
+  border-radius:6px;padding:11px 13px;cursor:pointer;
+  box-shadow:2px 2px 0 rgba(35,33,28,.14);
+  transition:transform .08s, box-shadow .08s;
+}
+.act:hover:not(:disabled){transform:translate(-1px,-1px);box-shadow:3px 3px 0 rgba(35,33,28,.2);}
+.act:active:not(:disabled){transform:translate(1px,1px);box-shadow:none;}
+.act:disabled{opacity:.42;cursor:not-allowed;}
+.act .a-name{font-weight:700;font-size:14.5px;display:flex;justify-content:space-between;gap:6px;}
+.act .a-cost{font-size:11px;color:var(--shu-deep);white-space:nowrap;}
+.act .a-fx{font-size:11.5px;color:var(--sumi-soft);margin-top:3px;}
+.btn-main{
+  display:block;width:100%;margin:20px auto 0;padding:14px;
+  background:var(--shu);color:#FFF;border:2px solid var(--sumi);border-radius:6px;
+  font-size:17px;font-weight:700;letter-spacing:.22em;cursor:pointer;
+  box-shadow:3px 3px 0 var(--sumi);
+  transition:transform .08s, box-shadow .08s;
+}
+.btn-main:hover{transform:translate(-1px,-1px);box-shadow:4px 4px 0 var(--sumi);}
+.btn-main:active{transform:translate(2px,2px);box-shadow:0 0 0 var(--sumi);}
+.btn-sub{
+  display:inline-block;padding:9px 20px;background:#FCFAF3;color:var(--sumi);
+  border:1.5px solid var(--sumi);border-radius:6px;font-size:14px;font-weight:700;
+  cursor:pointer;box-shadow:2px 2px 0 rgba(35,33,28,.2);
+}
+
+/* ── ログ ── */
+#log{margin-top:16px;}
+.log-e{
+  font-size:12.5px;padding:7px 10px;border-left:3px solid var(--line);
+  background:rgba(255,255,255,.5);margin-bottom:5px;border-radius:0 4px 4px 0;
+}
+.log-e.good{border-left-color:var(--ok);}
+.log-e.bad{border-left-color:var(--shu);}
+.log-e.info{border-left-color:var(--ai);}
+
+/* ── モーダル ── */
+#modal-bg{
+  position:fixed;inset:0;background:rgba(35,33,28,.55);z-index:100;
+  display:none;align-items:center;justify-content:center;padding:16px;
+}
+#modal-bg.on{display:flex;}
+#modal{
+  background:var(--washi);border:2.5px solid var(--sumi);border-radius:8px;
+  max-width:520px;width:100%;max-height:86vh;overflow-y:auto;
+  padding:22px 22px 18px;box-shadow:6px 6px 0 rgba(35,33,28,.3);
+  animation:fadein .3s ease;
+}
+#modal .m-tag{
+  display:inline-block;background:var(--sumi);color:var(--washi);
+  font-size:11px;letter-spacing:.2em;padding:2px 10px;border-radius:3px;margin-bottom:10px;
+}
+#modal .m-tag.hanketsu{background:var(--shu-deep);}
+#modal h3{font-size:18px;margin-bottom:10px;line-height:1.5;}
+#modal p{font-size:14px;margin-bottom:12px;}
+#modal .m-quote{
+  font-size:14.5px;background:#FCFAF3;border:1px solid var(--line);
+  border-radius:6px;padding:12px 14px;margin-bottom:14px;
+}
+.m-choice{
+  display:block;width:100%;text-align:left;margin-bottom:9px;
+  background:#FCFAF3;border:1.5px solid var(--sumi);border-radius:6px;
+  padding:12px 14px;font-size:14px;font-weight:700;cursor:pointer;
+  box-shadow:2px 2px 0 rgba(35,33,28,.18);
+}
+.m-choice:hover{transform:translate(-1px,-1px);}
+.kaisetsu{
+  background:#FFF;border:1.5px dashed var(--ai);border-radius:6px;
+  padding:12px 14px;font-size:13px;margin:12px 0;
+}
+.kaisetsu .k-h{color:var(--ai);font-weight:700;font-size:12px;letter-spacing:.15em;margin-bottom:4px;}
+.jobun{font-size:11.5px;color:var(--sumi-soft);margin-top:6px;}
+
+/* ── フェーズ2グリッド ── */
+.koma-strip{display:flex;gap:5px;margin:10px 0 16px;flex-wrap:wrap;}
+.koma{
+  flex:1;min-width:52px;text-align:center;font-size:11px;padding:5px 2px;
+  border:1.5px solid var(--line);border-radius:5px;background:#FCFAF3;color:var(--sumi-soft);
+}
+.koma.now{border-color:var(--shu);background:var(--shu);color:#FFF;font-weight:700;}
+.koma.done{background:var(--washi-deep);text-decoration:line-through;}
+
+/* ── 開票 ── */
+.kaihyo-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px;}
+.kaihyo-rate{font-size:26px;font-weight:700;font-variant-numeric:tabular-nums;}
+table.kaihyo{width:100%;border-collapse:collapse;font-size:13px;}
+table.kaihyo th{
+  text-align:left;font-size:11px;color:var(--sumi-soft);
+  border-bottom:2px solid var(--sumi);padding:4px 6px;letter-spacing:.1em;
+}
+table.kaihyo td{padding:5px 6px;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums;}
+tr.me{background:rgba(192,57,43,.09);font-weight:700;}
+tr.me td:first-child{border-left:4px solid var(--shu);}
+.tousen-mark{color:var(--shu);font-weight:700;font-size:11px;letter-spacing:.05em;}
+.rakusen-mark{color:var(--sumi-soft);font-size:11px;}
+tr.cutline td{border-bottom:2.5px dashed var(--shu-deep);}
+
+/* ── 結果 ── */
+.result-banner{
+  text-align:center;padding:30px 10px 22px;margin:14px 0;
+  border:2.5px solid var(--sumi);border-radius:8px;background:#FCFAF3;
+  box-shadow:4px 4px 0 rgba(35,33,28,.18);
+}
+.result-banner .rb-big{font-size:clamp(40px,10vw,66px);letter-spacing:.15em;font-weight:700;line-height:1.3;}
+.result-banner .win{color:var(--shu);}
+.result-banner .lose{color:var(--ai);}
+.uchiwake{width:100%;border-collapse:collapse;font-size:13px;margin-top:8px;}
+.uchiwake td,.uchiwake th{padding:5px 8px;border-bottom:1px solid var(--line);text-align:right;font-variant-numeric:tabular-nums;}
+.uchiwake th{text-align:left;font-weight:400;color:var(--sumi-soft);}
+
+.daruma-stage{text-align:center;margin:8px 0 2px;}
+.me-eye{animation:eyein .7s cubic-bezier(.2,1.6,.4,1) both;transform-box:fill-box;transform-origin:center;}
+@keyframes eyein{0%{transform:scale(0);}70%{transform:scale(1.35);}100%{transform:scale(1);}}
+.center{text-align:center;}
+.small{font-size:12px;color:var(--sumi-soft);}
+.hr{border:none;border-top:1.5px dashed var(--line);margin:16px 0;}
+.fukidashi{
+  position:relative;background:#FFF;border:1.5px solid var(--sumi);border-radius:8px;
+  padding:12px 15px;font-size:14px;margin:10px 0 4px;
+}
+.fukidashi::before{
+  content:"";position:absolute;top:-9px;left:26px;width:14px;height:14px;
+  background:#FFF;border-left:1.5px solid var(--sumi);border-top:1.5px solid var(--sumi);
+  transform:rotate(45deg);
+}
+@media (prefers-reduced-motion: reduce){
+  *{animation:none!important;transition:none!important;}
+}
+
+/* ── v2: シーン/声/チップ ── */
+.scene-card{border-width:2px;}
+.scene-setup{font-size:15px;line-height:1.9;}
+.voices{margin-top:12px;border-top:1.5px dashed var(--line);padding-top:9px;}
+.voices .v-h{font-size:10.5px;letter-spacing:.25em;color:var(--sumi-soft);margin-bottom:5px;}
+.v-line{font-size:13.5px;color:var(--sumi-soft);margin-bottom:4px;animation:fadein .5s ease both;}
+.v-line:nth-child(3){animation-delay:.15s;}
+.v-line:nth-child(4){animation-delay:.3s;}
+.fx-chip{display:inline-block;font-size:11.5px;font-weight:700;border-radius:4px;padding:2px 8px;margin:2px 4px 2px 0;border:1px solid;}
+.fx-chip.plus{color:var(--ok);border-color:var(--ok);background:rgba(62,124,79,.07);}
+.fx-chip.minus{color:var(--shu-deep);border-color:var(--shu-deep);background:rgba(150,40,27,.06);}
+.news-line{background:#FFF;border:1.5px solid var(--ai);border-radius:6px;padding:10px 13px;font-size:13.5px;margin:10px 0;}
+.tension{margin-top:10px;padding:8px 12px;border:1.5px solid var(--shu-deep);border-radius:6px;background:rgba(192,57,43,.05);font-size:13px;font-variant-numeric:tabular-nums;font-weight:700;text-align:center;}
+#tokaku-ov{position:fixed;inset:0;z-index:200;display:flex;align-items:center;justify-content:center;background:rgba(35,33,28,.35);pointer-events:none;}
+.tokaku-stamp{font-family:"Hiragino Mincho ProN","Yu Mincho",serif;font-size:min(26vw,150px);font-weight:700;color:var(--shu);border:6px double var(--shu);border-radius:12px;padding:6px 30px;background:rgba(245,241,230,.94);letter-spacing:.15em;transform:rotate(-8deg);animation:stampin .55s cubic-bezier(.2,1.5,.4,1) both;box-shadow:0 10px 40px rgba(35,33,28,.35);}
+@keyframes stampin{0%{transform:rotate(-8deg) scale(3);opacity:0;}60%{transform:rotate(-8deg) scale(.92);opacity:1;}100%{transform:rotate(-8deg) scale(1);}}
+.confetti{position:fixed;top:-14px;width:9px;height:15px;z-index:201;animation:cfall linear both;pointer-events:none;}
+@keyframes cfall{to{transform:translateY(110vh) rotate(720deg);}}
+</style>
+</head>
+<body>
+<div class="kouhaku"></div>
+
+<div id="statusbar">
+  <div class="sb-inner">
+    <div class="sb-daruma" id="sb-daruma"></div>
+    <div class="sb-stats">
+      <div class="sb-row"><span class="lbl">認知度</span><div class="bar"><i class="nin" id="b-nin"></i></div></div>
+      <div class="sb-row"><span class="lbl">地盤</span><div class="bar"><i class="jib" id="b-jib"></i></div></div>
+      <div class="sb-row"><span class="lbl">政策</span><div class="bar"><i class="sei" id="b-sei"></i></div></div>
+      <div class="sb-row"><span class="lbl">体力</span><div class="bar"><i class="tai" id="b-tai"></i></div></div>
+      <div class="sb-row"><span class="lbl">信頼</span><div class="bar"><i class="shin" id="b-shin"></i></div></div>
+      <div class="sb-row sb-turn" id="sb-turn"></div>
+      <div class="sb-money"><span>資金</span><span class="kin-v" id="b-kin"></span></div>
+    </div>
+  </div>
+</div>
+
+<div class="wrap"><div id="app"></div></div>
+
+<div id="modal-bg"><div id="modal"></div></div>
+
+<script>
+"use strict";
+/* ══════════════════════════════════════════
+   七日間の審判 v2 ― シーン駆動型
+   すべてのターンが「事件」になる
+   ══════════════════════════════════════════ */
+
+const $ = id => document.getElementById(id);
+const app = $("app");
+const yen = n => "¥" + Math.round(n).toLocaleString("ja-JP");
+const rnd = (a,b) => a + Math.random()*(b-a);
+const pick = arr => arr[Math.floor(Math.random()*arr.length)];
+
+let S = null;
+function newGame(){
+  S = {
+    phase: 0, week: 1, day: 1,
+    nin: 6, jib: 4, sei: 12,
+    tai: 100, shin: 50, kin: 1000000,
+    hōtei: 0, chishiki: 0, ihan: 0, donated: 0,
+    policies: [],
+    gear: {car:false, uguisu:false, bira:false, tel:false},
+    weather: [],
+    sotaD: 0,        // 颯太の得票変動
+    gouwanAtk: false, // 岩城の敵対フラグ
+    kaichō: false,    // 商店街会長の支持
+    useCount: {},
+    prepPaid: false, loan: false,
+    gameOver: false,
+  };
+}
+const HOTEI_JOGEN = 2400000;
+
+function gain(cur, amt){
+  if(amt >= 0) return Math.min(100, cur + amt * (1 - cur/160));
+  return Math.max(0, cur + amt);
+}
+
+/* ── ステータスバー ── */
+function renderSB(turnText){
+  $("statusbar").classList.add("on");
+  $("b-nin").style.width = S.nin + "%";
+  $("b-jib").style.width = S.jib + "%";
+  $("b-sei").style.width = S.sei + "%";
+  $("b-tai").style.width = S.tai + "%";
+  $("b-shin").style.width = S.shin + "%";
+  $("b-kin").textContent = yen(S.kin);
+  $("sb-turn").textContent = turnText || "";
+  $("sb-daruma").innerHTML = darumaSVG(46, true, false);
+}
+
+function openModal(html){ $("modal").innerHTML = html; $("modal-bg").classList.add("on"); $("modal").scrollTop = 0; }
+function closeModal(){ $("modal-bg").classList.remove("on"); }
+
+/* ── 有権者の声 ── */
+const VOICES = {
+  low_nin: ["「誰、この人?」","「ポスター…見たことあったかなぁ」","「名前が読めん」"],
+  mid_nin: ["「駅で毎朝見るわ、あの人」","「最近よう名前を聞くな」","「ああ、あの軽トラの人か」"],
+  jiban: ["「大森会長がえらい気に入っとるらしい」","「うちの店にも顔出してくれたよ」","「若いのに義理堅いんだと」"],
+  sei: ["「介護の話、やけに具体的だったな」","「学童の件、ちゃんと覚えててくれた」","「数字で話す候補は珍しい」"],
+  shin: ["「あの人は断るときも筋を通すらしい」","「金の匂いがせんのがいい」","「クリーンだけで飯が食えるかね……でも嫌いじゃない」"],
+  rain: ["「この雨の中もやっとるわ……」","「傘もささんと。風邪ひくぞ」"],
+  neg: ["「若いもんの綺麗事に聞こえるがな」","「で、結局なにをしてくれるの?」"],
+};
+function voicesHTML(keys){
+  const lines = [];
+  keys.forEach(k=>{
+    if(VOICES[k]) lines.push(pick(VOICES[k]));
+    else lines.push(k); // 直接文字列も可
+  });
+  if(S.nin < 20 && !keys.includes("low_nin")) lines.push(pick(VOICES.low_nin));
+  return `<div class="voices"><div class="v-h">── 街の声 ──</div>` +
+    lines.slice(0,3).map(l=>`<div class="v-line serif">${l}</div>`).join("") + `</div>`;
+}
+
+/* ── 変化量の表示 ── */
+function fxApply(fx, tai, cost){
+  S.tai = Math.max(0, Math.min(100, S.tai - (tai||0)));
+  S.kin -= (cost||0);
+  const label = {nin:"認知度",jib:"地盤",sei:"政策浸透",shin:"信頼"};
+  const parts = [];
+  for(const k in (fx||{})){
+    const before = S[k];
+    if(k === "shin") S.shin = Math.max(0, Math.min(100, S.shin + fx[k]));
+    else S[k] = gain(S[k], fx[k]);
+    const d = S[k] - before;
+    if(Math.abs(d) >= 0.5) parts.push(`${label[k]}${d>0?"+":""}${d.toFixed(0)}`);
+  }
+  if(tai > 0) parts.push(`体力−${tai}`);
+  if(tai < 0) parts.push(`体力+${-tai}`);
+  if(cost > 0) parts.push(`−${yen(cost)}`);
+  return parts.map(p=>`<span class="fx-chip ${p.includes("−")&&!p.includes("体力")?"minus":p.includes("+")?"plus":"minus"}">${p}</span>`).join("");
+}
+
+/* ══════════════ タイトル ══════════════ */
+function scTitle(){
+  $("statusbar").classList.remove("on");
+  app.innerHTML = `
+  <div class="screen center">
+    <p class="subtitle serif" style="margin:30px 0 0;">地盤なし・看板なし・カバンなし</p>
+    <h1 class="title serif">七日間の<span class="shu-c">審判</span></h1>
+    <p class="subtitle">CLEAN CAMPAIGN, REAL VICTORY</p>
+    <div class="daruma-stage">${darumaSVG(130, true, false)}</div>
+    <p class="small" style="margin-top:-4px;">左目に願をかけた。右目は、当選の夜に。</p>
+    <div class="card" style="text-align:left;max-width:520px;margin:22px auto 14px;">
+      <p style="font-size:13.5px;">人口5.7万人の地方都市・みなみ市。市議選は<b>定数18に候補24人</b>。
+      あなたは組織も知名度もない新人。立ちはだかるのは6期目の実力者<b>・岩城剛三</b>、
+      そして同じ最終議席を狙うもう一人の新人<b>・水島颯太</b>。<br>
+      武器は自己資金<b>100万円</b>と、二本の足。90日の仕込みと7日間の勝負で、
+      <b>1,000票</b>を積み上げろ。</p>
+      <hr class="hr">
+      <p class="note">⚖ 誘いのなかには公職選挙法の罠が<b>予告なく</b>混ざります。見抜いて断ることが、信頼と票になります。違反3回で摘発、すべてが終わります。</p>
+    </div>
+    <button class="btn-main" style="max-width:340px;" onclick="startGame()">出 馬 表 明</button>
+    <p class="small" style="margin-top:14px;">※ 制度・金額は学習用に簡略化したモデルです</p>
+  </div>`;
+}
+
+/* ══════════════ 重点政策 ══════════════ */
+const POLICIES = [
+  {id:"kosodate", name:"子育て・教育支援",     m:[1.25,1.22,1.00,0.90], desc:"給食費・学習支援・放課後の居場所づくり。子育て世代に強く響く。"},
+  {id:"iryo",     name:"医療・介護の充実",     m:[0.90,0.95,1.10,1.22], desc:"通院の足、在宅介護、地域医療の維持。高齢層の切実な関心事。"},
+  {id:"keizai",   name:"地元経済・雇用の循環", m:[1.05,1.18,1.15,0.95], desc:"公共調達の域内循環と地元企業支援。働き盛り世代に届く。"},
+  {id:"iju",      name:"移住・若者定着",       m:[1.28,1.12,0.96,0.88], desc:"移住支援と雇用のマッチング。若年層の期待を集めるが票田は薄い。"},
+  {id:"nogyo",    name:"農業・6次産業化",      m:[0.88,0.96,1.18,1.12], desc:"加工・販路開拓で農家の所得向上。農村部の壮年・高齢層に強い。"},
+  {id:"gyozaisei",name:"行財政改革",           m:[1.05,1.08,1.04,1.00], desc:"事業の棚卸しと財政健全化。幅広く薄く支持される堅実路線。"},
+];
+
+function startGame(){ newGame(); S.phase = 0.5; scPolicy(); }
+
+function scPolicy(){
+  $("statusbar").classList.remove("on");
+  const rows = POLICIES.map(p=>{
+    const sel = S.policies.includes(p.id);
+    const full = !sel && S.policies.length >= 2;
+    const bars = ["18-29","30-49","50-64","65+"].map((g,i)=>{
+      const v = p.m[i];
+      const c = v >= 1.15 ? "var(--shu)" : v >= 1.03 ? "var(--kin)" : v <= 0.92 ? "var(--ai)" : "var(--line)";
+      return `<span style="display:inline-block;margin-right:7px;font-size:10.5px;color:var(--sumi-soft);">${g}<b style="color:${c};"> ${v>=1.15?"◎":v>=1.03?"○":v<=0.92?"▲":"−"}</b></span>`;
+    }).join("");
+    return `<button class="act" ${full?"disabled":""} onclick="togglePol('${p.id}')" style="${sel?"background:#FBEBE7;border-color:var(--shu);":""}">
+      <div class="a-name"><span>${sel?"☑ ":"☐ "}${p.name}</span></div>
+      <div class="a-fx">${p.desc}</div>
+      <div class="a-fx" style="margin-top:4px;">${bars}</div>
+    </button>`;
+  }).join("");
+  app.innerHTML = `
+  <div class="screen">
+    <h2 class="ph serif">出馬表明 ── 何を掲げて立つのか</h2>
+    <p class="ph-sub">重点政策を<b>2つ</b>選ぶ(${S.policies.length}/2)。年代ごとに響き方が違う。</p>
+    <div class="acts" style="grid-template-columns:1fr;">${rows}</div>
+    <div class="card" style="margin-top:14px;">
+      <p class="note">◎=強く響く ○=響く −=普通 ▲=響きにくい<br>
+      政策は掲げるだけでは票になりません。<b>「政策浸透」が育つほど補正が効きます</b>。
+      最大の票田は65歳以上(1.9万人×投票率70%)。そして無名では、組織も政策も動きません。</p>
+    </div>
+    <button class="btn-main" ${S.policies.length===2?"":"disabled style='opacity:.4;'"} onclick="confirmPolicy()">この二本柱で出馬する</button>
+  </div>`;
+}
+function togglePol(id){
+  if(S.policies.includes(id)) S.policies = S.policies.filter(x=>x!==id);
+  else if(S.policies.length < 2) S.policies.push(id);
+  scPolicy();
+}
+function confirmPolicy(){
+  if(S.policies.length !== 2) return;
+  S.p1seq = buildP1Seq();
+  S.phase = 1;
+  scP1();
+}
+
+/* ══════════════ フェーズ1:12週のシーン ══════════════
+   choice: {t, tai, cost, fx, res, voices, trap, kchi, roll, sota, flag} */
+const KAISETSU = {
+  temiyage:{title:"手土産も「寄附」", body:"政治家が選挙区内の人へお金や物を贈ることは、祝儀・香典・手土産・差し入れまで名目を問わず原則禁止です。「日本の付き合いの常識」が、政治家には通用しない──ここが最初の関門です。", jobun:"公職選挙法 第199条の2(寄附の禁止)"},
+  jizen:{title:"告示前の投票依頼は「事前運動」", body:"選挙運動は告示日の届出から投票日前日まで。告示前に支持や投票を呼びかければ事前運動です。「ご支援を」等の言い換えでも、趣旨が投票依頼なら同じ。政策・理念の周知と後援会の勧誘までが政治活動の範囲です。", jobun:"公職選挙法 第129条・第142条"},
+  kifu:{title:"選挙区内への寄附は一切禁止", body:"祝儀も名義を変えた祝儀も、実質が候補者側からの寄附ならすべて禁止。有権者側が求めることも禁止されています。労力で貢献するのが正解です。", jobun:"公職選挙法 第199条の2"},
+  aisatsu:{title:"時候の挨拶状・事前の支援依頼", body:"政治家は選挙区内へ年賀状・暑中見舞い等を出せません(答礼の自筆を除く)。また名簿を使って告示前に電話で投票を頼めば事前運動。旧交を温めるのは自由ですが、票の話は告示後、法の枠内で。", jobun:"公職選挙法 第147条の2・第129条"},
+  kobetsu:{title:"戸別訪問は全面禁止", body:"投票依頼のための戸別訪問は買収の温床になりやすいとして全面禁止。「演説会のお知らせ」等の名目でも、戸別に訪ね歩けば違反と明記されています。電話は合法な数少ない個別接触です。", jobun:"公職選挙法 第138条"},
+  baishū:{title:"運動員買収 ── 連座制の入口", body:"選挙運動は原則無償。報酬を払えるのは車上運動員など法定の職種と上限額の範囲だけ。現金でも商品券でも枠外は「運動買収」。出納責任者が処罰されれば連座制で当選無効になり得ます。", jobun:"公職選挙法 第221条・第251条の2"},
+  koden:{title:"香典の例外は「本人がその場で」だけ", body:"政治家の寄附は原則禁止ですが、本人が自ら通夜・葬儀に出席してその場で渡す香典だけは例外です。秘書に持たせる・後日郵送する・代理で渡すはすべて違反。なお弔電は金銭・物品ではないため送れます。", jobun:"公職選挙法 第199条の2(ただし書)"},
+  netmail:{title:"選挙運動メールを送れるのは候補者と政党だけ", body:"選挙運動用の電子メールを送信できるのは候補者・政党等に限られ、受け取った有権者が転送することも禁止です。一方、SNSやLINE等のメッセージ機能は「ウェブサイト等」の扱いで、一般有権者も拡散できます。手段の違いが合法・違法を分けます。", jobun:"公職選挙法 第142条の4"},
+  minor:{title:"18歳未満は選挙運動ができない", body:"18歳未満の者は、SNS投稿を含め一切の選挙運動ができません。本人の意思でも、家族のアカウント名義でも、行為者が18歳未満なら違反。させた側も処罰対象です。応援の気持ちは、18歳の誕生日まで取っておいてもらいましょう。", jobun:"公職選挙法 第137条の2"},
+  toujitsu:{title:"ネット選挙運動も「前日まで」", body:"ウェブサイトやSNSでの選挙運動ができるのは投票日の前日まで。投票日当日に「○○さんへ投票を!」と投稿すれば、候補者本人でも違反です(前日までの投稿が残ることは可)。最後の一押しは、前日の夜までに。", jobun:"公職選挙法 第129条・第142条の3"},
+  kaibunsho:{title:"怪文書・虚偽事項の公表は犯罪", body:"落選させる目的で虚偽の事実を公表すれば虚偽事項公表罪。匿名SNSでも発信者は特定され得ます。仮に事実でも法定外文書の頒布自体が違反です。", jobun:"公職選挙法 第235条・第142条・第146条"},
+};
+
+const P1_SCENES = [
+{ // W1
+  title:"第一声",
+  setup:"事務所はまだない。あるのは借り物の軽トラと、昨夜刷ったばかりの政策リーフレットだけ。<br>最初の一歩を、どこで踏み出す?",
+  choices:[
+    {t:"駅前ロータリーの朝。通勤の人波に向かって第一声", tai:15, fx:{nin:10}, res:"声が嗄れるまで叫んだ。足を止める人はまばら──それでも、確かに数人が振り返った。", voices:["mid_nin","「朝の6時から立っとったぞ、あの兄ちゃん」"]},
+    {t:"商店街を一軒ずつ。店主たちに顔つなぎの挨拶", tai:12, fx:{jib:9}, res:"「議員さんになりたいの? まぁ頑張りな」──シャッターの奥の反応は薄い。だが顔は覚えられた。", voices:["jiban"]},
+    {t:"スマホ一本。出馬表明動画をSNSに投げる", tai:5, fx:{nin:5,sei:5}, roll:{stat:"nin",diff:30,win:{res:"素朴な軽トラ前の動画が思わぬ拡散。「なんか応援したくなる」とコメントが伸びる。", fx:{nin:8}},lose:{res:"再生数は2桁で止まった。ネットの海は広く、無名の声は届かない。", fx:{}}}, voices:["low_nin"]},
+  ]
+},
+{ // W2
+  title:"商店街会長の呼び出し",
+  setup:"商店街振興組合の大森会長(72)から呼び出しがかかった。<br>「議員になりたいなら、まず地元の顔と名前を覚えることだ。<b>うちの組合はまだ誰も推しとらん</b>──さて、あんたはどうする」",
+  choices:[
+    {t:"翌朝から、店開け前の商店街に毎日通う", tai:18, fx:{jib:10}, flag:"kaichō", res:"一週間目、大森会長が初めて茶を出した。「……物好きだな、あんた」。口の端が少し緩んでいた。", voices:["jiban","「会長が茶ぁ出すなんて、初めて見た」"]},
+    {t:"商店街活性化の政策案を持ち込み、理詰めで口説く", tai:8, fx:{sei:8}, roll:{stat:"sei",diff:35,win:{res:"「域内循環、ね。絵空事かと思ったが、数字は嫌いじゃない」──会長が身を乗り出した。", fx:{jib:6}, flag:"kaichō"},lose:{res:"「絵に描いた餅だな」。資料は応接机に置かれたまま、茶も出なかった。", fx:{jib:1}}}, voices:["sei"]},
+    {t:"老舗の銘菓を手土産に、まずは礼儀から", cost:5000, trap:"temiyage", res:""},
+  ]
+},
+{ // W3
+  title:"地元紙の取材",
+  setup:"みなみ新報の記者が事務所(=自宅の居間)に現れた。<br>「新人のあなたに聞きます。<b>定数18に候補24人。なぜ、あなたなのか</b>──30秒でどうぞ」",
+  choices:[
+    {t:"重点政策を一点突破で語り切る", fx:{sei:7,nin:5}, res:"翌朝の紙面、囲み記事に政策の要点が載った。「政策で語る新人」──悪くない見出しだ。", voices:["sei"]},
+    {t:"生い立ちと、この街への想いを語る", fx:{nin:8,shin:4}, res:"記事は小さかったが、犬に頬を舐められて立候補を決めた、というくだりに反響があった。", voices:["「なんか、憎めん人らしいな」","mid_nin"]},
+    {t:"現職批判を展開して爪痕を残す", fx:{nin:10,shin:-6}, res:"「現職は寝ている」──発言は確かに載った。翌日、岩城事務所の空気が凍ったという噂も、一緒に届いた。", flag:"gouwanAtk", voices:["neg","「威勢はいいが、敵を作るやり方だな」"]},
+  ]
+},
+{ // W4
+  title:"岩城剛三、現る",
+  setup:"6期24年、市政の重鎮・岩城剛三(68)が突然、玄関先に立った。<br>「若いの、悪いことは言わん。<b>今回は降りて、俺の後援会で4年修行しろ。次は俺が推してやる</b>──悪い話じゃなかろう」",
+  choices:[
+    {t:"丁重に、しかしはっきり断る", fx:{shin:6}, res:"「……青いな。まぁいい、潰し甲斐がある」。岩城は笑って帰っていった。目は笑っていなかった。", voices:["shin","「岩剛の誘いを断った新人がおるらしい」"]},
+    {t:"「勉強させてください」と頭を下げつつ、出馬は貫く", fx:{jib:5,shin:2}, res:"「口だけは達者だ」。岩城は鼻を鳴らしたが、敵意は薄れたようだった。老練な男は、無用な敵を作らない。", voices:["jiban"]},
+    {t:"「4年後にはあなたがいない」と啖呵を切る", fx:{nin:7,shin:-3}, flag:"gouwanAtk", res:"啖呵は町中に広まった。痛快だと言う者、身の程知らずと言う者──岩城陣営が本気で潰しに来る、という噂も。", voices:["「若いの、言いよったなぁ」","neg"]},
+  ]
+},
+{ // W5
+  title:"後援会長を、誰に",
+  setup:"活動を続けるには後援会が要る。看板になってくれる会長を探すが──<br>名士たちは皆「岩城さんの手前ね……」と口を濁す。残された選択肢は。",
+  choices:[
+    {t:"若手経営者仲間の盟友に頭を下げる", fx:{jib:8}, res:"「お前が出るなら、腹くくるわ」。盟友は一晩考えて、引き受けた。若い後援会の誕生だ。", voices:["「若手の商売人らが動き出したぞ」","jiban"]},
+    {t:"引退した元市議の「ご意見番」を口説く", tai:10, roll:{stat:"jib",diff:30,win:{res:"三度目の訪問で、老人は折れた。「岩城に一泡吹かせるのも一興か」──百戦錬磨の看板が付いた。", fx:{jib:12}},lose:{res:"「儂はもう政治はこりごりじゃ」。三度通ったが、首は縦に振られなかった。", fx:{jib:3}}}, res:"", voices:["jiban"]},
+    {t:"家族に頼む。手作りの選挙でいく", fx:{jib:4,shin:4}, res:"妻が会長、義父が会計。頼りないと笑われた。だが「家族総出」の姿は、思わぬ好感を呼び始める。", voices:["「奥さんが受付やっとった。ええ家族やな」","shin"]},
+  ]
+},
+{ // W6
+  title:"印刷業者の提案",
+  setup:"リーフレット増刷の打ち合わせ。業者の営業がふと声を落とした。<br>「今の内容、惜しいんですよ。<b>支援をお願いする一文</b>があるだけで反応が全然違う。サービスで入れときますよ?」",
+  choices:[
+    {t:"政策と理念の紹介のまま、増刷する", cost:40000, fx:{nin:6,sei:5}, kchi:true, res:"「……お客さん、詳しいね」。営業は肩をすくめた。リーフレットは地味に、しかし確実に配られていく。", voices:["sei"]},
+    {t:"「ご支援ください」の一文を入れてもらう", cost:40000, trap:"jizen", res:""},
+    {t:"後援会入会の案内を同封する", cost:45000, fx:{nin:4,jib:7}, kchi:true, res:"投票依頼ではなく、後援会への勧誘──政治活動の王道だ。入会はがきがぽつり、ぽつりと返り始める。", voices:["jiban"]},
+  ]
+},
+{ // W7
+  title:"車座集会の夜",
+  setup:"公民館のミニ集会。介護の話になった途端、堰を切ったように声があふれた。<br>「病院までバスで1時間半」「息子は仙台、頼れる人がおらん」──<b>予定時間はとうに過ぎている</b>。",
+  choices:[
+    {t:"最後のひとりまで、聞き切る", tai:14, fx:{sei:8,shin:5}, res:"時計は22時を回った。帰り際、腰の曲がった婦人が手を握った。「あんた、聞いてくれただけで、ええ」", voices:["「あの候補、2時間も年寄りの話聞いとったと」","sei"]},
+    {t:"予定通り切り上げ、次の集会へ回る", fx:{sei:4,jib:4}, res:"数をこなすのも戦略だ。今夜は3か所を回り切った。ただ、最初の公民館の空気が少し冷えた気もする。", voices:["mid_nin"]},
+    {t:"話を引き取って、自分の政策を語る", fx:{sei:6,shin:-4}, res:"淀みない政策説明。だが会場の温度は上がらない。「聞いてほしかったんじゃがなぁ」と、誰かが呟いた。", voices:["neg"]},
+  ]
+},
+{ // W8
+  title:"水島颯太、バズる",
+  setup:"みなみ新報電子版:<b>「新人・水島颯太氏(29)のPR動画、10万再生」</b>。<br>IT起業家の颯太はスーツを着ない。ドローン映像と軽快な編集で、若者の話題を独占しつつある。",
+  choices:[
+    {t:"対抗してショート動画に挑戦する", tai:8, roll:{stat:"nin",diff:38,win:{res:"素人臭さが逆に受けた。「必死さが刺さる」──颯太ファンの一部が、こちらも面白がり始めた。", fx:{nin:9}, sota:-30},lose:{res:"渾身のダンス動画は、静かに沈んだ。コメント欄「見てて恥ずかしい」。消したいが、消すともっと燃える。", fx:{nin:2,shin:-2}}}, res:"", voices:["low_nin"]},
+    {t:"流行は追わない。現場回りを黙々と続ける", tai:12, fx:{jib:7,shin:4}, res:"画面の中の颯太と、泥のついた自分の長靴。「向こうは空中戦、こっちは地上戦だ」と腹を決めた。", voices:["jiban","shin"]},
+    {t:"颯太に公開討論を申し込む", roll:{stat:"sei",diff:42,win:{res:"配信討論は互角以上。「政策の解像度はあっちが上では?」のコメントに、颯太の笑顔が一瞬固まった。", fx:{sei:8,nin:6}, sota:-50},lose:{res:"颯太のトークは軽やかで、こちらの言葉は重かった。切り抜き動画で「論破」扱いされ、颯太の株だけが上がった。", fx:{nin:2}, sota:40}}, res:"", voices:["sei"]},
+  ]
+},
+{ // W9
+  title:"夏祭りの祝儀袋",
+  setup:"地区の祭り実行委員が事務所に来た。<br>「今度の夏祭り、<b>ご祝儀を包んでもらえると助かる</b>んだが。歴代の議員さんはみんな出してくれたもんだよ」",
+  choices:[
+    {t:"地域の伝統だ。例年通りの額を包む", cost:10000, trap:"kifu", res:""},
+    {t:"寄附は断り、当日みこしの担ぎ手として汗を流す", tai:15, fx:{jib:8}, kchi:true, res:"「金は出せんが、肩なら貸せます」。祭りの夜、法被姿で神輿の下にいた。実行委員が笑った。「あんた、変わっとるな」", voices:["「祝儀は断ったのに神輿は担ぐんかい」","jiban"]},
+    {t:"自分は出せないので、妻の名義で包む", cost:10000, trap:"kifu", res:""},
+  ]
+},
+{ // W10
+  title:"台風12号",
+  setup:"観測史上級の台風が直撃した。床上浸水、断水、避難所には200人。<br>選挙どころではない──<b>いや、こういう時こそ何をするかが問われる</b>。",
+  choices:[
+    {t:"長靴で泥かきへ。避難所も回って御用聞き", tai:25, fx:{jib:9,shin:8}, res:"三日間、泥と汗にまみれた。腕章も名前入りタスキもなし。それでも「あの時おった人」として、名前は静かに刻まれた。", voices:["「選挙のためだとしても、来ん奴よりずっとええ」","shin"]},
+    {t:"事務所で災害情報をSNSで整理・発信し続ける", tai:8, fx:{nin:5,sei:4}, res:"給水所の場所、罹災証明の出し方──淡々とまとめた投稿が、静かに、しかし広く共有された。", voices:["「あの人のまとめ、一番わかりやすかった」"]},
+    {t:"活動自粛と称して、骨を休める", tai:-35, fx:{}, res:"正直、限界だった。二日間泥のように眠った。街の泥は、他の誰かがかいた。", voices:["「こういう時に顔を見せん人は、覚えとくよ」"]},
+  ]
+},
+{ // W11
+  title:"同窓会名簿",
+  setup:"高校の同級生が名簿を携えてやって来た。<br>「懐かしいだろ? <b>これ使って全員に挨拶回せば</b>、300人は固いぞ。住所も電話も載ってる」",
+  choices:[
+    {t:"名簿で全員に暑中見舞いを出す", cost:30000, trap:"aisatsu", res:""},
+    {t:"名簿は使わず、同窓会に出席して旧交を温める", cost:8000, fx:{jib:6,nin:3}, kchi:true, res:"二次会のカラオケまで付き合った。票の話はしない。それでも帰り際、何人かが小声で言った。「頑張れよ」", voices:["「同級生が出とるんなら、まぁ応援するか」"]},
+    {t:"名簿の番号に電話をかけ、支援を頼んで回る", trap:"aisatsu", res:""},
+  ]
+},
+{ // W12
+  title:"決起集会",
+  setup:"告示まであと一週間。仕込みの90日を締めくくる決起集会──<br>どんな形で、本番へ向かうか。",
+  choices:[
+    {t:"公民館を借りて総決起大会。気勢を上げる", cost:50000, fx:{nin:7,jib:6}, res:"集まった150人。「勝つぞ」の三唱が夜空に響いた。数は力だ。そして力は、伝播する。", voices:["「あの新人、思ったより人が集まっとる」","jiban"]},
+    {t:"後援会と家族だけの、小さな会", fx:{jib:4,shin:6}, tai:-15, res:"会費制の手弁当。妻が「勝っても負けても、うちはうちだから」と笑った。明日からの七日間、これでいい。", voices:["shin"]},
+    {t:"集会はしない。最後の一日まで街頭に立つ", tai:15, fx:{nin:9}, res:"決起大会の代わりに、夕暮れの駅前でマイクを握った。「集会より、あなたの前に立つことを選びました」", voices:["mid_nin","「変わっとるな、この候補」"]},
+  ]
+},
+];
+
+/* ── フェーズ1:代替シーン(各週2種からランダム) ── */
+const P1_ALT = {
+0: { title:"事務所開き",
+  setup:"活動の拠点が要る。カバンのない新人に、選べる場所は多くないが──<br><b>「城」をどこに構える?</b>",
+  choices:[
+    {t:"商店街の空き店舗を借りる", cost:80000, fx:{jib:7,nin:4}, res:"シャッターが一枚開いただけで、通りの空気が少し変わった。「あそこ、誰か入ったんだね」", voices:["jiban","「空き店舗が埋まるのは、ええことよ」"]},
+    {t:"自宅の居間で始める", fx:{jib:3,shin:5}, res:"表札の横に手書きの看板。妻が「事務所仕様」に模様替えした居間で、最初の作戦会議が開かれた。", voices:["shin"]},
+    {t:"駅前のシェアオフィスに机ひとつ", cost:50000, fx:{nin:7,sei:2}, res:"人通りは市内一。ガラス越しに作業する姿そのものが、小さな広告になった。", voices:["mid_nin"]},
+  ]},
+2: { title:"初めてのヤジ",
+  setup:"街頭演説の最中、酒気を帯びた男が声を張り上げた。<br>「<b>どうせお前も、当選したら同じだろうが!</b>」──足を止めた人たちが、あなたの反応を見ている。",
+  choices:[
+    {t:"演説を止め、マイクを置いて男の話を聞きに行く", fx:{shin:6,sei:4}, res:"男は工場を辞めさせられた人だった。15分後、男は言った。「……あんた、変わっとるな」。人垣は増えていた。", voices:["「ヤジった相手と話し込むとは」","shin"]},
+    {t:"「そう思われて当然です。だから──」と切り返す", roll:{stat:"nin",diff:35,win:{res:"切り返しの動画が拡散した。「この返し、好き」──ヤジは最高の演出になった。", fx:{nin:8}},lose:{res:"声が上ずり、言葉が滑った。切り抜かれたのは、狼狽した3秒間だけだった。", fx:{nin:2,shin:-2}}}, res:"", voices:["mid_nin"]},
+    {t:"聞こえないふりで演説を続ける", fx:{nin:3}, res:"プロらしい、と言えなくもない。ただ、足を止めた人たちの何人かは、少し残念そうに歩き出した。", voices:["neg"]},
+  ]},
+4: { title:"ポスターの顔",
+  setup:"掲示板に貼られる一枚が、数千人にとっての「あなたの全て」になる。<br><b>ポスター写真を、どう撮る?</b>",
+  choices:[
+    {t:"プロのカメラマンに依頼する", cost:30000, fx:{nin:7}, res:"仕上がりは見違えた。「詐欺じゃない範囲で、一番いいあなたです」とカメラマンは笑った。", voices:["mid_nin"]},
+    {t:"家族に撮ってもらう", fx:{nin:3,shin:5}, res:"犬をかまっている瞬間を妻が撮った一枚。事務所の誰かが言った。「これ、笑顔が本物だ」", voices:["「ポスターの犬、うちの近所の子と同じ犬種だわ」","shin"]},
+    {t:"気合の自撮りで済ませる", roll:{stat:"nin",diff:30,win:{res:"素人感が逆に目を引いた。「手作り選挙」の象徴として、むしろ語り草に。", fx:{nin:6}},lose:{res:"「証明写真かと思った」。掲示板の中で、あなたの一枚だけが少し寂しい。", fx:{nin:1}}}, res:"", voices:["low_nin"]},
+  ]},
+5: { title:"SNS広告の営業",
+  setup:"ネット広告代理店から電話。<br>「市内在住者にターゲティング配信できますよ。<b>『ご投票よろしくお願いします』の一文も入れて</b>、リーチを最大化しましょう」",
+  choices:[
+    {t:"投票依頼の一文入りで配信する", cost:40000, trap:"jizen", res:""},
+    {t:"政策紹介だけの政治活動広告として配信する", cost:40000, fx:{nin:6,sei:3}, kchi:true, res:"「……線引きにお詳しいですね」。営業は感心した声を出した。広告は政策ページへ静かに人を運んだ。", voices:["sei"]},
+    {t:"広告は見送り、無料の投稿を磨く", fx:{nin:3,sei:2}, res:"金をかけない分、言葉を磨いた。伸びは緩やかだが、フォロワーの質は悪くない。", voices:["mid_nin"]},
+  ]},
+6: { title:"登校見守りの朝",
+  setup:"通学路の交差点で、旗振りのボランティアが足りていないと聞いた。<br>毎朝7時、雨の日も。<b>選挙活動の時間と、まるごと重なる。</b>",
+  choices:[
+    {t:"毎朝の見守りを引き受ける", tai:12, fx:{jib:5,shin:5}, res:"三週目、子どもたちが名前を覚えた。「おはよう、おじさん!」──親たちが、その光景を見ている。", voices:["「うちの子が『旗のおじさん』の話ばっかりする」","shin"]},
+    {t:"初日だけ顔を出し、あとはボランティアに任せる", fx:{jib:2,nin:2}, res:"一度きりの参加。写真は撮れたが、それ以上のものは残らなかった。", voices:["mid_nin"]},
+    {t:"朝は駅頭演説を優先する", fx:{nin:5,shin:-2}, res:"合理的な判断だ。ただ、交差点の方角から「最近見んね」という声が聞こえた気がした。", voices:["neg"]},
+  ]},
+8: { title:"訃報",
+  setup:"古くからの支援者の母堂が亡くなった。通夜は明日の晩。<br>事務所スタッフが聞く。「<b>香典、どうします?</b>」",
+  choices:[
+    {t:"スタッフに香典を持たせて弔問してもらう", cost:10000, trap:"koden", res:""},
+    {t:"自ら通夜に出席し、香典を手渡す", cost:10000, tai:8, fx:{jib:4,shin:3}, kchi:true, res:"焼香を終え、遺族の手を取った。「母は、あんたのミニ集会を楽しみにしとった」──言葉が出なかった。", voices:["jiban"]},
+    {t:"香典は控え、弔電だけ打つ", fx:{shin:2}, kchi:true, res:"弔電は読み上げられた。法には適う。ただ、あの家の玄関までの距離が、少しだけ遠くなった気もする。", voices:[]},
+  ]},
+9: { title:"工場閉鎖の報",
+  setup:"市内の部品工場が閉鎖を発表した。<b>従業員120人</b>。地元紙の一面が暗い。<br>あなたはまだ、何の権限も持たない一候補にすぎないが──",
+  choices:[
+    {t:"従業員の声を聞きに、工場前へ通う", tai:15, fx:{sei:7,jib:4}, res:"再就職の不安、住宅ローン、子の進学。ノートが一冊埋まった。この声が、あなたの政策の背骨になる。", voices:["「候補者で来たのは、あの人だけだった」","sei"]},
+    {t:"雇用対策の提言をまとめ、発信する", fx:{sei:8,nin:3}, res:"移住支援と職業訓練を接続する私案を公開した。市役所の若手が「読みました」と小声で言った。", voices:["sei"]},
+    {t:"今は静観し、体力を温存する", tai:-20, fx:{}, res:"何もできることはない──そう自分に言い聞かせた。テレビの中で、従業員が頭を下げていた。", voices:["neg"]},
+  ]},
+10: { title:"同級生のLINE",
+  setup:"同級生からメッセージが届いた。<br>「同窓会のLINEグループあるだろ? <b>『アイツに投票よろしく』って俺が流しとくわ</b>。150人おるぞ」",
+  choices:[
+    {t:"「頼む」と返信する", trap:"jizen", res:""},
+    {t:"投票の話はまだできない。後援会の案内だけ頼む", fx:{jib:5}, kchi:true, res:"「相変わらず固いなぁ」と笑われた。それでも後援会の案内は流れ、入会はがきが数枚届いた。", voices:["jiban"]},
+    {t:"「告示後に、SNSのシェアで頼む」と伝える", fx:{jib:3,nin:2}, res:"「よく分からんが、そういうもんか」。同級生は素直に了解した。告示後の拡散部隊が、ひとり増えた。", voices:["mid_nin"]},
+  ]},
+};
+
+/* プール構築:固定週(2=会長,4=岩城,8=颯太,12=決起)以外は2種から抽選 */
+function buildP1Seq(){
+  return P1_SCENES.map((sc,i)=> P1_ALT[i] && Math.random() < 0.5 ? P1_ALT[i] : sc);
+}
+
+/* ── フェーズ1 画面 ── */
+function scP1(){
+  renderSB(`フェーズ1|第${S.week}週 / 全12週(告示前)`);
+  const sc = S.p1seq[S.week-1];
+  const btns = sc.choices.map((c,i)=>{
+    const poor = c.cost && S.kin < c.cost;
+    const costs = [];
+    if(c.tai > 0) costs.push(`体力−${c.tai}`);
+    if(c.cost) costs.push(yen(c.cost));
+    return `<button class="act" ${poor?"disabled":""} onclick="chooseP1(${i})">
+      <div class="a-name"><span>${c.t}</span><span class="a-cost">${costs.join(" / ")}</span></div>
+      ${poor?'<div class="a-fx"><b>資金不足</b></div>':""}
+    </button>`;
+  }).join("");
+  app.innerHTML = `
+  <div class="screen">
+    <h2 class="ph serif">第${S.week}週|${sc.title}</h2>
+    <p class="ph-sub">告示まで、あと${13-S.week}週</p>
+    <div class="card scene-card">
+      <p class="scene-setup serif">${sc.setup}</p>
+    </div>
+    <div class="acts" style="grid-template-columns:1fr;">${btns}</div>
+    ${S.tai <= 25 ? '<p class="note center" style="margin-top:10px;">⚠ 体力が限界に近い。無理をすれば倒れる。</p>' : ""}
+  </div>`;
+}
+
+function chooseP1(i){
+  const sc = S.p1seq[S.week-1];
+  resolveChoice(sc.choices[i], ()=> afterP1Scene());
+}
+
+/* ── シーン解決(共通) ── */
+function resolveChoice(c, next){
+  window._next = next;
+  /* 罠 */
+  if(c.trap){
+    S.kin -= (c.cost||0);
+    return violationFlow(KAISETSU[c.trap], next);
+  }
+  /* 判定ロール */
+  if(c.roll){
+    const r = c.roll;
+    const p = Math.max(0.15, Math.min(0.9, 0.3 + (S[r.stat] - r.diff)/55));
+    const win = Math.random() < p;
+    const o = win ? r.win : r.lose;
+    const chips = fxApply(Object.assign({}, c.fx, o.fx), c.tai, c.cost);
+    if(o.flag) S[o.flag] = true;
+    if(o.sota) S.sotaD += o.sota;
+    if(c.kchi){ S.chishiki++; S.shin = Math.min(100, S.shin+6); }
+    return outcomeModal(win ? "成 功" : "失 敗", win, o.res, chips, c.voices, next);
+  }
+  /* 通常 */
+  const chips = fxApply(c.fx, c.tai, c.cost);
+  if(c.flag) S[c.flag] = true;
+  if(c.sota) S.sotaD += c.sota;
+  if(c.kchi){ S.chishiki++; S.shin = Math.min(100, S.shin+6); }
+  outcomeModal(null, true, c.res, chips, c.voices, next);
+}
+
+function outcomeModal(rollLabel, ok, res, chips, voices, next){
+  window._next = next;
+  openModal(`
+    ${rollLabel ? `<span class="m-tag ${ok?"":"hanketsu"}" style="${ok?"background:var(--ok);":""}">判定|${rollLabel}</span>` : ""}
+    <p class="m-quote serif" style="font-size:14.5px;">${res}</p>
+    <div style="margin:10px 0;">${chips}</div>
+    ${voices ? voicesHTML(voices) : ""}
+    <button class="m-choice" onclick="closeModal(); window._next();">つづける</button>
+  `);
+}
+
+/* ── 違反フロー(3ストライク) ── */
+function violationFlow(k, next){
+  S.ihan++;
+  S.shin = Math.max(0, S.shin - 15);
+  if(S.ihan >= 3){ closeModal(); return scBusted(); }
+  const stage = S.ihan === 1
+    ? {tag:"警告", txt:"後日、選挙管理委員会から<b>注意</b>を受けた。今回は指導で済んだが、記録は残り、<b>信頼だけを失った</b>。"}
+    : {tag:"事情聴取", txt:"警察から<b>任意の事情聴取</b>。地元紙に小さく記事が載り、SNSで広まっていく。<b>次はない。</b>"};
+  if(S.ihan === 2) S.nin = Math.max(0, S.nin - 8);
+  window._next = next;
+  openModal(`
+    <span class="m-tag hanketsu">${stage.tag}|違反${S.ihan}回目</span>
+    <h3 class="serif">それは、公職選挙法違反だった</h3>
+    <p>${stage.txt}</p>
+    <div class="kaisetsu"><div class="k-h">解説|${k.title}</div>${k.body}<div class="jobun">▶ ${k.jobun}</div></div>
+    <button class="m-choice" onclick="closeModal(); window._next();">深く反省する</button>
+  `);
+}
+
+function scBusted(){
+  S.gameOver = true;
+  $("statusbar").classList.remove("on");
+  app.innerHTML = `
+  <div class="screen center">
+    <div class="result-banner" style="border-color:var(--shu-deep);">
+      <p class="small" style="letter-spacing:.3em;">GAME OVER</p>
+      <div class="rb-big serif" style="color:var(--shu-deep);">摘 発</div>
+      <p style="margin-top:10px;font-size:14px;">度重なる公職選挙法違反により、あなたの挑戦はここで終わった。<br>
+      当選しても<b>当選無効</b>・<b>公民権停止</b>が待っていたはずだ。</p>
+    </div>
+    <div class="card" style="text-align:left;">
+      <p style="font-size:13.5px;">現実の選挙違反は連座制により、運動員の違反でも当選無効になり得ます。「知らなかった」は通用しません。<b>知識こそ最強の防具</b>です。</p>
+    </div>
+    <button class="btn-main" style="max-width:320px;" onclick="scTitle()">最初からやり直す</button>
+  </div>`;
+}
+
+/* ── 週送り+寄付月+ニュース ── */
+const NEWS_P1 = [
+  null,null,null,
+  "岩城剛三氏、市内全域でミニ集会を精力的に展開。組織力は健在。",
+  null,
+  "水島颯太氏の後援会、若手経営者中心に急拡大中。",
+  null,
+  null,
+  "情勢メモ:現職15人はおおむね安泰。最後の3議席を新人らが争う構図か。",
+  null,
+  "岩城陣営、締め付けを強化。「浮動票など当てにするな」と檄。",
+  null,
+];
+
+function afterP1Scene(){
+  if(S.tai <= 0){
+    S.tai = 30;
+    return openModal(`
+      <span class="m-tag hanketsu">過労</span>
+      <h3 class="serif">倒れた</h3>
+      <p>目が覚めると点滴が繋がっていた。医者は言った。「選挙より先に、体が落ちますよ」<br>丸一週間を療養で失った。</p>
+      <button class="m-choice" onclick="closeModal(); skipWeek();">……不覚</button>
+    `);
+  }
+  proceedWeek();
+}
+function skipWeek(){ S.week++; if(S.week > 12){ scPrep(); } else { scP1(); } }
+
+function proceedWeek(){
+  const news = NEWS_P1[S.week-1];
+  const donation = (S.week % 4 === 0);
+  if(donation){
+    const keihi = 30000;
+    S.kin -= keihi;
+    const kifu = Math.round((S.jib*2000 + Math.max(0,(S.shin-50))*3000) / 1000)*1000;
+    S.kin += kifu; S.donated += kifu;
+    openModal(`
+      <span class="m-tag">月次報告|第${S.week/4}月</span>
+      <p>経費 <b>${yen(keihi)}</b> を支出。後援会経由の個人寄付が <b>${yen(kifu)}</b> 集まった。<span class="note">(寄付額=地盤×信頼。クリーンさは調達力になる)</span></p>
+      ${news ? `<div class="news-line">📰 ${news}</div>` : ""}
+      <button class="m-choice" onclick="closeModal(); skipWeek();">帳簿に記す</button>
+    `);
+  } else if(news){
+    openModal(`
+      <span class="m-tag" style="background:var(--ai);">みなみ新報</span>
+      <div class="news-line">📰 ${news}</div>
+      <button class="m-choice" onclick="closeModal(); skipWeek();">つづける</button>
+    `);
+  } else {
+    skipWeek();
+  }
+}
+
+/* ── 選挙だるまSVG(左目=出陣、右目=当選) ── */
+let _did = 0;
+function darumaSVG(size, leftEye, rightEye){
+  const id = "dg" + (++_did);
+  return `<svg width="${size}" height="${size*1.06}" viewBox="0 0 100 106" aria-label="選挙だるま">
+    <defs>
+      <radialGradient id="${id}" cx="36%" cy="28%" r="85%">
+        <stop offset="0%" stop-color="#E2604E"/>
+        <stop offset="52%" stop-color="#C0392B"/>
+        <stop offset="100%" stop-color="#8E2318"/>
+      </radialGradient>
+    </defs>
+    <!-- 胴体(丸型) -->
+    <path d="M50 5 C77 5 93 26 93 57 C93 87 76 103 50 103
+             C24 103 7 87 7 57 C7 26 23 5 50 5 Z"
+          fill="url(#${id})" stroke="#23211C" stroke-width="2.4"/>
+    <!-- ハイライト -->
+    <ellipse cx="29" cy="19" rx="10" ry="6" fill="#FFF" opacity=".18" transform="rotate(-28 29 19)"/>
+    <!-- 顔まわりの金縁 -->
+    <path d="M50 14 C68.5 14 79 26 79 42.5 C79 61 67 72 50 72
+             C33 72 21 61 21 42.5 C21 26 31.5 14 50 14 Z"
+          fill="none" stroke="#B8933D" stroke-width="4.2"/>
+    <!-- 顔 -->
+    <path d="M50 14 C68.5 14 79 26 79 42.5 C79 61 67 72 50 72
+             C33 72 21 61 21 42.5 C21 26 31.5 14 50 14 Z"
+          fill="#F8F3E4" stroke="#23211C" stroke-width="1.6"/>
+    <!-- 眉 -->
+    <path d="M29.5 33 C32.5 26.5 42 25.5 46.5 30 C41 29 34 30 32 35.5 Z" fill="#23211C"/>
+    <path d="M70.5 33 C67.5 26.5 58 25.5 53.5 30 C59 29 66 30 68 35.5 Z" fill="#23211C"/>
+    <!-- 目 -->
+    <circle cx="37" cy="44" r="8.2" fill="#FFF" stroke="#23211C" stroke-width="2.2"/>
+    <circle cx="63" cy="44" r="8.2" fill="#FFF" stroke="#23211C" stroke-width="2.2"/>
+    ${leftEye ? '<circle cx="63" cy="44" r="4.9" fill="#23211C"/>' : ''}
+    ${rightEye ? '<circle cx="37" cy="44" r="4.9" fill="#23211C" class="me-eye"/>' : ''}
+    <!-- 鼻・口 -->
+    <path d="M47.8 53 q2.2 2.6 4.4 0" fill="none" stroke="#23211C" stroke-width="1.7" stroke-linecap="round"/>
+    <path d="M43.5 61 q6.5 4.2 13 0" fill="none" stroke="#23211C" stroke-width="2.4" stroke-linecap="round"/>
+    <!-- 肩の金飾り -->
+    <path d="M14 72 q5 -3 9 1 M86 72 q-5 -3 -9 1" fill="none" stroke="#B8933D" stroke-width="2.2" stroke-linecap="round"/>
+    <!-- 必勝 -->
+    <text x="50" y="96.5" text-anchor="middle" font-size="14" font-weight="bold"
+          fill="#B8933D" font-family="'Hiragino Mincho ProN','Yu Mincho',serif"
+          style="letter-spacing:2.5px;">必勝</text>
+  </svg>`;
+}
+/* ══════════════ 告示前夜:装備調達 ══════════════ */
+const GEARS = [
+  {id:"car",    name:"選挙カー(レンタル+運転手7日)", cost:200000, note:"7日間、あなたが何をしていても市内を回り続け、毎日自動で認知を積む(運行費 別途¥12,000/日)。"},
+  {id:"uguisu", name:"車上運動員(ウグイス嬢)",        cost:100000, note:"選挙カーの効果1.5倍。法定日当の範囲で雇用。", req:"car"},
+  {id:"bira",   name:"法定ビラ4,000枚+証紙貼り",      cost:80000,  note:"街頭作戦にビラ配布が付き、効果が上がる。"},
+  {id:"tel",    name:"電話作戦ブース(回線+名簿)",     cost:50000,  note:"作戦「電話作戦」解禁。地盤を固める合法な個別接触。"},
+];
+
+function scPrep(){
+  S.phase = 1.5;
+  if(!S.prepPaid){
+    S.prepPaid = true;
+    S.kin -= 450000;
+    S.hōtei += 150000;
+    if(S.kin < 0){ S.loan = true; }
+  }
+  renderSB("告示前夜|選挙準備");
+  const rows = GEARS.map(g=>{
+    const owned = S.gear[g.id];
+    const reqNG = g.req && !S.gear[g.req];
+    const poor = S.kin < g.cost;
+    const dis = owned||reqNG||poor ? "disabled":"";
+    return `<button class="act" ${dis} onclick="buyGear('${g.id}')">
+      <div class="a-name"><span>${owned?"✔ ":""}${g.name}</span><span class="a-cost">${owned?"手配済":yen(g.cost)}</span></div>
+      <div class="a-fx">${g.note}${reqNG?" ── <b>先に選挙カーが必要</b>":""}${(!owned&&poor)?" ── <b>資金不足</b>":""}</div>
+    </button>`;
+  }).join("");
+  app.innerHTML = `
+  <div class="screen">
+    <h2 class="ph serif">告示前夜 ── 装備を整えろ</h2>
+    <p class="ph-sub">90日で集めた資金が、七日間の選択肢に変わる。</p>
+    <div class="card">
+      <h3>必須支出(支払済)</h3>
+      <p style="font-size:13.5px;">供託金 <b>¥300,000</b>(規定得票で返還)/ ポスター印刷・掲示 <b>¥150,000</b></p>
+      <p class="note">使える残資金:<b>${yen(S.kin)}</b>${S.loan?"(親族から借入で補填。収支報告に記載)":""}。
+      日々の運行費・会場費も残しておくこと。法定上限 ${yen(HOTEI_JOGEN)}。</p>
+    </div>
+    <div class="acts" style="grid-template-columns:1fr;">${rows}</div>
+    <button class="btn-main" onclick="startP2()">告示日を迎える(7日間へ)</button>
+  </div>`;
+}
+function buyGear(id){
+  const g = GEARS.find(x=>x.id===id);
+  S.kin -= g.cost; S.hōtei += g.cost;
+  S.gear[id] = true;
+  scPrep();
+}
+
+/* ══════════════ フェーズ2:7日間 ══════════════ */
+const TACTICS = [
+  {id:"gaito", name:"駅頭+街頭演説ハシゴ", tai:20, cost:0, fx:{nin:4.5,sei:3}, outdoor:true, note:"肉声で語り、握手で締める。体力勝負。", biraBonus:true},
+  {id:"enzetsu",name:"個人演説会(夜)", tai:14, cost:20000, fx:{sei:6.5,jib:3.5}, note:"会場費はかかるが、深く刺さる。"},
+  {id:"tel",   name:"電話作戦", gear:"tel", tai:10, cost:6000, fx:{jib:6}, note:"支援者名簿を電話で締める。天候不問。"},
+  {id:"sns",   name:"SNS集中デー", tai:8, cost:0, fx:{nin:3,sei:3}, note:"ライブ配信と拡散依頼。若年層に届く。"},
+  {id:"rest",  name:"半日休養+作戦会議", tai:-30, cost:0, fx:{}, note:"倒れたら終わり。守りも戦術。"},
+];
+
+function startP2(){
+  S.phase = 2; S.day = 1;
+  S.tai = Math.min(100, S.tai + 30);
+  S.weather = Array.from({length:7}, ()=> Math.random() < 0.25);
+  S.p2seq = buildP2Seq();
+  scDayPlan();
+}
+
+function scDayPlan(){
+  renderSB(`フェーズ2|${S.day}日目 / 全7日`);
+  const rain = S.weather[S.day-1];
+  const cards = TACTICS.map(t=>{
+    const noGear = t.gear && !S.gear[t.gear];
+    const short = t.tai > 0 && S.tai < t.tai;
+    const poor = t.cost > 0 && S.kin < t.cost;
+    const overcap = t.cost > 0 && S.hōtei + t.cost > HOTEI_JOGEN;
+    const dis = (noGear||short||poor||overcap) ? "disabled":"";
+    let fx = [];
+    if(t.tai>0) fx.push(`体力−${t.tai}`); if(t.tai<0) fx.push(`体力+${-t.tai}`);
+    if(t.biraBonus && S.gear.bira) fx.push("証紙ビラ配布つき");
+    if(rain && t.outdoor) fx.push('<span style="color:var(--ai);">☔雨×0.65</span>');
+    const u = S.useCount[t.id]||0;
+    if(t.id!=="rest" && u>0) fx.push(`<span style="color:var(--shu-deep);">飽き×${Math.max(0.4,1-0.15*u).toFixed(2)}</span>`);
+    return `<button class="act" ${dis} onclick="chooseTactic('${t.id}')">
+      <div class="a-name"><span>${t.name}</span><span class="a-cost">${t.cost?yen(t.cost):"無料"}</span></div>
+      <div class="a-fx">${fx.join(" / ")}</div>
+      <div class="a-fx">${t.note}${noGear?" ── <b>未手配</b>":""}${short?" ── <b>体力不足</b>":""}${poor?" ── <b>資金不足</b>":""}${overcap?" ── <b>法定上限</b>":""}</div>
+    </button>`;
+  }).join("");
+  app.innerHTML = `
+  <div class="screen">
+    <h2 class="ph serif">${S.day}日目の朝 ${rain?"☔":"☀"} ── 今日の主戦場は</h2>
+    <p class="ph-sub">投票日まであと${8-S.day}日。${rain?"雨。屋外は響きにくい。":""} 法定費用:${yen(S.hōtei)} / ${yen(HOTEI_JOGEN)}</p>
+    ${S.gear.car ? `<div class="news-line" style="border-color:var(--kin);">🚗 選挙カー${S.gear.uguisu?"+ウグイス嬢":""}が今日も市内を回る(毎日自動で認知+/運行費¥12,000)</div>` : ""}
+    <div class="acts" style="grid-template-columns:1fr;">${cards}</div>
+  </div>`;
+}
+
+function chooseTactic(id){
+  const t = TACTICS.find(x=>x.id===id);
+  /* 選挙カーのパッシブ稼働(行動枠を使わない) */
+  let carLine = "";
+  if(S.gear.car && S.kin >= 12000 && S.hōtei + 12000 <= HOTEI_JOGEN){
+    S.kin -= 12000; S.hōtei += 12000;
+    const cm = (S.gear.uguisu?1.5:1) * (S.weather[S.day-1]?0.65:1);
+    const before = S.nin;
+    S.nin = gain(S.nin, 2.4*cm);
+    carLine = `<span class="fx-chip plus">選挙カー稼働 認知+${(S.nin-before).toFixed(1)}</span><span class="fx-chip minus">−¥12,000</span>`;
+  }
+  let mult = 1;
+  if(t.id!=="rest") mult *= Math.max(0.4, 1 - 0.15*(S.useCount[id]||0));
+  if(S.weather[S.day-1] && t.outdoor) mult *= 0.65;
+  const fx = {};
+  for(const k in t.fx) fx[k] = t.fx[k]*mult;
+  if(t.biraBonus && S.gear.bira){ fx.nin = (fx.nin||0)+1.2; fx.sei = (fx.sei||0)+1; }
+  const chips = carLine + fxApply(fx, t.tai, t.cost);
+  S.hōtei += t.cost||0;
+  if(t.id!=="rest") S.useCount[id] = (S.useCount[id]||0)+1;
+  const flavor = {
+    gaito:"駅前、スーパー前、交差点。マイクを握った回数だけ、足を止めた顔があった。",
+    enzetsu:"夜の会場。集まった数十人の目は真剣だ。演説会に来る人は、誰かに話す人だ。",
+    tel:"「はい、はい……ええ、期日前もあるんですよ」。受話器の向こうの一票を、一本ずつ確かめる。",
+    sns:"配信のコメント欄が流れていく。画面の向こうの「いいね」は、投票所まで来てくれるだろうか。",
+    rest:"事務所の畳で泥のように眠った。夕方、ホワイトボードの得票試算を睨む。あと何票、どこから。",
+  }[id];
+  const voices = {
+    gaito:S.weather[S.day-1]?["rain"]:["mid_nin","sei"], enzetsu:["sei"],
+    tel:["jiban"], sns:["「配信見たよ。意外とおもろいやん」"], rest:["「今日は見かけんかったな」"],
+  }[id];
+  outcomeModal(null, true, flavor, chips, voices, ()=> afterTactic());
+}
+
+function afterTactic(){
+  if(S.tai <= 0){
+    S.tai = 25;
+    return openModal(`
+      <span class="m-tag hanketsu">過労</span>
+      <p class="m-quote serif">演説の途中、視界が白く飛んだ。気づけば救護室。「明日は絶対安静です」──貴重な一日が消えた。</p>
+      <button class="m-choice" onclick="closeModal(); endDay(true);">……無念</button>
+    `);
+  }
+  const ev = S.p2seq[S.day];
+  if(ev && ev.special === "debate") return runDebateIntro();
+  if(ev) return playP2Scene(ev);
+  endDay();
+}
+
+/* ── フェーズ2のシーン ── */
+const P2_SCENES = {
+  1: {
+    title:"出陣式",
+    setup:"届出を済ませ、事務所前に人が集まった。7日間の火蓋を切る出陣式──<br><b>誰にたすきを掛けてもらう?</b>",
+    choices:[
+      {t:"母に掛けてもらう", fx:{shin:5,nin:2}, res:"母は不器用に結び目を直し、「行ってきなさい」とだけ言った。誰かの目尻が光っていた。", voices:["「あの場面は、ちょっともらい泣きしたわ」"]},
+      {t:"後援会長に掛けてもらう", fx:{jib:5}, res:"会長が力強く肩を叩く。「預かった看板、汚すなよ」。組織の結束が一段固まった。", voices:["jiban"]},
+      {t:"自分で締める。「借り物じゃない戦いだ」", fx:{nin:5}, res:"「このたすきは、自分で締めます」──ざわめきが起き、その一言が写真付きでSNSに流れた。", voices:["mid_nin"]},
+    ]
+  },
+  2: {
+    title:"ベテラン支援者の申し出",
+    setup:"古参の支援者が地図を広げた。<br>「昔はみんなやったもんだ。<b>一軒一軒ピンポン押して回るのが一番効く</b>。わしが案内するから、行こう」",
+    choices:[
+      {t:"案内してもらい、一軒ずつ回る", trap:"kobetsu", res:""},
+      {t:"訪問はせず、電話で支援を呼びかける", fx:{jib:5}, kchi:true, res:"「気持ちだけ受け取ります。今は電話が精一杯なんです」。老人は不服そうだったが、受話器は取ってくれた。", voices:["jiban"]},
+      {t:"「演説会のお知らせを配るだけ」なら、と回る", trap:"kobetsu", res:""},
+    ]
+  },
+  3: {
+    title:"岩城の切り崩し",
+    setup:"支援を約束していた建設会社の社長から、歯切れの悪い電話。<br>「いやぁ、その……<b>岩城さんとこから、ちょっとな</b>」──組織票が、剥がされ始めている。",
+    choices:[
+      {t:"今すぐ会社へ。社長と正面から話す", tai:12, roll:{stat:"jib",diff:40,win:{res:"「──分かった。うちは最初の約束どおりだ」。社長は電話の子機を裏返して置いた。繋ぎ止めた。", fx:{jib:6}},lose:{res:"「悪いな。うちも商売なんだ」。深々と下げられた頭が、答えだった。", fx:{jib:-4}}}, res:"", voices:["jiban"]},
+      {t:"深追いしない。浮動票の海へ漕ぎ出す", fx:{nin:4,sei:3}, res:"「組織で負けるなら、数で勝つしかない」。固定票の綱引きを捨て、街頭に立つ時間を増やした。", voices:["mid_nin"]},
+      {t:"電話作戦部隊で外堀の支援者を固め直す", fx:{jib:4}, res:"崩されたのは一社。だがその周りには、まだ迷っている人たちがいる。夜まで受話器を置かなかった。", voices:["jiban"]},
+    ]
+  },
+  4: {
+    title:"日当3万円",
+    setup:"選対の若手が言いにくそうに切り出した。<br>「学生ボランティア、疲れてます。<b>日当3万くらい弾めば</b>、明日から倍動いてくれますよ」",
+    choices:[
+      {t:"士気は金だ。日当3万円を払う", cost:90000, trap:"baishū", res:""},
+      {t:"現金は避けて、商品券を配る", cost:60000, trap:"baishū", res:""},
+      {t:"実費(弁当・交通費)と、深夜の豚汁で報いる", cost:15000, fx:{jib:3,shin:4}, kchi:true, res:"「払える金には法律の枠がある。その代わり──」深夜の事務所に豚汁の湯気が立つ。学生たちの箸が止まらない。", voices:["「あの事務所、飯だけはうまいらしい」","shin"]},
+    ]
+  },
+  5: { special:"debate" },
+  6: {
+    title:"匿名の封筒",
+    setup:"事務所のポストに分厚い封筒。中には対立候補の醜聞メモと、走り書き。<br>「<b>真偽は微妙ですが、最終日に流せば数百票動きます</b>。ご自由に」",
+    choices:[
+      {t:"匿名SNSアカウントで流す", trap:"kaibunsho", res:""},
+      {t:"裏が取れた部分だけビラにして撒く", cost:30000, trap:"kaibunsho", res:""},
+      {t:"封筒ごとシュレッダーへ。政策で勝負する", fx:{shin:6}, kchi:true, res:"細断音が事務所に響いた。「うちはこれでいく」。スタッフの誰かが、小さく拍手した。", voices:["shin","「あの陣営は最後まで綺麗にやっとるな」"]},
+    ]
+  },
+  7: {
+    title:"マイク納め",
+    setup:"最終日、20時。法律が定めた「声の締め切り」が近づく。<br>7日間の最後の一声を、<b>どこで置く?</b>",
+    choices:[
+      {t:"すべてが始まった駅前で", fx:{nin:4,shin:3}, res:"90日前、誰も足を止めなかった場所。今夜は人垣ができていた。「ありがとうございました」──20時、マイクが落ちた。", voices:["「最初からずっと、あの駅前におったなぁ」"]},
+      {t:"商店街のアーケードで", fx:{jib:4,shin:3}, res:"シャッターの前に、大森会長が腕を組んで立っていた。演説が終わると一言。「──明日、見とるからな」", voices:["jiban"]},
+      {t:"自宅前で、家族と支えてくれた人にだけ", fx:{shin:6}, res:"聴衆は30人。でも全員の名前が言えた。「勝っても負けても、この7日間は財産です」。妻が頷いた。", voices:["shin"]},
+    ]
+  },
+};
+
+/* ══════════════ FMみなみ・公開討論会(5日目・強制) ══════════════ */
+const DEBATE = {
+  intro:`夕方、FMみなみのスタジオ。<b>全候補出演の公開討論会</b>──欠席は「逃げた」と報じられる。<br>
+  隣のブースに岩城剛三、その隣に水島颯太。赤いランプが点き、司会が口を開いた。<br>
+  「テーマは<b>『この街の10年後』</b>。お一人ずつ、伺います」`,
+  q:[
+    {q:"市の貯金にあたる基金が、5年連続で減っています。<b>まず何から手を付けますか?</b>",
+     opts:[
+      {t:"全事業の総点検。決算カードと経常収支比率を市民に開き、優先順位を一緒に決める", g:2, pol:"gyozaisei",
+       react:"司会「……新人さんの口から決算カードとは」。岩城の眉がぴくりと動いた。"},
+      {t:"無駄の削減に、全力で努めてまいります", g:1,
+       react:"司会「具体的には?」──沈黙が2秒。ラジオの2秒は、長い。"},
+      {t:"国や県から、もっと予算を取ってきます", g:0,
+       react:"岩城が笑いを噛み殺した。「取ってくるのはワシの仕事じゃ。40年かけてな」"},
+     ]},
+    {q:"「病院までバスで1時間半」。<b>通院の足がない高齢者に、市は何ができますか?</b>",
+     opts:[
+      {t:"デマンド交通を医療・買物支援と一体で設計する。まず1地区で実証運行から", g:2, pol:"iryo",
+       react:"車座集会で聞いたあの声が、そのまま言葉になった。スタジオの外で、誰かが頷いた気がした。"},
+      {t:"地域包括ケアシステムの構築を推進します", g:1,
+       react:"間違いではない。だが役所の答弁のようだ、と自分でも思った。"},
+      {t:"まずはご家族やご近所の支え合いが基本かと", g:0,
+       react:"颯太がすかさず拾った。「その家族が市外にいるから、困ってるんですよね」。一本取られた。"},
+     ]},
+    {q:"若者が毎年、市外へ流出しています。<b>現実的な一手は?</b>",
+     opts:[
+      {t:"雇用とセットの移住支援。地元企業の求人と待遇を見える化し、支援金と接続する", g:2, pol:"iju",
+       react:"颯太が初めてこちらを見た。「……それ、僕が言おうと思ってたやつです」。スタジオに笑いが起きた。"},
+      {t:"この街の魅力発信を、SNSで強化していきます", g:1,
+       react:"颯太が微笑んだ。「発信なら、僕がもうやってますよ」。分が悪い。"},
+      {t:"若者は、いずれ故郷の良さに気づいて戻ってきます", g:0,
+       react:"司会「戻るための仕事は、あるんでしょうか」。答えに詰まった。"},
+     ]},
+    {q:"利用者が減った公民館や学校。<b>統廃合を進めますか?</b>",
+     opts:[
+      {t:"施設ごとの維持費と利用実態をまず全部開示する。数字を共有してから、地区ごとに合意形成を", g:2, pol:"gyozaisei",
+       react:"「潰す・潰さないの前に、開く」──司会がメモを取った。"},
+      {t:"住民の声を聞きながら、慎重に検討します", g:1,
+       react:"誰も傷つけない答えは、誰にも刺さらない。"},
+      {t:"一つも潰しません。すべて守ります", g:0,
+       react:"拍手が起きかけた瞬間、颯太が静かに刺した。「財源は、どこにあるんですか?」──立ち往生した。"},
+     ]},
+    {q:"共働き家庭から<b>「学童保育の空きがない」</b>との声が届いています。どうしますか?",
+     opts:[
+      {t:"待機の実数と地区分布をまず公表し、空き教室と地域人材で受け皿を作る", g:2, pol:"kosodate",
+       react:"「数字を出してから約束する」──子育て世代のSNSで、この部分の音声が回り始めた。"},
+      {t:"子育て支援の一層の充実に努めてまいります", g:1,
+       react:"司会「具体的には、いつまでに?」。宿題を持ち帰る形になった。"},
+      {t:"昔はおじいちゃんおばあちゃんが見たものですが", g:0,
+       react:"颯太が即座に拾った。「その世代が現役で働く時代の話を、今しているんです」"},
+     ]},
+    {q:"担い手のいない農地が増え続けています。<b>市に打てる手はありますか?</b>",
+     opts:[
+      {t:"作るだけでなく加工と販路まで。規格外で捨てられていた作物を商品に変える6次化支援を", g:2, pol:"nogyo",
+       react:"「捨てていたものが、金になる」──ラジオの向こうの畑で、誰かが手を止めた。"},
+      {t:"国の補助事業の活用を、しっかり促してまいります", g:1,
+       react:"岩城が薄く笑う。「その補助金の取り方を、あんたは知っとるのか?」"},
+      {t:"正直、儲からない農業からの転換もやむを得ないかと", g:0,
+       react:"スタジオが凍った。この街の外周は、すべて田畑だ。"},
+     ]},
+    {q:"先の台風では避難の遅れが出ました。<b>防災で最優先すべきは?</b>",
+     opts:[
+      {t:"避難行動要支援者の名簿を実効化する。「誰が誰を助けるか」を地区単位で決めておく", g:2,
+       react:"泥かきの三日間で見た光景が、そのまま政策になっていた。言葉に体温がある。"},
+      {t:"防災意識の啓発と、訓練の充実に努めます", g:1,
+       react:"正しい。ただ、昨年も一昨年も、誰かが同じことを言っていた。"},
+      {t:"基本は自助です。まず自分の身は自分で守っていただく", g:0,
+       react:"司会が静かに返した。「先日浸水した地区の、独り暮らしの方にも同じことを?」"},
+     ]},
+    {q:"「議員が多すぎる、報酬も高い」という市民の声に、<b>どう答えますか?</b>",
+     opts:[
+      {t:"減らす前に、開く。議会の仕事と成果を可視化し、定数論は住民の判断材料とセットで", g:2, pol:"gyozaisei",
+       react:"「切る話より、見せる話が先」──司会がもう一度メモを取った。"},
+      {t:"市民の声を重く受け止め、議論してまいります", g:1,
+       react:"受け止めただけでは、ラジオでは何も鳴らない。"},
+      {t:"当選した暁には、真っ先に定数削減を提案します", g:0,
+       react:"拍手が起きかけた。だが司会が返す。「削減で浮くのは予算の0.1%ほどです。本丸は?」──続く言葉がなかった。"},
+     ]},
+    {q:"市が発注する仕事の<b>半分以上が市外の業者に流れています</b>。どう見ますか?",
+     opts:[
+      {t:"域内循環の設計を。分離分割発注と地元要件を、品質を落とさず入れていく", g:2, pol:"keizai",
+       react:"「市の金が市内を回れば、それは巡り巡って税収に還る」──岩城が初めて、まともにこちらを見た。"},
+      {t:"地元優先の意識を持って、取り組んでまいります", g:1,
+       react:"「意識」は予算書に書けない、と自分でも分かっていた。"},
+      {t:"安くて質が良ければ、市外でも構わないのでは", g:0,
+       react:"商店街の方角から、シャッターの閉まる音が聞こえた気がした。"},
+     ]},
+    {q:"最後に。<b>実績の現職でも、発信力の若手でもない。あなたに入れる理由は?</b>",
+     opts:[
+      {t:"この90日、現場で聞いた声を全部ノートに書いた。私の政策は、そのノートから作りました", g:2,
+       react:"ポケットの中の、角の折れたノートに触れた。嘘のない言葉は、電波に乗っても嘘がない。"},
+      {t:"誠心誠意、この街のために働きます", g:1,
+       react:"本心だ。ただ、24人全員が同じことを言える言葉でもあった。"},
+      {t:"他の候補では、この街は変わらないからです", g:0,
+       react:"スタジオの空気が2度下がった。岩城は無言。無言が、一番怖かった。"},
+     ]},
+  ]
+};
+
+/* ── フェーズ2:代替シーン(ネット選挙の罠) ── */
+const P2_ALT = {
+  2: {
+    title:"高校生の甥っ子",
+    setup:"事務所を手伝ってくれている高校2年の甥が、目を輝かせて言った。<br>「僕もSNSで<b>『おじさんに投票して!』って投稿します!</b> フォロワー800人いるんで!」",
+    choices:[
+      {t:"若い力だ。任せる", trap:"minor", res:""},
+      {t:"気持ちだけ受け取り、投稿は18歳になってからと伝える", fx:{shin:4}, kchi:true, res:"「えー、なんでですか」と口を尖らせた甥に、法律の話をした。「じゃあ18になったら、真っ先にやりますからね」", voices:["「あそこの陣営、高校生にもちゃんと説明しとったよ」"]},
+      {t:"親(姉)のアカウントから投稿してもらう", trap:"minor", res:""},
+    ]
+  },
+  4: {
+    title:"町内会メーリングリスト",
+    setup:"支援者の男性が親切心で申し出た。<br>「あんたから来た選挙のメール、<b>うちの町内会のメーリングリストに転送しとくよ</b>。200世帯に届くぞ」",
+    choices:[
+      {t:"ありがたい。転送をお願いする", trap:"netmail", res:""},
+      {t:"メールではなく、SNS投稿のシェアをお願いする", fx:{jib:3,nin:2}, kchi:true, res:"「メールはダメでSNSはええんか。ややこしい世の中だ」と男性は笑い、投稿を町内のグループに共有してくれた。", voices:["jiban"]},
+      {t:"LINEのグループへの共有をお願いする", fx:{jib:2,nin:2}, res:"LINE等のメッセージ機能は「ウェブサイト等」の扱い──合法の範囲で、200世帯への回覧板が回った。", voices:["mid_nin"]},
+    ]
+  },
+  6: {
+    title:"投票日朝の一斉投稿計画",
+    setup:"若手スタッフがホワイトボードに書き出した。<br>「<b>投票日の朝8時、『投票行こう!○○さんへ!』ってみんなで一斉投稿</b>しましょう! 最後のひと押しです!」",
+    choices:[
+      {t:"名案だ。当日朝の一斉投稿を計画する", trap:"toujitsu", res:""},
+      {t:"投稿は前日の夜までに仕込む", fx:{nin:3}, kchi:true, res:"「明日は投票日です」──前日20時、最後の投稿を送信した。ここから先は、法の定めた静寂だ。", voices:["「ネットも前日までって、知らんかったわ」"]},
+      {t:"候補者本人のアカウントなら当日も大丈夫だろう", trap:"toujitsu", res:""},
+    ]
+  },
+};
+
+function buildP2Seq(){
+  const seq = {};
+  for(const d in P2_SCENES) seq[d] = P2_SCENES[d];
+  for(const d in P2_ALT) if(Math.random() < 0.5) seq[d] = P2_ALT[d];
+  return seq;
+}
+
+function runDebateIntro(){
+  const pool = DEBATE.q.slice(0, -1);           // 最終問以外
+  const closing = DEBATE.q[DEBATE.q.length-1];  // 「なぜあなたか」は毎回ラスト
+  const drawn = [...pool].sort(()=>Math.random()-0.5).slice(0,4);
+  S.debate = {i:0, score:0, gaffe:0, qs:[...drawn, closing]};
+  openModal(`
+    <span class="m-tag" style="background:var(--ai);">FMみなみ|候補者公開討論会</span>
+    <p class="m-quote serif">${DEBATE.intro}</p>
+    <p class="note">全5問。答えの質が支持を動かす。あなたの重点政策と筋の通った答えには、説得力が宿る。</p>
+    <button class="m-choice" onclick="closeModal(); scDebateQ();">マイクの前へ</button>
+  `);
+}
+
+function scDebateQ(){
+  const d = S.debate;
+  const Q = d.qs[d.i];
+  renderSB(`5日目・夜|公開討論 ${d.i+1}/5問`);
+  const btns = Q.opts.map((o,i)=>`
+    <button class="act" onclick="answerDebate(${i})">
+      <div class="a-name"><span>${o.t}</span></div>
+    </button>`).join("");
+  app.innerHTML = `
+  <div class="screen">
+    <h2 class="ph serif">公開討論|第${d.i+1}問</h2>
+    <p class="ph-sub">FMみなみ 生放送中 🔴</p>
+    <div class="card scene-card"><p class="scene-setup serif">司会「${Q.q}」</p></div>
+    <div class="acts" style="grid-template-columns:1fr;">${btns}</div>
+  </div>`;
+}
+
+function answerDebate(i){
+  const d = S.debate;
+  const o = d.qs[d.i].opts[i];
+  const polHit = o.g===2 && o.pol && S.policies.includes(o.pol);
+  d.score += o.g===2 ? 1 : o.g===1 ? 0.5 : 0;
+  if(o.g===0) d.gaffe++;
+  const fx = o.g===2 ? {sei:2.5, nin:1.5} : o.g===1 ? {sei:1} : {shin:-2};
+  if(polHit) fx.sei = (fx.sei||0) + 2;
+  const chips = fxApply(fx, 0, 0);
+  const tag = o.g===2 ? {t:"会心の答え", c:"background:var(--ok);"} : o.g===1 ? {t:"無難な答え", c:"background:var(--kin);"} : {t:"失 言", c:""};
+  d.i++;
+  openModal(`
+    <span class="m-tag ${o.g===0?"hanketsu":""}" style="${tag.c}">${tag.t}${polHit?"|公約と一貫":""}</span>
+    <p class="m-quote serif">${o.react}${polHit?"<br><b>掲げた政策と地続きの答えに、説得力が宿った。</b>":""}</p>
+    <div style="margin:10px 0;">${chips}</div>
+    <button class="m-choice" onclick="closeModal(); ${d.i<5?"scDebateQ()":"debateVerdict()"};">${d.i<5?"次の質問へ":"放送終了"}</button>
+  `);
+}
+
+function debateVerdict(){
+  const d = S.debate;
+  let v;
+  if(d.score >= 4){
+    v = {tag:"圧 勝", c:"background:var(--ok);", fx:{sei:5,nin:5}, sota:-60,
+         txt:"翌朝の電子版:<b>「無名の新人、討論で存在感」</b>。切り抜き音声が拡散し、颯太陣営に初めて焦りの色が浮いた。",
+         voices:["「ラジオ聞いたか? あの新人、ようしゃべるわ」","sei"]};
+  } else if(d.score >= 2.5){
+    v = {tag:"善 戦", c:"background:var(--kin);", fx:{sei:2.5,nin:2}, sota:-10,
+         txt:"大崩れはしなかった。「新人にしては、まとも」──最高の褒め言葉ではないが、最悪でもない。",
+         voices:["「悪くはなかったんちゃう」"]};
+  } else {
+    v = {tag:"苦 杯", c:"", fx:{nin:1}, sota:40,
+         txt:"岩城は老練に、颯太は軽妙に。自分の言葉だけがスタジオの床に落ちた。切り抜かれたのは、失言のほうだった。",
+         voices:["neg","「颯太くんのほうが面白かったなぁ」"]};
+  }
+  S.sotaD += v.sota;
+  const chips = fxApply(v.fx, 0, 0);
+  openModal(`
+    <span class="m-tag ${v.sota>0?"hanketsu":""}" style="${v.c}">討論結果|${v.tag}(${d.score}/5点)</span>
+    <p class="m-quote serif">${v.txt}</p>
+    <div style="margin:10px 0;">${chips}<span class="fx-chip ${v.sota<0?"plus":"minus"}">颯太の勢い${v.sota<0?v.sota:"+"+v.sota}</span></div>
+    ${voicesHTML(v.voices)}
+    <button class="m-choice" onclick="closeModal(); endDay();">事務所へ戻る</button>
+  `);
+}
+
+function playP2Scene(ev){
+  renderSB(`フェーズ2|${S.day}日目・夕`);
+  const btns = ev.choices.map((c,i)=>{
+    const poor = c.cost && S.kin < c.cost;
+    const costs = [];
+    if(c.tai > 0) costs.push(`体力−${c.tai}`);
+    if(c.cost) costs.push(yen(c.cost));
+    return `<button class="act" ${poor?"disabled":""} onclick="chooseP2Scene(${i})">
+      <div class="a-name"><span>${c.t}</span><span class="a-cost">${costs.join(" / ")}</span></div>
+    </button>`;
+  }).join("");
+  app.innerHTML = `
+  <div class="screen">
+    <h2 class="ph serif">${S.day}日目・夕|${ev.title}</h2>
+    <div class="card scene-card"><p class="scene-setup serif">${ev.setup}</p></div>
+    <div class="acts" style="grid-template-columns:1fr;">${btns}</div>
+  </div>`;
+  window._p2ev = ev;
+}
+function chooseP2Scene(i){
+  resolveChoice(window._p2ev.choices[i], ()=> endDay());
+}
+
+/* ── 一日の終わり ── */
+const NEWS_P2 = [
+  "各陣営、初日から全力疾走。期日前投票は今日から。",
+  "序盤情勢:現職優位は変わらず。残り2〜3議席を新人4人が争う。",
+  null, // 3日目は情勢調査
+  "水島颯太氏の街頭に若者の人だかり。今夜はFMみなみで全候補討論会──欠席者は「逃げた」と書かれる。",
+  "岩城剛三氏「議席は積み上げた信頼の器だ」と貫禄の演説。",
+  "最終盤へ。各陣営、電話とSNSで最後の追い込み。",
+  null,
+];
+function endDay(skipRegen){
+  S.day++;
+  if(!skipRegen) S.tai = Math.min(100, S.tai + 24);
+  if(S.day > 7) return scVoteDay();
+  if(S.day === 4){ return showPoll(); }
+  const news = NEWS_P2[S.day-2];
+  const rain = S.weather[S.day-1];
+  if(news){
+    openModal(`
+      <span class="m-tag" style="background:var(--ai);">みなみ新報|${S.day-1}日目・夜</span>
+      <div class="news-line">📰 ${news}</div>
+      ${rain?'<p class="note">☔ 明日は雨の予報。</p>':""}
+      <button class="m-choice" onclick="closeModal(); scDayPlan();">${S.day}日目の朝へ</button>
+    `);
+  } else {
+    scDayPlan();
+  }
+}
+
+function showPoll(){
+  const est = calcVotes().total;
+  const sotaEst = 840 + S.sotaD;
+  let joukyou;
+  if(est >= 980) joukyou = "「当選圏内」──ただし終盤の失速で泣いた新人は数知れない。";
+  else if(est >= 800) joukyou = "「当落線上」──ボーダーの上を裸足で歩いている。";
+  else joukyou = "「苦戦」──このままでは届かない。残り4日、戦い方を変えろ。";
+  const weakest = [["nin",S.nin,"認知不足が全てを目減りさせている。選挙カーと街頭で名前を刻め"],
+                   ["jib",S.jib,"組織が薄い。電話作戦と個人演説会で票を「固定」しろ(高齢層が弱い)"],
+                   ["sei",S.sei,"政策が浸透していない。演説会とSNSで中身を語れ(政策補正が眠っている)"]]
+                  .sort((a,b)=>a[1]-b[1])[0];
+  openModal(`
+    <span class="m-tag" style="background:var(--ai);">中盤情勢|みなみ新報・電話調査</span>
+    <h3 class="serif">「新人候補、${est>=980?"当選圏うかがう":est>=800?"当落線上の激戦":"厳しい戦い"}」</h3>
+    <p>あなたの情勢は${joukyou}</p>
+    <p class="note">ライバル動向:水島颯太氏は${sotaEst>=900?"勢いに乗り、当選圏が見えている":sotaEst>=800?"当落線上であなたと並走中":"伸び悩んでいる"}。最後の一議席は、この男との取り合いになる公算。</p>
+    <div class="kaisetsu"><div class="k-h">選対の分析</div>${weakest[2]}。</div>
+    <button class="m-choice" onclick="closeModal(); scDayPlan();">4日目の朝へ</button>
+  `);
+}
+
+/* ══════════════ 投票日 ══════════════ */
+function scVoteDay(){
+  S.phase = 3;
+  renderSB("投票日|できることは、もうない");
+  app.innerHTML = `
+  <div class="screen center">
+    <h2 class="ph serif" style="text-align:left;">翌日、投票日 ── 静かな一日</h2>
+    <p class="ph-sub" style="text-align:left;">投票は朝7時から夜8時まで。当日の選挙運動は禁止──マイクを置き、審判を待つ。開票は午後9時から。</p>
+    <div class="daruma-stage">${darumaSVG(120, true, false)}</div>
+    <div class="fukidashi" style="max-width:460px;margin:14px auto;text-align:left;">
+      90日と7日。駅頭の会釈、車座の夜、断った封筒、泥の中の長靴──<br>
+      その一つひとつが、今日、誰かの鉛筆の先に宿るだろうか。
+    </div>
+    <div class="card" style="text-align:left;max-width:460px;margin:0 auto 8px;">
+      <table class="uchiwake">
+        <tr><th>重点政策</th><td>${S.policies.map(id=>POLICIES.find(p=>p.id===id).name).join(" / ")}</td></tr>
+        <tr><th>認知度</th><td>${S.nin.toFixed(0)} / 100</td></tr>
+        <tr><th>地盤(組織)</th><td>${S.jib.toFixed(0)} / 100</td></tr>
+        <tr><th>政策浸透</th><td>${S.sei.toFixed(0)} / 100</td></tr>
+        <tr><th>信頼</th><td>${S.shin.toFixed(0)} / 100</td></tr>
+        <tr><th>公選法知識</th><td>${S.chishiki} / 7</td></tr>
+      </table>
+    </div>
+    <button class="btn-main" style="max-width:340px;" onclick="scCount()">投票締切、そして午後9時 ── 開票開始</button>
+  </div>`;
+}
+
+/* ══════════════ 得票エンジン ══════════════ */
+const DEMO = [
+  {name:"18〜29歳", voters:5000,  turnout:0.31, w:s=>(s.nin*0.60 + s.sei*0.40), coef:0.000355},
+  {name:"30〜49歳", voters:12000, turnout:0.46, w:s=>(s.sei*0.60 + s.nin*0.40), coef:0.000429},
+  {name:"50〜64歳", voters:12000, turnout:0.60, w:s=>(s.jib*0.50 + s.sei*0.28 + s.nin*0.22), coef:0.000503},
+  {name:"65歳以上", voters:19000, turnout:0.70, w:s=>(s.jib*0.76 + s.nin*0.24), coef:0.000592},
+];
+let _lastGate = 1;
+
+function polMult(gi){
+  if(S.policies.length === 0) return 1;
+  const raw = S.policies.reduce((s,pid)=>s + POLICIES.find(p=>p.id===pid).m[gi], 0) / S.policies.length;
+  return 1 + (raw - 1) * Math.min(1, S.sei/70);
+}
+
+function calcVotes(){
+  const trustMult = 0.85 + S.shin * 0.0035;
+  const ninGate = Math.min(1, 0.12 + S.nin/70);
+  const kaichōB = S.kaichō ? 1.04 : 1;   // 商店街会長の支持
+  const breakdown = DEMO.map((d,i)=>{
+    const pm = polMult(i);
+    const v = d.voters * d.turnout * d.w(S) * d.coef * trustMult * pm * ninGate * kaichōB * rnd(0.94,1.06);
+    return {name:d.name, votes:Math.round(v), cast:Math.round(d.voters*d.turnout), pm};
+  });
+  const total = breakdown.reduce((s,b)=>s+b.votes,0);
+  _lastGate = ninGate;
+  const altYoung = Math.round(DEMO[0].voters * 0.70 * DEMO[0].w(S) * DEMO[0].coef * trustMult * polMult(0) * ninGate);
+  return {breakdown, total, trustMult, altYoung};
+}
+
+/* ライバル陣容:岩城=盤石の1位候補、颯太=最終議席の宿敵 */
+const RIVAL_BASE = [1710,1590,1500,1430,1360,1300,1240,1190,1140,1090,1040,1000,960,925,890,858,826,795,760,720,672,610];
+const RIVAL_NAMES = ["佐藤一郎","高橋正","田中博","渡辺茂","伊藤誠","山本清","中村勲","小林亮","加藤守","吉田隆","山田要","斎藤実","松本進","井上晃","木村修","林達也","清水健","山口宏","阿部聡","森大介","橋本良","石川陽"];
+
+function buildField(){
+  const gouwan = Math.round((S.gouwanAtk ? 1610 : 1690) * rnd(0.97,1.03));
+  const sota = Math.max(450, Math.round((840 + S.sotaD) * rnd(0.95,1.05)));
+  const cands = [{name:"岩城剛三", final:gouwan, me:false, inc:true, star:"gouwan"}];
+  RIVAL_BASE.forEach((b,i)=>{
+    cands.push({name:RIVAL_NAMES[i], final:Math.round(b*rnd(0.95,1.05)), me:false, inc:i<14});
+  });
+  cands.push({name:"水島颯太", final:sota, me:false, inc:false, star:"sota"});
+  const my = calcVotes();
+  cands.push({name:"あなた", final:my.total, me:true, inc:false});
+  return {cands, my};
+}
+
+/* ══════════════ 開票演出 ══════════════ */
+let FIELD=null;
+function scCount(){
+  FIELD = buildField();
+  renderSB("開票速報");
+  const steps = [4, 12, 25, 40, 55, 70, 83, 93, 100];
+  let idx = 0;
+  app.innerHTML = `
+  <div class="screen">
+    <h2 class="ph serif">開票速報 ── みなみ市議会議員選挙</h2>
+    <p class="ph-sub">定数18/候補24|投票率 55.4%</p>
+    <div class="card">
+      <div class="kaihyo-head">
+        <span>開票率</span><span class="kaihyo-rate" id="rate">0%</span>
+      </div>
+      <div id="board"></div>
+    </div>
+    <p class="center small" id="count-msg">開票所から第一報を待っています…</p>
+  </div>`;
+  const sortedF = [...FIELD.cands].sort((a,b)=>b.final-a.final);
+  const myRank = sortedF.findIndex(c=>c.me)+1;
+  const sotaRank = sortedF.findIndex(c=>c.star==="sota")+1;
+  const closeBattle = Math.abs(myRank-18) <= 2 || Math.abs(sotaRank-18) <= 2;
+  const msgs = [
+    "第一陣の票束が開いた。岩城陣営、早くも万歳の準備か",
+    "現職勢が順当に積み上げる",
+    "中盤──あなたの名前が読み上げられ始めた",
+    "票の山が拮抗している",
+    closeBattle ? "当落線上、あなたと水島颯太が数十票差でもつれている" : "当落線上、激しい攻防",
+    "終盤──ボーダーが目まぐるしく入れ替わる",
+    "残すは期日前投票の開披。事務所は誰も喋らない",
+    "最終集計中……",
+    "開票終了",
+  ];
+  const timer = setInterval(()=>{
+    const rate = steps[idx];
+    drawBoard(rate, idx === steps.length-1);
+    $("rate").textContent = rate + "%";
+    $("count-msg").textContent = msgs[idx] || "";
+    idx++;
+    if(idx >= steps.length){
+      clearInterval(timer);
+      const won = [...FIELD.cands].sort((a,b)=>b.final-a.final).findIndex(c=>c.me) < 18;
+      if(won){ setTimeout(showTokaku, 500); setTimeout(scResult, 2600); }
+      else setTimeout(scResult, 1800);
+    }
+  }, 1300);
+}
+
+function drawBoard(rate, final){
+  const rows = FIELD.cands.map(c=>{
+    const counted = final ? c.final : Math.round(c.final * rate/100 * rnd(0.86,1.14));
+    return {...c, counted};
+  }).sort((a,b)=>b.counted-a.counted);
+  const html = `<table class="kaihyo">
+    <tr><th>順位</th><th>候補</th><th></th><th style="text-align:right;">得票</th><th></th></tr>
+    ${rows.map((c,i)=>{
+      const mark = final ? (i<18 ? `<span class="tousen-mark">当</span>` : `<span class="rakusen-mark">落</span>`) : "";
+      const nm = c.star==="sota" ? `<b>${c.name}</b>` : c.star==="gouwan" ? `<b>${c.name}</b>` : c.name;
+      return `<tr class="${c.me?"me":""} ${i===17?"cutline":""}">
+        <td>${i+1}</td><td>${nm}${c.me?" ★":""}</td>
+        <td class="small">${c.inc?"現":"新"}</td>
+        <td style="text-align:right;">${c.counted.toLocaleString()}</td>
+        <td>${mark}</td></tr>`;
+    }).join("")}
+  </table>
+  <p class="small" style="margin-top:6px;">── 点線が当落ライン(18位)──</p>`;
+  const meRow = rows.find(r=>r.me);
+  const myPos = rows.indexOf(meRow) + 1;
+  const lineV = rows[17].counted;
+  const diff = meRow.counted - lineV;
+  const tension = myPos <= 18
+    ? `あなた ${meRow.counted.toLocaleString()}票(${myPos}位)|当落線まで<b style="color:var(--ok);">+${diff.toLocaleString()}票</b>の貯金`
+    : `あなた ${meRow.counted.toLocaleString()}票(${myPos}位)|当落線まで<b>あと${(-diff).toLocaleString()}票</b>`;
+  $("board").innerHTML = html + `<div class="tension">${tension}</div>`;
+}
+
+/* ── 当確演出 ── */
+function showTokaku(){
+  const ov = document.createElement("div");
+  ov.id = "tokaku-ov";
+  ov.innerHTML = `<div class="tokaku-stamp">当確</div>`;
+  document.body.appendChild(ov);
+  const colors = ["#C0392B","#B8933D","#2B4A6F","#F5F1E6"];
+  for(let i=0;i<28;i++){
+    const c = document.createElement("div");
+    c.className = "confetti";
+    c.style.left = Math.random()*100 + "vw";
+    c.style.background = colors[i%4];
+    c.style.animationDuration = (1.6+Math.random()*1.6)+"s";
+    c.style.animationDelay = (Math.random()*0.7)+"s";
+    document.body.appendChild(c);
+    setTimeout(()=>c.remove(), 4200);
+  }
+  setTimeout(()=>ov.remove(), 2400);
+}
+
+/* ══════════════ 結果 ══════════════ */
+function scResult(){
+  const sorted = [...FIELD.cands].sort((a,b)=>b.final-a.final);
+  const rank = sorted.findIndex(c=>c.me) + 1;
+  const won = rank <= 18;
+  const my = FIELD.my;
+  const sota = FIELD.cands.find(c=>c.star==="sota");
+  const sotaRank = sorted.findIndex(c=>c.star==="sota")+1;
+
+  let title, sub, cls;
+  if(won && rank <= 5){ title="上位当選"; sub="新人としては異例の得票。市政の台風の目になる。"; cls="win"; }
+  else if(won && rank <= 15){ title="当 選"; sub="確かな議席。90日と7日の積み重ねが実を結んだ。"; cls="win"; }
+  else if(won){ title="滑り込み当選"; sub=`次点との差、わずか${Math.max(1,(my.total - sorted[18].final)).toLocaleString()}票。${sotaRank===19?"敗れた水島颯太が、深夜、事務所に握手に来た。「次は負けません」":"まさに薄氷の勝利だった。"}`; cls="win"; }
+  else if(rank === 19){ title="次 点"; sub=`あと${(sorted[17].final - my.total).toLocaleString()}票。${sotaRank<=18?"当選圏に滑り込んだのは水島颯太だった。":""}この悔しさは、4年後の一票目になる。`; cls="lose"; }
+  else { title="落 選"; sub="力及ばず。だが得た知識と信頼は消えない。"; cls="lose"; }
+
+  let hotokuLine = "";
+  if(S.shin >= 80) hotokuLine = `<p class="serif" style="margin-top:10px;font-size:14px;">「至誠と実行は、最後に報われる」── 信頼 ${S.shin.toFixed(0)} は得票を <b>${((my.trustMult-1)*100).toFixed(0)}%</b> 押し上げた。</p>`;
+  else if(S.shin <= 40) hotokuLine = `<p style="margin-top:10px;font-size:13px;">信頼の低さが得票の足を引っ張った(補正 ${((my.trustMult-1)*100).toFixed(0)}%)。クリーンさは倫理であると同時に、戦略でもある。</p>`;
+
+  window._resultCtx = {rank, won, total:my.total, sotaRank, sota};
+  renderSB("結果");
+  app.innerHTML = `
+  <div class="screen">
+    <div class="result-banner">
+      <p class="small" style="letter-spacing:.3em;">みなみ市議会議員選挙 ── 審判</p>
+      <div class="rb-big serif ${cls}">${title}</div>
+      <p style="font-size:15px;margin-top:6px;"><b>${my.total.toLocaleString()}票</b>(${rank}位/24人・定数18)</p>
+      <div class="daruma-stage">${darumaSVG(130, true, won)}</div>
+      <p style="font-size:13.5px;">${won ? "だるまに、両の目が入った。" : "だるまの右目は、まだ白いまま。"}</p>
+      <p style="font-size:13.5px;max-width:420px;margin:6px auto 0;">${sub}</p>
+    </div>
+
+    <div class="card">
+      <h3>ライバルたちの結末</h3>
+      <p style="font-size:13.5px;">
+      <b>岩城剛三</b>:${sorted.findIndex(c=>c.star==="gouwan")+1}位・${FIELD.cands.find(c=>c.star==="gouwan").final.toLocaleString()}票。${S.gouwanAtk?"あなたとの確執が報じられ、盤石の牙城もわずかに削れた。":"6期目も貫禄の当選。"}<br>
+      <b>水島颯太</b>:${sotaRank}位・${sota.final.toLocaleString()}票で${sotaRank<=18?"当選":"落選"}。${S.sotaD<=-40?"あなたとの直接対決での失点が、最後まで響いた。":S.sotaD>=30?"あなたが討論を避けた分の風は、彼に吹いた。":"SNSの風は、投票箱の前でいくらか止んだ。"}</p>
+    </div>
+
+    <div class="card">
+      <h3>得票の内訳 ── どの世代が、あなたを押し上げたか</h3>
+      <table class="uchiwake">
+        <tr><th></th><td>投票者数</td><td>政策補正</td><td>あなたの得票</td></tr>
+        ${my.breakdown.map(b=>`<tr><th>${b.name}</th><td>${b.cast.toLocaleString()}</td><td>×${b.pm.toFixed(2)}</td><td><b>${b.votes.toLocaleString()}票</b></td></tr>`).join("")}
+        <tr><th>合計</th><td></td><td></td><td><b>${my.total.toLocaleString()}票</b></td></tr>
+      </table>
+      <div class="kaisetsu" style="margin-top:12px;"><div class="k-h">シルバーデモクラシーの数理</div>
+      65歳以上は有権者1.9万人×投票率70%。18〜29歳は5千人×31%。同じ「支持率」でも票の重みが数倍違います。
+      もし若年投票率が高齢層並み(70%)なら、あなたの若年票は <b>${my.breakdown[0].votes.toLocaleString()}票 → 約${my.altYoung.toLocaleString()}票</b> でした。投票率そのものが、政治の重心を決めています。</div>
+    </div>
+
+    <div class="card">
+      <h3>戦いの記録</h3>
+      <table class="uchiwake">
+        <tr><th>重点政策</th><td>${S.policies.map(id=>POLICIES.find(p=>p.id===id).name).join(" / ")}</td></tr>
+        <tr><th>最終ステータス</th><td>認知${S.nin.toFixed(0)} / 地盤${S.jib.toFixed(0)} / 政策${S.sei.toFixed(0)}</td></tr>
+        <tr><th>信頼</th><td>${S.shin.toFixed(0)} / 100(得票補正 ×${my.trustMult.toFixed(2)})</td></tr>
+        ${_lastGate < 0.99 ? `<tr><th>認知ゲート</th><td style="color:var(--shu-deep);">×${_lastGate.toFixed(2)} ── 無名が最後まで足かせに</td></tr>` : ""}
+        ${S.kaichō ? `<tr><th>大森会長の支持</th><td>×1.04 ── 商店街が最後に効いた</td></tr>` : ""}
+        <tr><th>公選法知識</th><td>${S.chishiki} / 7 ${S.chishiki>=6?"── 見事。もう選対を任せられる":""}</td></tr>
+        <tr><th>違反</th><td>${S.ihan}回 ${S.ihan===0?"── 完全クリーン達成":""}</td></tr>
+        <tr><th>集めた寄付</th><td>${yen(S.donated)}</td></tr>
+        <tr><th>選挙運動費用</th><td>${yen(S.hōtei)} / 上限${yen(HOTEI_JOGEN)}</td></tr>
+        <tr><th>供託金</th><td>${my.total >= 140 ? "返還(法定得票クリア)" : "没収(得票が規定に届かず)"}</td></tr>
+      </table>
+      ${hotokuLine}
+    </div>
+
+    <div class="center" style="margin-top:18px;">
+      <a class="btn-sub" target="_blank" rel="noopener" href="https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText())}" style="text-decoration:none;display:inline-block;margin:0 5px 10px;">結果をXでシェア</a>
+      <button class="btn-sub" style="margin:0 5px 10px;" onclick="navigator.clipboard && navigator.clipboard.writeText(shareText()).then(()=>this.textContent='コピーしました!')">結果をコピー</button>
+    </div>
+    <button class="btn-main" onclick="scEpilogue()">その後の物語へ</button>
+    <button class="btn-sub" style="display:block;margin:12px auto 0;" onclick="scTitle()">タイトルへ戻る</button>
+  </div>`;
+}
+
+function shareText(){
+  const c = window._resultCtx;
+  return `【七日間の審判】みなみ市議選(定数18/候補24)、${c.total.toLocaleString()}票で${c.rank}位──${c.won?"当選!":"落選…"} クリーン戦績:違反${S.ihan}回/公選法知識${S.chishiki}/7 #七日間の審判`;
+}
+
+/* ══════════════ エピローグ ══════════════ */
+function scEpilogue(){
+  const c = window._resultCtx;
+  const pol = S.policies.map(id=>POLICIES.find(p=>p.id===id).name).join("」と「");
+  let body = "";
+  if(c.won){
+    body += `<p class="scene-setup serif">初登院の朝。議場の一番奥、新人の席にあなたは座った。${c.rank>=16?"18ある椅子の、ぎりぎり端の一脚。だが椅子は椅子だ。":""}</p>`;
+    body += `<p class="scene-setup serif">${S.gouwanAtk
+      ? "岩城剛三がすれ違いざま、立ち止まった。「……気に食わんが、票は票だ。議場では容赦せんぞ」──それは、老練な男なりの承認だった。"
+      : "岩城剛三が声をかけてきた。「若いの、席は用意されるもんじゃない。奪うもんだ。──ようやった」"}</p>`;
+    if(c.sotaRank > 18) body += `<p class="scene-setup serif">深夜、水島颯太から短いメッセージが届いていた。「完敗です。でも4年後、僕はもっと強くなってます」──良い敵は、良い薬だ。</p>`;
+    body += `<p class="scene-setup serif">最初の一般質問。あなたは「${pol}」を取り上げた。90日と7日、ノートに書き溜めたあの声たちを、初めて公式の議事録に刻む日だ。<br>マイクを引き寄せ、息を吸う。──ここからが、本当の始まりだ。</p>`;
+  } else {
+    body += `<p class="scene-setup serif">選挙事務所を畳む夜。がらんとした部屋の真ん中で、角の折れたノートを開いた。駅頭の会釈、車座の声、泥の中の長靴──負けても、これは消えない。</p>`;
+    if(c.sotaRank <= 18) body += `<p class="scene-setup serif">当選した水島颯太から電話があった。「……正直、あなたが一番怖かった。4年後、また戦いましょう」</p>`;
+    body += `<p class="scene-setup serif">${S.shin>=70
+      ? "後援会長が最後に言った。「胸を張れ。汚れた勝ちより、綺麗な負けのほうが、次につながる」"
+      : "敗因はいくつも思い当たる。それを数えられること自体が、次への装備だ。"}</p>`;
+    body += `<p class="scene-setup serif">翌朝。あなたは、また駅前に立っていた。タスキはない。ただ「おはようございます」と頭を下げる。<br>審判は、終わっていない。<b>4年後に、続きがある。</b></p>`;
+  }
+  if(S.shin >= 80) body += `<p class="scene-setup serif" style="color:var(--sumi-soft);">──誠を尽くした90日と7日は、勝敗がどうであれ、この街の土に還って肥やしになる。</p>`;
+  renderSB("エピローグ");
+  app.innerHTML = `
+  <div class="screen">
+    <h2 class="ph serif">${c.won ? "その後 ── 議員一年生" : "その後 ── 審判のつづき"}</h2>
+    <div class="card scene-card">${body}</div>
+    <div class="center" style="margin-top:14px;">
+      <a class="btn-sub" target="_blank" rel="noopener" href="https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText())}" style="text-decoration:none;display:inline-block;margin:0 5px 10px;">結果をXでシェア</a>
+    </div>
+    <button class="btn-main" onclick="scTitle()">もう一度、審判を受ける</button>
+  </div>`;
+}
+
+/* ══════════════ 起動 ══════════════ */
+scTitle();
+
+</script>
+</body>
+</html>

@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>栗原尚希後援会｜福島県南相馬市 公式サイト</title>
+<meta name="description" content="栗原尚希（くりはら なおき）後援会の公式サイト。福島県南相馬市を拠点に、一人の市民として現場の声を聴く政治活動をおこなっています。後援会入会のご案内、公式LINE、政治や行政を遊びながら学べる独自アプリのご紹介。">
+
+<!-- ▼SEO：canonical・OGP（本番URL https://kuriharanaoki.com/ 設定済み） -->
+<link rel="canonical" href="https://kuriharanaoki.com/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="栗原尚希後援会">
+<meta property="og:title" content="栗原尚希後援会｜福島県南相馬市 公式サイト">
+<meta property="og:description" content="福島県南相馬市を拠点に、一人の市民として現場の声を聴く政治活動をおこなっています。">
+<meta property="og:url" content="https://kuriharanaoki.com/">
+<meta property="og:image" content="https://kuriharanaoki.com/assets/img/common/ogp.png">
+<meta property="og:locale" content="ja_JP">
+<meta name="twitter:card" content="summary_large_image">
+
+<!-- ▼構造化データ（JSON-LD）：人物・後援会・地域（福島県南相馬市）を検索エンジンに明示 -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://kuriharanaoki.com/#org",
+      "name": "栗原尚希後援会",
+      "url": "https://kuriharanaoki.com/",
+      "logo": "https://kuriharanaoki.com/assets/img/common/icon-512.png",
+      "address": {
+        "@type": "PostalAddress",
+        "addressRegion": "福島県",
+        "addressLocality": "南相馬市"
+      }
+    },
+    {
+      "@type": "Person",
+      "@id": "https://kuriharanaoki.com/#person",
+      "name": "栗原尚希",
+      "alternateName": "くりはら なおき",
+      "address": {
+        "@type": "PostalAddress",
+        "addressRegion": "福島県",
+        "addressLocality": "南相馬市"
+      },
+      "affiliation": { "@id": "https://kuriharanaoki.com/#org" },
+      "url": "https://kuriharanaoki.com/",
+      "description": "福島県南相馬市を拠点に、一人の市民として政治活動をおこなっています。"
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://kuriharanaoki.com/#website",
+      "name": "栗原尚希後援会 公式サイト",
+      "url": "https://kuriharanaoki.com/",
+      "inLanguage": "ja",
+      "publisher": { "@id": "https://kuriharanaoki.com/#org" }
+    }
+  ]
+}
+</script>
+
+<!-- ============================================================
+     外部リソース（Tailwind CDN / Google Fonts / Font Awesome）
+     ============================================================ -->
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Zen+Old+Mincho:wght@400;500;600;700;900&family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+<!-- favicon・アイコン一式（落款「栗」意匠） -->
+<link rel="icon" href="favicon.ico">
+<link rel="apple-touch-icon" href="assets/img/common/apple-touch-icon.png">
+
+<script>
+  // ==========================================================
+  // デザイントークン（色・書体はここで一元管理）
+  // ==========================================================
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          paper: '#FAF8F2',      // 基調：上質な書籍用紙の白
+          paper2: '#F2EEE3',     // セクション区切り用のやや濃い紙色
+          ink: '#22262E',        // 本文：青みの墨色
+          tetsu: '#1B2F4B',      // 鉄紺：メインカラー（知性・信頼）
+          tetsu2: '#2E4A70',     // 鉄紺の明るめ
+          gray1: '#6E6A61',      // 補助テキスト
+          shu: '#9E3B2C',        // 朱：落款・強調にのみ最小限使用
+        },
+        fontFamily: {
+          mincho: ['"Zen Old Mincho"', 'serif'],
+          jp: ['"Noto Sans JP"', 'sans-serif'],
+        },
+      }
+    }
+  }
+</script>
+
+<style>
+  html { scroll-behavior: smooth; }
+  body { background-color: #FAF8F2; }
+
+  /* 固定ヘッダー分のアンカーオフセット（ナビからの移動で見出しが隠れないように） */
+  section[id] { scroll-margin-top: 4.5rem; }
+
+  /* ------------------------------------------------------------
+     紙の質感：SVG feTurbulence による極薄の粒子ノイズを全面に
+     ------------------------------------------------------------ */
+  body::before {
+    content: '';
+    position: fixed; inset: 0; z-index: 0;
+    pointer-events: none;
+    opacity: 0.35;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 0.13 0 0 0 0 0.14 0 0 0 0 0.17 0 0 0 0.045 0'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  main, header, footer { position: relative; z-index: 1; }
+
+  /* 縦書き */
+  .tategaki {
+    writing-mode: vertical-rl;
+    text-orientation: upright;
+    letter-spacing: 0.35em;
+  }
+
+  /* 罫線 */
+  .rule-t { border-top: 1px solid rgba(34,38,46,0.14); }
+  .rule-b { border-bottom: 1px solid rgba(34,38,46,0.14); }
+
+  /* 落款ロゴ */
+  .hanko {
+    background: #9E3B2C;
+    color: #FAF8F2;
+    box-shadow: inset 0 0 0 1.5px rgba(250,248,242,0.4);
+  }
+
+  /* ------------------------------------------------------------
+     読了プログレスバー（画面最上部・極細の鉄紺ライン）
+     ------------------------------------------------------------ */
+  #progress {
+    position: fixed; top: 0; left: 0; height: 2px; width: 0%;
+    background: linear-gradient(90deg, #1B2F4B, #2E4A70);
+    z-index: 60;
+    transition: width 0.08s linear;
+  }
+
+  /* ------------------------------------------------------------
+     縦書き見出し：一文字ずつ墨が滲むように現れる
+     （JSで .char に分割し、順に .in を付与）
+     ------------------------------------------------------------ */
+  .char {
+    display: inline-block;
+    opacity: 0;
+    filter: blur(6px);
+    transform: translateY(-0.35em);
+    transition: opacity 0.7s ease, filter 0.7s ease, transform 0.7s ease;
+  }
+  .char.in { opacity: 1; filter: blur(0); transform: translateY(0); }
+
+  /* ------------------------------------------------------------
+     スクロールリビール（IntersectionObserver で .visible 付与）
+     ------------------------------------------------------------ */
+  .reveal {
+    opacity: 0;
+    transform: translateY(26px);
+    transition: opacity 0.9s cubic-bezier(0.22, 1, 0.36, 1), transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+  /* 子要素の時間差出現 */
+  .reveal[data-delay="1"] { transition-delay: 0.12s; }
+  .reveal[data-delay="2"] { transition-delay: 0.24s; }
+  .reveal[data-delay="3"] { transition-delay: 0.36s; }
+
+  /* ------------------------------------------------------------
+     ヒーロー本人写真：裾を紙色へフェードさせるマスク
+     ------------------------------------------------------------ */
+  .hero-photo {
+    -webkit-mask-image: linear-gradient(to bottom, #000 78%, transparent 99%);
+    mask-image: linear-gradient(to bottom, #000 78%, transparent 99%);
+  }
+
+  /* ------------------------------------------------------------
+     カード：マウス追従スポットライト（CSS変数 --mx/--my をJSで更新）
+     ------------------------------------------------------------ */
+  .quiet-card {
+    position: relative;
+    background: #FFFFFF;
+    border: 1px solid rgba(34,38,46,0.12);
+    transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+    overflow: hidden;
+  }
+  .quiet-card::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(280px circle at var(--mx, 50%) var(--my, 50%), rgba(27,47,75,0.06), transparent 65%);
+    opacity: 0;
+    transition: opacity 0.35s ease;
+    pointer-events: none;
+  }
+  .quiet-card:hover::after { opacity: 1; }
+  .quiet-card:hover {
+    border-color: rgba(27,47,75,0.45);
+    box-shadow: 0 14px 36px -20px rgba(27,47,75,0.3);
+  }
+
+  /* ------------------------------------------------------------
+     ナビリンク：下線が左から引かれるアニメーション
+     ------------------------------------------------------------ */
+  .navlink { position: relative; }
+  .navlink::after {
+    content: '';
+    position: absolute; left: 0; bottom: -4px;
+    width: 100%; height: 1px;
+    background: #1B2F4B;
+    transform: scaleX(0); transform-origin: left;
+    transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .navlink:hover::after { transform: scaleX(1); }
+
+  /* ------------------------------------------------------------
+     主ボタン：マグネティックホバー用の下地（JSで微小に追従）
+     ------------------------------------------------------------ */
+  .magnetic { transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1); will-change: transform; }
+
+  /* フォーム：フローティングラベル */
+  .field { position: relative; }
+  .field label {
+    position: absolute; left: 1rem; top: 0.9rem;
+    transition: all 0.18s ease; pointer-events: none;
+    color: #6E6A61;
+  }
+  .field input:focus + label,
+  .field input:not(:placeholder-shown) + label,
+  .field textarea:focus + label,
+  .field textarea:not(:placeholder-shown) + label {
+    top: -0.55rem; left: 0.75rem; font-size: 0.7rem;
+    background: #FFFFFF; padding: 0 0.4rem; color: #1B2F4B;
+  }
+
+  /* モーション低減設定の尊重 */
+  @media (prefers-reduced-motion: reduce) {
+    * { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+    .char { opacity: 1 !important; filter: none !important; transform: none !important; }
+    .reveal { opacity: 1 !important; transform: none !important; }
+  }
+</style>
+</head>
+
+<body class="font-jp text-ink antialiased">
+
+<!-- 読了プログレスバー -->
+<div id="progress" aria-hidden="true"></div>
+
+<!-- ============================================================
+     1. ナビゲーションヘッダー（固定・スクロールで質感が変化）
+     ============================================================ -->
+<header id="site-header" class="fixed top-0 inset-x-0 z-50 bg-paper/0 border-b border-transparent transition-all duration-500">
+  <div class="max-w-6xl mx-auto px-5 sm:px-8 h-16 flex items-center justify-between">
+    <!-- ロゴ ※差し替え可能 -->
+    <a href="#top" class="flex items-center gap-3">
+      <span class="w-8 h-8 rounded-full hanko flex items-center justify-center font-mincho font-bold text-sm">栗</span>
+      <span class="font-mincho font-semibold tracking-widest text-base">栗原尚希<span class="text-gray1 font-normal text-xs ml-2 hidden sm:inline">後援会</span></span>
+    </a>
+
+    <nav class="hidden md:flex items-center gap-9 text-[13px] tracking-wider text-gray1">
+      <a href="#houtoku" class="navlink hover:text-tetsu transition-colors">報徳思想</a>
+      <a href="#apps" class="navlink hover:text-tetsu transition-colors">学びのアプリ</a>
+      <a href="#message" class="navlink hover:text-tetsu transition-colors">政治姿勢</a>
+      <a href="#join" class="navlink hover:text-tetsu transition-colors">入会のご案内</a>
+    </nav>
+
+    <div class="flex items-center gap-4">
+      <!-- SNSリンク ※URLを差し替えてください -->
+      <div class="hidden sm:flex items-center gap-4 text-gray1 text-sm">
+        <a href="#" aria-label="X" class="hover:text-tetsu transition-colors"><i class="fa-brands fa-x-twitter"></i></a>
+        <a href="#" aria-label="Instagram" class="hover:text-tetsu transition-colors"><i class="fa-brands fa-instagram"></i></a>
+        <a href="#" aria-label="note" class="hover:text-tetsu transition-colors"><i class="fa-solid fa-pen-nib"></i></a>
+      </div>
+      <a href="#" class="magnetic text-xs sm:text-[13px] font-medium bg-tetsu text-paper px-5 py-2 rounded-sm tracking-wider hover:bg-tetsu2 transition-colors whitespace-nowrap">
+        LINE登録
+      </a>
+    </div>
+  </div>
+</header>
+
+<main>
+
+<!-- ============================================================
+     2. メインビジュアル（縦書き文字アニメ × 本人写真）
+     ============================================================ -->
+<section id="top" class="relative pt-32 sm:pt-36 pb-24 px-5 sm:px-8 overflow-hidden">
+  <div class="max-w-6xl mx-auto">
+    <div class="grid grid-cols-12 gap-4 sm:gap-8 lg:gap-12 items-start">
+
+      <!-- 縦書きキャッチコピー：一文字ずつ墨が滲むように出現 ※差し替え可能 -->
+      <div class="col-span-4 lg:col-span-5 flex gap-5 sm:gap-10">
+        <h1 class="tategaki split font-mincho font-semibold text-3xl sm:text-4xl lg:text-[2.6rem] leading-loose h-[380px] sm:h-[460px]">現場の声を聴く</h1>
+        <p class="tategaki split font-mincho text-lg sm:text-xl text-gray1 h-[300px] sm:h-[360px] mt-8" data-split-delay="700">一人の市民として</p>
+      </div>
+
+      <!-- ▼本人写真：全デバイスで「右上に大きく」の同構図（背景透過・左右反転・裾は紙色にフェード。原本は assets/img/original/ に保管） -->
+      <div class="col-span-8 lg:col-span-7">
+        <div class="hero-photo reveal relative h-[400px] sm:h-[540px] lg:h-[580px] -mt-4 sm:-mt-8 lg:-mt-16 overflow-hidden">
+          <img src="assets/img/candidate-main.webp" alt="栗原尚希の写真" width="459" height="1000"
+               class="absolute top-0 right-0 h-[460px] sm:h-[700px] lg:h-[800px] w-auto max-w-none -scale-x-100">
+        </div>
+      </div>
+    </div>
+
+    <!-- 候補者情報と導線（写真の下。lgでは写真列に揃える） -->
+    <div class="lg:grid lg:grid-cols-12 lg:gap-12">
+      <div class="lg:col-start-6 lg:col-span-7 mt-8 lg:mt-2">
+        <div class="reveal flex flex-col sm:flex-row sm:items-end justify-between gap-6 rule-b pb-8" data-delay="1">
+          <div>
+            <p class="font-mincho font-bold text-3xl tracking-[0.2em]">栗原 尚希</p>
+            <p class="text-gray1 text-xs tracking-[0.25em] mt-2">くりはら なおき ／ 南相馬市在住</p>
+          </div>
+          <!-- 座右の銘 ※差し替え可能 -->
+          <p class="font-mincho font-semibold text-lg sm:text-xl text-tetsu tracking-wider leading-relaxed">
+            「至誠を尽くして、市政と向き合う。」
+          </p>
+        </div>
+
+        <!-- CTA：LINEを最優先、次いで入会（マグネティックホバー） -->
+        <div class="reveal mt-8 flex flex-col sm:flex-row gap-3" data-delay="2">
+          <a href="#" class="magnetic flex-1 inline-flex items-center justify-center gap-2 bg-tetsu text-paper font-mincho tracking-[0.2em] text-base px-8 py-4 hover:bg-tetsu2 transition-colors">
+            公式LINEに登録する
+          </a>
+          <a href="#join" class="magnetic flex-1 inline-flex items-center justify-center gap-2 border border-ink/25 font-mincho tracking-[0.2em] text-base px-8 py-4 hover:bg-paper2 transition-colors">
+            後援会に入会する
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     3. 報徳思想（思想的軸）— 四綱領の説明と市政への落とし込み
+     ※定義文は南相馬市公式ウェブサイトの報徳仕法解説を参照した独自要約
+     （市サイトは無断転載不可のため原文は転載しない）
+     ============================================================ -->
+<section id="houtoku" class="relative py-24 px-5 sm:px-8">
+  <div class="max-w-4xl mx-auto">
+    <p class="reveal text-[11px] tracking-[0.4em] text-gray1 mb-4 text-center">思想的軸</p>
+    <h2 class="reveal font-mincho font-semibold text-2xl sm:text-3xl tracking-widest text-center leading-relaxed mb-4">
+      かつて、この地を立て直した報徳思想。
+    </h2>
+    <div class="reveal w-10 h-px bg-ink/30 mx-auto mb-10"></div>
+
+    <!-- ▼導入文（報徳仕法と相馬地方の歴史） ※差し替え可能 -->
+    <p class="reveal text-gray1 text-sm sm:text-[15px] leading-loose text-center max-w-2xl mx-auto mb-16" data-delay="1">
+      南相馬を含む相馬地方は、天明の飢饉で疲弊した村々を、二宮尊徳の教え「報徳仕法」によって立て直した土地です。江戸末期、尊徳門下の藩士・富田高慶らの手で領内の百を超える村に広がり、復興の礎となりました。この土地に根づく報徳の思想を土台に、これからの活動に取り組んでいきます。
+    </p>
+
+    <!-- 四綱領：編集誌風の縦リスト（左＝徳目／右＝意味と市政への落とし込み） -->
+    <div>
+
+      <!-- 至誠 -->
+      <div class="reveal grid sm:grid-cols-12 gap-4 sm:gap-8 py-10 rule-t">
+        <div class="sm:col-span-4">
+          <h3 class="font-mincho font-semibold text-2xl tracking-[0.3em]">至誠</h3>
+          <p class="text-[11px] tracking-[0.3em] text-gray1 mt-2">しせい</p>
+        </div>
+        <div class="sm:col-span-8 space-y-4">
+          <p class="text-sm leading-loose text-ink/85">誠を尽くすこと。尊徳の教えのすべては、この一点の上に立っています。</p>
+          <div>
+            <p class="text-[11px] tracking-[0.25em] text-tetsu mb-1.5">─ 市政への落とし込み</p>
+            <p class="text-sm leading-loose text-gray1">都合の良い情報だけを並べない。データと現場の事実にもとづいて、誠実に説明する市政をつくる。</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 勤労 -->
+      <div class="reveal grid sm:grid-cols-12 gap-4 sm:gap-8 py-10 rule-t" data-delay="1">
+        <div class="sm:col-span-4">
+          <h3 class="font-mincho font-semibold text-2xl tracking-[0.3em]">勤労</h3>
+          <p class="text-[11px] tracking-[0.3em] text-gray1 mt-2">きんろう</p>
+        </div>
+        <div class="sm:col-span-8 space-y-4">
+          <p class="text-sm leading-loose text-ink/85">頭と身体を惜しまず、よく観察し、工夫して働くこと。働きは、世の役に立ってこそ実を結びます。</p>
+          <div>
+            <p class="text-[11px] tracking-[0.25em] text-tetsu mb-1.5">─ 市政への落とし込み</p>
+            <p class="text-sm leading-loose text-gray1">会議室ではなく、現場から始める。自分の足で歩き、自分の目で確かめ、市民の利益のために働く。</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 分度 -->
+      <div class="reveal grid sm:grid-cols-12 gap-4 sm:gap-8 py-10 rule-t" data-delay="1">
+        <div class="sm:col-span-4">
+          <h3 class="font-mincho font-semibold text-2xl tracking-[0.3em]">分度</h3>
+          <p class="text-[11px] tracking-[0.3em] text-gray1 mt-2">ぶんど</p>
+        </div>
+        <div class="sm:col-span-8 space-y-4">
+          <p class="text-sm leading-loose text-ink/85">収入と力量に応じて暮らしの限度を定め、その範囲の中で生きること。</p>
+          <div>
+            <p class="text-[11px] tracking-[0.25em] text-tetsu mb-1.5">─ 市政への落とし込み</p>
+            <p class="text-sm leading-loose text-gray1">身の丈を知る財政運営。市財政の限度を直視し、優先順位を明らかにして、負担を将来世代へ先送りしない。</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 推譲 -->
+      <div class="reveal grid sm:grid-cols-12 gap-4 sm:gap-8 py-10 rule-t rule-b" data-delay="2">
+        <div class="sm:col-span-4">
+          <h3 class="font-mincho font-semibold text-2xl tracking-[0.3em]">推譲</h3>
+          <p class="text-[11px] tracking-[0.3em] text-gray1 mt-2">すいじょう</p>
+        </div>
+        <div class="sm:col-span-8 space-y-4">
+          <p class="text-sm leading-loose text-ink/85">分度によって生まれた余りを将来のために蓄え、その一部を人と社会に譲ること。</p>
+          <div>
+            <p class="text-[11px] tracking-[0.25em] text-tetsu mb-1.5">─ 市政への落とし込み</p>
+            <p class="text-sm leading-loose text-gray1">余力を次の世代へ譲る設計。子どもと教育、新しい産業への投資にまわし、まちに循環を生む。</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- 結び：四徳と循環 -->
+    <p class="reveal mt-12 text-center font-mincho tracking-[0.3em] text-sm text-tetsu" data-delay="1">四つの徳は、一つの循環である。</p>
+  </div>
+</section>
+
+<!-- ============================================================
+     4.【最重要】学びのアプリ紹介（目次風・スポットライトカード）
+     ============================================================ -->
+<section id="apps" class="relative py-24 px-5 sm:px-8 bg-paper2/70">
+  <div class="max-w-6xl mx-auto">
+
+    <div class="grid lg:grid-cols-12 gap-10 mb-14">
+      <div class="reveal lg:col-span-4">
+        <p class="text-[11px] tracking-[0.4em] text-gray1 mb-4">政治を、学びに。</p>
+        <h2 class="font-mincho font-semibold text-2xl sm:text-3xl tracking-widest leading-relaxed">遊びながら学べる<br>四つのアプリ</h2>
+      </div>
+      <div class="reveal lg:col-span-8 lg:pt-9" data-delay="1">
+        <p class="text-gray1 text-sm sm:text-[15px] leading-loose max-w-xl">
+          政治や行政の仕組みは、本来もっと身近で、もっと分かりやすいはずです。まちの経営、選挙の仕組み、公選法のルール、そして税金のゆくえ。誰もが手を動かしながら理解を深められるWebアプリを、独自に開発しています。
+        </p>
+      </div>
+    </div>
+
+    <!-- アプリ一覧（内容はここで編集） -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+
+      <!-- App 1: 10万人都市シミュレーター（体験版「奇跡の10万人都市」＝ apps/100k-city.html へリンク） -->
+      <a href="apps/100k-city.html" target="_blank" rel="noopener" class="reveal quiet-card block p-8 sm:p-9 transform hover:-translate-y-1 duration-300">
+        <div class="flex items-start justify-between mb-6">
+          <span class="font-mincho text-gray1 text-sm tracking-widest">壱</span>
+          <span class="text-[11px] tracking-wider text-shu border border-shu/40 px-3 py-1">体験版を公開中</span>
+        </div>
+        <h3 class="font-mincho font-semibold text-xl tracking-wider mb-3">10万人都市シミュレーター</h3>
+        <p class="text-sm text-gray1 leading-loose">市長になって10万人都市を目指す、ゲーム感覚の自治体経営シミュレーション。</p>
+        <p class="mt-5 text-[11px] tracking-[0.25em] text-tetsu">まちの経営を、体験する。</p>
+        <p class="mt-3 text-xs tracking-[0.2em] text-shu font-medium">▶ 体験版「奇跡の10万人都市」で遊ぶ</p>
+      </a>
+
+      <!-- App 2: 市議選ロード（体験版「七日間の審判」＝ apps/shigisen-road.html へリンク） -->
+      <a href="apps/shigisen-road.html" target="_blank" rel="noopener" class="reveal quiet-card block p-8 sm:p-9 transform hover:-translate-y-1 duration-300" data-delay="1">
+        <div class="flex items-start justify-between mb-6">
+          <span class="font-mincho text-gray1 text-sm tracking-widest">弐</span>
+          <span class="text-[11px] tracking-wider text-shu border border-shu/40 px-3 py-1">体験版を公開中</span>
+        </div>
+        <h3 class="font-mincho font-semibold text-xl tracking-wider mb-3">市議選ロード</h3>
+        <p class="text-sm text-gray1 leading-loose">市議選への立候補から選挙戦までを疑似体験する、リアルな選挙戦略アプリ。</p>
+        <p class="mt-5 text-[11px] tracking-[0.25em] text-tetsu">選挙の裏側を、知る。</p>
+        <p class="mt-3 text-xs tracking-[0.2em] text-shu font-medium">▶ 体験版「七日間の審判」で遊ぶ</p>
+      </a>
+
+      <!-- App 3: 公職選挙法クイズ（体験版「公選法クエスト」＝ apps/kousenhou-quest.html へリンク） -->
+      <a href="apps/kousenhou-quest.html" target="_blank" rel="noopener" class="reveal quiet-card block p-8 sm:p-9 transform hover:-translate-y-1 duration-300" data-delay="1">
+        <div class="flex items-start justify-between mb-6">
+          <span class="font-mincho text-gray1 text-sm tracking-widest">参</span>
+          <span class="text-[11px] tracking-wider text-shu border border-shu/40 px-3 py-1">体験版を公開中</span>
+        </div>
+        <h3 class="font-mincho font-semibold text-xl tracking-wider mb-3">守れる！学べる！公職選挙法クイズ</h3>
+        <p class="text-sm text-gray1 leading-loose">複雑な公選法のルールを、クイズ形式で楽しく正しく学べるバイブル。</p>
+        <p class="mt-5 text-[11px] tracking-[0.25em] text-tetsu">ルールを、正しく学ぶ。</p>
+        <p class="mt-3 text-xs tracking-[0.2em] text-shu font-medium">▶ 体験版「公選法クエスト」で遊ぶ</p>
+      </a>
+
+      <!-- App 4: みえる・わかる地方財政（体験版「財政クエスト」＝ apps/zaisei-quest.html へリンク） -->
+      <a href="apps/zaisei-quest.html" target="_blank" rel="noopener" class="reveal quiet-card block p-8 sm:p-9 transform hover:-translate-y-1 duration-300" data-delay="2">
+        <div class="flex items-start justify-between mb-6">
+          <span class="font-mincho text-gray1 text-sm tracking-widest">肆</span>
+          <span class="text-[11px] tracking-wider text-shu border border-shu/40 px-3 py-1">体験版を公開中</span>
+        </div>
+        <h3 class="font-mincho font-semibold text-xl tracking-wider mb-3">みえる・わかる地方財政</h3>
+        <p class="text-sm text-gray1 leading-loose">私たちの税金はどこへ？街の財政状況をビジュアルで直感的に学ぶアプリ。</p>
+        <p class="mt-5 text-[11px] tracking-[0.25em] text-tetsu">税金のゆくえを、見る。</p>
+        <p class="mt-3 text-xs tracking-[0.2em] text-shu font-medium">▶ 体験版「財政クエスト」で遊ぶ</p>
+      </a>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     5. メッセージ（政治姿勢）— 書簡のような一段組
+     ============================================================ -->
+<section id="message" class="relative py-24 px-5 sm:px-8">
+  <div class="max-w-3xl mx-auto">
+    <p class="reveal text-[11px] tracking-[0.4em] text-gray1 mb-4 text-center">政治姿勢</p>
+    <h2 class="reveal font-mincho font-semibold text-2xl sm:text-3xl tracking-widest text-center leading-relaxed mb-4">
+      政治を、アップデートする。
+    </h2>
+    <div class="reveal w-10 h-px bg-ink/30 mx-auto mb-12"></div>
+
+    <!-- ▼メッセージ本文 ※差し替え・追記可能 -->
+    <div class="space-y-7 text-[15px] leading-[2.1] text-ink/85">
+      <p class="reveal">
+        私は特定の組織や団体の後ろ盾を持たない、一人の市民です。だからこそ、政党や団体の理屈ではなく、南相馬で暮らす皆さまの声に真っ直ぐ耳を傾けることができると考えています。
+      </p>
+      <p class="reveal" data-delay="1">
+        街も、人も、経済も、本来あるべき「循環」を取り戻すことで、もっと良くなっていく。淀んでしまっている部分を見つけ、丁寧に取り除いていくこと。それが私の政治への向き合い方です。
+      </p>
+      <p class="reveal" data-delay="2">
+        いつでも現場に足を運び、自分の目で見て、自分の耳で聞く。そして市民の利益のために判断し、行動します。
+      </p>
+    </div>
+
+    <!-- 署名 -->
+    <p class="reveal mt-12 text-right font-mincho tracking-[0.3em] text-lg" data-delay="2">栗原 尚希</p>
+
+    <!-- 政策詳細は後日追記予定 -->
+    <p class="reveal mt-12 pt-8 rule-t text-xs text-gray1 tracking-wider text-center">
+      具体的な政策は、準備が整い次第、本ページにて順次公開いたします。
+    </p>
+  </div>
+</section>
+
+<!-- ============================================================
+     6. 後援会入会フォーム
+     ============================================================ -->
+<section id="join" class="relative py-24 px-5 sm:px-8 bg-paper2/70">
+  <div class="max-w-2xl mx-auto">
+    <div class="mb-12 text-center">
+      <p class="reveal text-[11px] tracking-[0.4em] text-gray1 mb-4">入会のご案内</p>
+      <h2 class="reveal font-mincho font-semibold text-2xl sm:text-3xl tracking-widest">栗原尚希後援会</h2>
+      <div class="reveal w-10 h-px bg-ink/30 mx-auto my-6"></div>
+      <p class="reveal text-gray1 text-sm leading-loose" data-delay="1">
+        以下のフォームよりご入力いただきましたら、<br class="hidden sm:block">後日改めてご連絡いたします。
+      </p>
+    </div>
+
+    <form id="entry-form" class="reveal bg-white border border-ink/10 p-6 sm:p-10 space-y-5" novalidate>
+
+      <div class="field">
+        <input type="text" id="name" name="name" placeholder=" " required
+          class="w-full border border-ink/15 px-4 py-3.5 text-ink placeholder-transparent focus:outline-none focus:border-tetsu transition-colors bg-white">
+        <label for="name">お名前 <span class="text-shu">*</span></label>
+        <p class="error-msg hidden text-xs text-shu mt-1.5">お名前を入力してください。</p>
+      </div>
+
+      <div class="field">
+        <input type="text" id="kana" name="kana" placeholder=" " required
+          class="w-full border border-ink/15 px-4 py-3.5 text-ink placeholder-transparent focus:outline-none focus:border-tetsu transition-colors bg-white">
+        <label for="kana">ふりがな <span class="text-shu">*</span></label>
+        <p class="error-msg hidden text-xs text-shu mt-1.5">ふりがなを入力してください。</p>
+      </div>
+
+      <div class="field">
+        <input type="email" id="email" name="email" placeholder=" " required
+          class="w-full border border-ink/15 px-4 py-3.5 text-ink placeholder-transparent focus:outline-none focus:border-tetsu transition-colors bg-white">
+        <label for="email">メールアドレス <span class="text-shu">*</span></label>
+        <p class="error-msg hidden text-xs text-shu mt-1.5">正しいメールアドレスを入力してください。</p>
+      </div>
+
+      <div class="field">
+        <input type="tel" id="tel" name="tel" placeholder=" "
+          class="w-full border border-ink/15 px-4 py-3.5 text-ink placeholder-transparent focus:outline-none focus:border-tetsu transition-colors bg-white">
+        <label for="tel">電話番号</label>
+      </div>
+
+      <div class="field">
+        <input type="text" id="org" name="org" placeholder=" "
+          class="w-full border border-ink/15 px-4 py-3.5 text-ink placeholder-transparent focus:outline-none focus:border-tetsu transition-colors bg-white">
+        <label for="org">会社名・団体名</label>
+      </div>
+
+      <div class="field">
+        <input type="text" id="address" name="address" placeholder=" "
+          class="w-full border border-ink/15 px-4 py-3.5 text-ink placeholder-transparent focus:outline-none focus:border-tetsu transition-colors bg-white">
+        <label for="address">ご住所</label>
+      </div>
+
+      <div class="field">
+        <textarea id="message-text" name="message" rows="4" placeholder=" "
+          class="w-full border border-ink/15 px-4 py-3.5 text-ink placeholder-transparent focus:outline-none focus:border-tetsu transition-colors resize-none bg-white"></textarea>
+        <label for="message-text">その他追記事項</label>
+      </div>
+
+      <label class="flex items-start gap-3 text-sm text-gray1 cursor-pointer pt-1">
+        <input type="checkbox" id="privacy" required class="mt-1 w-4 h-4 accent-tetsu">
+        <!-- ▼プライバシーポリシーのリンク先を差し替えてください -->
+        <span><a href="#" class="text-tetsu underline underline-offset-2 hover:text-tetsu2">プライバシーポリシー</a>に同意します。</span>
+      </label>
+      <p id="privacy-error" class="error-msg hidden text-xs text-shu">プライバシーポリシーへの同意が必要です。</p>
+
+      <div class="flex flex-col sm:flex-row gap-3 pt-3">
+        <button type="reset" class="sm:w-auto px-8 py-3.5 border border-ink/15 text-gray1 tracking-widest text-sm hover:bg-paper2 transition-colors">
+          リセット
+        </button>
+        <button type="submit" class="magnetic flex-1 bg-tetsu text-paper font-mincho tracking-[0.3em] py-3.5 hover:bg-tetsu2 transition-colors">
+          送信する
+        </button>
+      </div>
+
+      <p id="form-success" class="hidden text-sm text-tetsu text-center pt-2 tracking-wider">
+        送信しました。ありがとうございます。
+      </p>
+    </form>
+
+    <!-- LINE誘導（フォーム下にも再掲） -->
+    <a href="#" class="reveal mt-5 flex items-center justify-center gap-2 border border-ink/10 bg-white py-3.5 text-sm tracking-wider hover:bg-paper2 transition-colors">
+      <i class="fa-solid fa-comment-dots text-tetsu"></i> LINEからでもご入会いただけます
+    </a>
+  </div>
+</section>
+
+</main>
+
+<!-- ============================================================
+     7. フッター
+     ============================================================ -->
+<footer class="rule-t py-12 px-5 sm:px-8">
+  <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6 text-sm text-gray1">
+    <div class="flex items-center gap-3">
+      <span class="w-7 h-7 rounded-full hanko flex items-center justify-center font-mincho font-bold text-xs">栗</span>
+      <div>
+        <span class="font-mincho tracking-widest">栗原尚希後援会</span>
+        <p class="text-[11px] tracking-wider text-gray1/70 mt-1">福島県南相馬市</p>
+      </div>
+    </div>
+    <div class="flex items-center gap-5">
+      <a href="#" aria-label="X" class="hover:text-tetsu transition-colors"><i class="fa-brands fa-x-twitter"></i></a>
+      <a href="#" aria-label="Instagram" class="hover:text-tetsu transition-colors"><i class="fa-brands fa-instagram"></i></a>
+      <a href="#" aria-label="note" class="hover:text-tetsu transition-colors"><i class="fa-solid fa-pen-nib"></i></a>
+      <a href="#" aria-label="LINE" class="hover:text-tetsu transition-colors"><i class="fa-solid fa-comment-dots"></i></a>
+    </div>
+    <p class="text-xs tracking-wider text-gray1/70">© 2026 栗原尚希後援会</p>
+  </div>
+</footer>
+
+<!-- ============================================================
+     JavaScript：先鋭的インタラクション一式
+     ============================================================ -->
+<script>
+  const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // --- 1. 縦書き見出しの一文字ずつ出現（split text） ---
+  document.querySelectorAll('.split').forEach((el) => {
+    const text = el.textContent;
+    const baseDelay = parseInt(el.dataset.splitDelay || '0', 10);
+    el.textContent = '';
+    [...text].forEach((ch, i) => {
+      const span = document.createElement('span');
+      span.className = 'char';
+      span.textContent = ch;
+      el.appendChild(span);
+      setTimeout(() => span.classList.add('in'), baseDelay + 250 + i * 110);
+    });
+  });
+
+  // --- 2. スクロールリビール（IntersectionObserver） ---
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        io.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.12, rootMargin: '0px 0px -6% 0px' });
+  document.querySelectorAll('.reveal').forEach((el) => io.observe(el));
+
+  // --- 3. 読了プログレスバー & ヘッダーの質感変化 ---
+  const progress = document.getElementById('progress');
+  const header = document.getElementById('site-header');
+  let ticking = false;
+  function onScroll() {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(() => {
+      const y = window.scrollY;
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      progress.style.width = (max > 0 ? (y / max) * 100 : 0) + '%';
+
+      // ヘッダー：スクロールすると紙の質感が現れる
+      if (y > 24) {
+        header.classList.add('bg-paper/90', 'backdrop-blur-sm', 'border-ink/10');
+        header.classList.remove('bg-paper/0', 'border-transparent');
+      } else {
+        header.classList.remove('bg-paper/90', 'backdrop-blur-sm', 'border-ink/10');
+        header.classList.add('bg-paper/0', 'border-transparent');
+      }
+
+      ticking = false;
+    });
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+
+  // --- 4. カードのマウス追従スポットライト ---
+  document.querySelectorAll('.quiet-card').forEach((card) => {
+    card.addEventListener('pointermove', (e) => {
+      const r = card.getBoundingClientRect();
+      card.style.setProperty('--mx', ((e.clientX - r.left) / r.width) * 100 + '%');
+      card.style.setProperty('--my', ((e.clientY - r.top) / r.height) * 100 + '%');
+    });
+  });
+
+  // --- 5. マグネティックボタン（カーソルに数pxだけ引き寄せられる） ---
+  if (!prefersReduced && matchMedia('(pointer: fine)').matches) {
+    document.querySelectorAll('.magnetic').forEach((btn) => {
+      btn.addEventListener('pointermove', (e) => {
+        const r = btn.getBoundingClientRect();
+        const dx = (e.clientX - (r.left + r.width / 2)) / r.width;
+        const dy = (e.clientY - (r.top + r.height / 2)) / r.height;
+        btn.style.transform = `translate(${dx * 6}px, ${dy * 4}px)`;
+      });
+      btn.addEventListener('pointerleave', () => { btn.style.transform = ''; });
+    });
+  }
+
+  // --- 6. フォームバリデーション ---
+  const form = document.getElementById('entry-form');
+  if (form) {
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      let valid = true;
+
+      ['name', 'kana'].forEach((id) => {
+        const input = document.getElementById(id);
+        const err = input.closest('.field').querySelector('.error-msg');
+        if (!input.value.trim()) {
+          err.classList.remove('hidden');
+          input.classList.add('border-shu');
+          valid = false;
+        } else {
+          err.classList.add('hidden');
+          input.classList.remove('border-shu');
+        }
+      });
+
+      const email = document.getElementById('email');
+      const emailErr = email.closest('.field').querySelector('.error-msg');
+      const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailPattern.test(email.value.trim())) {
+        emailErr.classList.remove('hidden');
+        email.classList.add('border-shu');
+        valid = false;
+      } else {
+        emailErr.classList.add('hidden');
+        email.classList.remove('border-shu');
+      }
+
+      const privacy = document.getElementById('privacy');
+      const privacyErr = document.getElementById('privacy-error');
+      if (!privacy.checked) {
+        privacyErr.classList.remove('hidden');
+        valid = false;
+      } else {
+        privacyErr.classList.add('hidden');
+      }
+
+      if (valid) {
+        // ここに実際の送信処理（API連携など）を実装してください
+        document.getElementById('form-success').classList.remove('hidden');
+        form.reset();
+      }
+    });
+  }
+</script>
+
+</body>
+</html>

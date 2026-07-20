@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>公選法クエスト — 落選する前に、遊んで覚える公職選挙法</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Mochiy+Pop+One&family=Zen+Maru+Gothic:wght@500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#FDF3E3;
+  --ink:#2B2440;
+  --card:#FFFFFF;
+  --blue:#3A6FF0;
+  --pink:#FF4D8D;
+  --yellow:#FFC53D;
+  --green:#25B86F;
+  --red:#FF5A5F;
+  --purple:#8A5CF6;
+  --shadow:#2B2440;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{-webkit-text-size-adjust:100%;}
+body{
+  background:var(--bg);
+  background-image:radial-gradient(#EFE2C8 1.5px, transparent 1.5px);
+  background-size:22px 22px;
+  color:var(--ink);
+  font-family:'Zen Maru Gothic',sans-serif;
+  font-size:16px;line-height:1.75;min-height:100vh;overflow-x:hidden;
+}
+.wrap{max-width:640px;margin:0 auto;padding:0 18px 80px;}
+.disp{font-family:'Mochiy Pop One',sans-serif;font-weight:400;}
+
+header.top{padding:26px 0 8px;text-align:center;}
+header.top h1{
+  font-family:'Mochiy Pop One',sans-serif;font-size:30px;letter-spacing:.04em;cursor:pointer;
+  text-shadow:3px 3px 0 var(--yellow);
+}
+header.top h1 .k{color:var(--blue);}
+header.top h1 .q{color:var(--pink);}
+header.top .tag{font-size:12px;font-weight:700;color:#8b7f6a;letter-spacing:.12em;margin-top:2px;}
+
+/* ===== cards & buttons ===== */
+.card{
+  background:var(--card);border:3px solid var(--ink);border-radius:18px;
+  box-shadow:5px 5px 0 var(--shadow);
+  padding:20px;margin:14px 0;
+}
+button.big{
+  display:block;width:100%;
+  font-family:'Zen Maru Gothic',sans-serif;font-weight:900;font-size:16px;
+  background:var(--card);color:var(--ink);
+  border:3px solid var(--ink);border-radius:16px;
+  box-shadow:4px 4px 0 var(--shadow);
+  padding:14px 18px;margin:10px 0;cursor:pointer;text-align:left;
+  transition:transform .08s, box-shadow .08s;
+}
+button.big:hover{transform:translate(-1px,-1px);box-shadow:5px 5px 0 var(--shadow);}
+button.big:active{transform:translate(3px,3px);box-shadow:1px 1px 0 var(--shadow);}
+button.big:focus-visible{outline:3px solid var(--blue);outline-offset:3px;}
+button.big .b-sub{display:block;font-size:12px;font-weight:700;color:#8b7f6a;margin-top:2px;}
+button.big.blue{background:var(--blue);color:#fff;}
+button.big.blue .b-sub{color:#D8E4FF;}
+button.big.pink{background:var(--pink);color:#fff;}
+button.big.pink .b-sub{color:#FFDCE9;}
+button.big.yellow{background:var(--yellow);}
+button.big.purple{background:var(--purple);color:#fff;}
+button.big.purple .b-sub{color:#E5DBFF;}
+button.big.center{text-align:center;}
+button.big:disabled{opacity:.55;cursor:default;transform:none;}
+.mini{
+  font-weight:900;font-size:13px;background:var(--card);
+  border:2.5px solid var(--ink);border-radius:12px;box-shadow:3px 3px 0 var(--shadow);
+  padding:8px 16px;cursor:pointer;
+}
+.mini:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--shadow);}
+
+/* ===== home stats ===== */
+.stat-row{display:flex;gap:10px;flex-wrap:wrap;}
+.stat{
+  flex:1;min-width:100px;text-align:center;
+  background:var(--card);border:3px solid var(--ink);border-radius:14px;
+  box-shadow:4px 4px 0 var(--shadow);padding:10px 6px;
+}
+.stat .s-num{font-family:'Mochiy Pop One',sans-serif;font-size:22px;color:var(--blue);}
+.stat .s-label{font-size:10.5px;font-weight:700;color:#8b7f6a;letter-spacing:.06em;}
+.zukan-bar{height:14px;border:2.5px solid var(--ink);border-radius:99px;background:#F0E8D8;overflow:hidden;margin-top:6px;}
+.zukan-fill{height:100%;background:linear-gradient(90deg,var(--yellow),var(--pink));transition:width .8s cubic-bezier(.3,1,.4,1);}
+.zukan-label{display:flex;justify-content:space-between;font-size:12px;font-weight:900;margin-top:10px;}
+h3.sec{font-family:'Mochiy Pop One',sans-serif;font-size:16px;margin:22px 0 4px;letter-spacing:.05em;}
+h3.sec .em{color:var(--pink);}
+
+/* ===== quiz screen ===== */
+.hud{display:flex;align-items:center;gap:10px;margin:14px 0 4px;}
+.hud .qcount{font-family:'Mochiy Pop One',sans-serif;font-size:15px;white-space:nowrap;}
+.dots{display:flex;gap:5px;flex:1;flex-wrap:wrap;}
+.dot{width:12px;height:12px;border-radius:50%;border:2px solid var(--ink);background:#fff;}
+.dot.hit{background:var(--green);}
+.dot.miss{background:var(--red);}
+.dot.now{background:var(--yellow);}
+.combo-pill{
+  font-family:'Mochiy Pop One',sans-serif;font-size:13px;
+  background:var(--ink);color:#fff;border-radius:99px;padding:4px 12px;white-space:nowrap;
+  transition:transform .15s;
+}
+.combo-pill.hot{background:var(--pink);}
+.combo-pill.bump{transform:scale(1.25) rotate(-4deg);}
+.score-pill{font-family:'Mochiy Pop One',sans-serif;font-size:13px;background:var(--blue);color:#fff;border-radius:99px;padding:4px 12px;white-space:nowrap;}
+
+.timer-wrap{height:12px;border:2.5px solid var(--ink);border-radius:99px;background:#F0E8D8;overflow:hidden;margin:8px 0 2px;}
+.timer-fill{height:100%;background:var(--green);width:100%;}
+.timer-fill.warn{background:var(--yellow);}
+.timer-fill.danger{background:var(--red);}
+
+.cat-tag{
+  display:inline-block;font-size:11px;font-weight:900;letter-spacing:.05em;
+  border:2px solid var(--ink);border-radius:99px;padding:2px 12px;margin-bottom:8px;
+}
+.cat-A{background:#DCE7FF;}
+.cat-B{background:#FFE0EC;}
+.cat-C{background:#FFF1C9;}
+.cat-D{background:#E5DBFF;}
+.cat-E{background:#D8F3E3;}
+.cat-F{background:#FFE3D6;}
+button.big.green{background:var(--green);color:#fff;}
+button.big.green .b-sub{color:#D2F3E0;}
+button.big.orange{background:#FF8A3D;color:#fff;}
+button.big.orange .b-sub{color:#FFE3D0;}
+.q-text{font-size:17px;font-weight:900;line-height:1.7;}
+.q-card{position:relative;}
+.q-card.shake{animation:shake .4s;}
+@keyframes shake{0%,100%{transform:translateX(0);}20%{transform:translateX(-8px) rotate(-1deg);}40%{transform:translateX(8px) rotate(1deg);}60%{transform:translateX(-6px);}80%{transform:translateX(6px);}}
+.q-card.pop{animation:popin .3s cubic-bezier(.2,1.5,.4,1);}
+@keyframes popin{0%{transform:scale(.92);opacity:.4;}100%{transform:scale(1);opacity:1;}}
+@media (prefers-reduced-motion:reduce){.q-card.shake,.q-card.pop{animation:none;}}
+
+.ox-row{display:flex;gap:12px;margin-top:14px;}
+.ox-row button.big{flex:1;text-align:center;font-family:'Mochiy Pop One',sans-serif;font-size:34px;padding:10px;}
+.ox-row .ox-o{color:var(--green);}
+.ox-row .ox-x{color:var(--red);}
+button.big.reveal-correct{background:var(--green);color:#fff;}
+button.big.reveal-correct .ox-o,button.big.reveal-correct .ox-x{color:#fff;}
+button.big.reveal-wrong{background:var(--red);color:#fff;}
+button.big.reveal-wrong .ox-o,button.big.reveal-wrong .ox-x{color:#fff;}
+button.big.dim{opacity:.45;}
+
+.judge{
+  position:absolute;top:-18px;right:-6px;
+  font-family:'Mochiy Pop One',sans-serif;font-size:26px;
+  padding:6px 16px;border:3px solid var(--ink);border-radius:14px;
+  transform:rotate(6deg);box-shadow:3px 3px 0 var(--shadow);
+  display:none;z-index:5;
+}
+.judge.on{display:block;animation:judgein .3s cubic-bezier(.2,1.8,.4,1);}
+.judge.good{background:var(--green);color:#fff;}
+.judge.bad{background:var(--red);color:#fff;}
+@keyframes judgein{0%{transform:rotate(6deg) scale(2);opacity:0;}100%{transform:rotate(6deg) scale(1);opacity:1;}}
+
+.float-pt{
+  position:absolute;right:14px;top:10px;
+  font-family:'Mochiy Pop One',sans-serif;font-size:20px;color:var(--blue);
+  animation:floatup 1s ease-out both;pointer-events:none;z-index:6;
+}
+@keyframes floatup{0%{transform:translateY(0);opacity:0;}20%{opacity:1;}100%{transform:translateY(-42px);opacity:0;}}
+
+.expl-box{
+  border:3px dashed var(--ink);border-radius:14px;background:#FFFBEF;
+  padding:12px 16px;margin-top:14px;font-size:13.5px;font-weight:700;display:none;
+}
+.expl-box.on{display:block;}
+.expl-box .ex-head{font-family:'Mochiy Pop One',sans-serif;font-size:13px;color:var(--purple);margin-bottom:2px;}
+
+/* ===== result ===== */
+.result-hero{text-align:center;padding:8px 0 2px;}
+.result-hero .r-title{
+  font-family:'Mochiy Pop One',sans-serif;font-size:30px;letter-spacing:.03em;
+  text-shadow:3px 3px 0 var(--yellow);margin:4px 0;
+}
+.result-hero .r-score{font-family:'Mochiy Pop One',sans-serif;font-size:44px;color:var(--blue);}
+.result-hero .r-sub{font-weight:900;font-size:14px;}
+.result-hero .r-new{display:inline-block;background:var(--pink);color:#fff;font-family:'Mochiy Pop One',sans-serif;
+  font-size:13px;padding:3px 14px;border-radius:99px;border:2.5px solid var(--ink);transform:rotate(-3deg);margin-top:6px;}
+.review-item{border-top:2px dashed #D8CDb6;padding:12px 0;font-size:13.5px;}
+.review-item .rv-q{font-weight:900;}
+.review-item .rv-a{color:#6b6252;font-weight:700;margin-top:2px;}
+.review-item .rv-mark{font-family:'Mochiy Pop One',sans-serif;margin-right:6px;}
+.rv-good{color:var(--green);} .rv-bad{color:var(--red);}
+
+/* confetti */
+.confetti{position:fixed;top:-20px;width:12px;height:12px;z-index:40;pointer-events:none;
+  animation:fall linear both;}
+@keyframes fall{0%{transform:translateY(-20px) rotate(0);}100%{transform:translateY(110vh) rotate(720deg);}}
+@media (prefers-reduced-motion:reduce){.confetti{display:none;}}
+
+.notice{font-size:11px;font-weight:700;color:#9a8f7a;margin-top:24px;line-height:1.7;
+  border-top:2px dashed #D8CDB6;padding-top:12px;}
+.center{text-align:center;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <h1 id="home-link" tabindex="0" role="button"><span class="k">公選法</span><span class="q">クエスト</span></h1>
+    <div class="tag">落選する前に、遊んで覚える公職選挙法</div>
+  </header>
+  <main id="app"></main>
+</div>
+
+<script>
+/* =====================================================
+   QUESTION BANK  (A=政治活動と選挙運動 / B=SNS・ネット / C=期間中のできる・できない)
+   type "ox": answer true=○  /  type "mc": opts + a(index)
+===================================================== */
+const CATS = {
+  A:{name:"政治活動と選挙運動",cls:"cat-A"},
+  B:{name:"SNS・ネット選挙",cls:"cat-B"},
+  C:{name:"選挙期間中のルール",cls:"cat-C"},
+  D:{name:"お金と寄付のルール",cls:"cat-D"},
+  E:{name:"投票する側のルール",cls:"cat-E"},
+  F:{name:"うっかり違反ケース",cls:"cat-F"}
+};
+const BANK = [
+/* ---------- A ---------- */
+{c:"A",t:"ox",q:"選挙運動ができるのは、立候補の届出をしてから投票日の前日までである。",a:true,e:"届出前は「事前運動」、投票日当日も選挙運動は禁止。できるのは告示日の届出後〜前日24時までです。"},
+{c:"A",t:"ox",q:"「政治活動」と「選挙運動」は法律上、同じ意味である。",a:false,e:"別物です。特定の選挙で特定の候補者への投票を得る目的の行為が「選挙運動」。それ以外の政策普及などが「政治活動」。"},
+{c:"A",t:"mc",q:"「選挙運動」と判断される3要素の組み合わせはどれ?",o:["特定の選挙・特定の候補者・投票を得る目的","大声・チラシ・お金","政党・演説・テレビ"],a:0,e:"①特定の選挙について②特定の候補者のために③投票を得る(得させる)目的の行為、が選挙運動の定義です。"},
+{c:"A",t:"ox",q:"告示前に「私に一票をお願いします」と呼びかけるのは禁止されている。",a:true,e:"事前運動の禁止。告示前の投票依頼は典型的な違反です。"},
+{c:"A",t:"ox",q:"告示前でも、自分の政策を知ってもらう活動(政治活動)は原則自由にできる。",a:true,e:"政策の普及宣伝や後援会活動は政治活動として原則自由。ただし投票依頼にわたるとアウトです。"},
+{c:"A",t:"ox",q:"後援会の会員募集は選挙運動にあたるため、告示前はできない。",a:false,e:"後援会活動は政治活動。告示前でも会員募集はできます(入会の勧誘が投票依頼にならないよう注意)。"},
+{c:"A",t:"mc",q:"事前運動をしてしまった場合の扱いは?",o:["注意されるだけ","罰則(禁錮・罰金)の対象になり得る","当選すれば不問"],a:1,e:"事前運動は公選法違反で罰則の対象。「知らなかった」では済みません。"},
+{c:"A",t:"ox",q:"「立候補を予定しています。ご支援ください」という挨拶も、内容次第で事前運動と判断される恐れがある。",a:true,e:"「支援」が実質的な投票依頼と受け取られる言い方は危険。政策を伝える表現に徹するのが安全です。"},
+{c:"A",t:"ox",q:"18歳未満でも選挙運動はできる。",a:false,e:"18歳未満(年齢満18年未満の者)は選挙運動ができません。SNSのシェアも含まれるので注意。"},
+{c:"A",t:"ox",q:"公務員が地位を利用して選挙運動をすることは禁止されている。",a:true,e:"公務員の地位利用による選挙運動は禁止。部下や窓口利用者への働きかけなどが典型です。"},
+{c:"A",t:"ox",q:"選挙管理委員会の職員や警察官などの「特定公務員」は、在職中の選挙運動が一切禁止されている。",a:true,e:"選管職員・裁判官・警察官などは、地位利用かどうかに関係なく在職中の選挙運動そのものが禁止です。"},
+{c:"A",t:"mc",q:"市議会議員選挙の選挙運動期間は何日間?",o:["5日間","7日間","14日間"],a:1,e:"市議選は告示日から投票日前日までの7日間。短期決戦です(参考:衆院選12日、参院選17日)。"},
+{c:"A",t:"ox",q:"投票日当日も「最後のお願い」として街頭で投票を呼びかけられる。",a:false,e:"選挙運動は投票日前日まで。当日の呼びかけは違反です。"},
+{c:"A",t:"ox",q:"候補者の氏名や顔写真入りの政治活動用ポスターは、任期満了日の6か月前からは掲示できない。",a:true,e:"公選法143条16項。いわゆる「6か月前ルール」で、個人の政治活動用ポスターに規制がかかります。"},
+{c:"A",t:"ox",q:"後援会の総会や集会を告示前に開くことはできる。",a:true,e:"政治活動として可能です。ただし会の中で投票依頼をすれば事前運動になります。"},
+{c:"A",t:"mc",q:"選挙運動期間中でも認められているのはどれ?",o:["電話での投票依頼","戸別訪問","有権者への金品の提供"],a:0,e:"電話による投票依頼は期間中OK。戸別訪問と金品提供はいつでも禁止です。"},
+{c:"A",t:"ox",q:"戸別訪問は、選挙運動期間中であれば認められる。",a:false,e:"戸別訪問は期間中でも常に禁止。買収の温床になりやすいためです。"},
+{c:"A",t:"mc",q:"買収罪が成立するのはどんな場合?",o:["現金を渡した場合だけ","金銭・物品・飲食のもてなしなど広く成立し得る","100万円を超えた場合だけ"],a:1,e:"現金に限らず、物品や供応接待(飲み食いのもてなし)でも成立します。金額の多寡は関係ありません。"},
+{c:"A",t:"ox",q:"選挙運動を手伝ってくれた人には、自由に日当を支払える。",a:false,e:"選挙運動は原則無報酬。報酬を払えるのは車上運動員(ウグイス)や事務員など法定の範囲だけです。"},
+{c:"A",t:"ox",q:"選挙事務所に来た人に、お茶と通常のお菓子を出すことは認められている。",a:true,e:"湯茶と「これに伴い通常用いられる程度の菓子」はOK。弁当や酒はNGです。"},
+{c:"A",t:"ox",q:"決起集会で支援者に弁当やお酒を振る舞うのは禁止されている。",a:true,e:"選挙運動に関する飲食物の提供は原則禁止。供応(もてなし)として買収罪に問われることもあります。"},
+{c:"A",t:"mc",q:"連座制で出納責任者らが買収により有罪になると、候補者はどうなる?",o:["何も起こらない","罰金だけ払う","当選無効+同じ選挙区から5年間立候補できない"],a:2,e:"本人が関与していなくても、当選無効と5年間の立候補制限。組織の管理責任が問われる厳しい制度です。"},
+{c:"A",t:"ox",q:"選挙に関して、特定の候補者への支持を集める署名運動は禁止されている。",a:true,e:"選挙に関する署名運動の禁止(公選法138条の2)。政策への一般的な署名とは区別されます。"},
+{c:"A",t:"ox",q:"「どの候補が人気か」を調べた人気投票の結果を公表することは禁止されている。",a:true,e:"人気投票の経過・結果の公表は禁止。選挙の公正を守るためのルールです(報道機関の世論調査とは別)。"},
+{c:"A",t:"mc",q:"市議会議員選挙(政令市以外)の供託金はいくら?",o:["10万円","30万円","100万円"],a:1,e:"30万円。一定の得票(有効投票総数÷議員定数÷10)に達しないと没収されます。"},
+{c:"A",t:"ox",q:"供託金は、得票が一定の基準に届かないと没収される。",a:true,e:"泡沫候補の乱立を防ぐ仕組み。市議選では有効投票総数÷定数÷10が没収ラインです。"},
+{c:"A",t:"ox",q:"政治家が選挙区内の人にお中元やお歳暮を贈るのは問題ない。",a:false,e:"政治家から選挙区内の人への寄付は原則禁止。お中元・お歳暮も寄付にあたります。"},
+{c:"A",t:"ox",q:"政治家が選挙区内のお祭りに寄付金や差し入れを出すことは禁止されている。",a:true,e:"祭りへのご祝儀・寄付も禁止対象。「気持ちだから」は通用しません。"},
+{c:"A",t:"ox",q:"政治家が結婚式のご祝儀を出すことは、本人が出席する場合に限り認められる。",a:true,e:"本人出席の結婚披露宴の祝儀、本人出席の葬式の香典は、通常の範囲内で例外的に認められています。"},
+{c:"A",t:"ox",q:"「まちをよくする勉強会」を開くこと自体は、告示前でも自由にできる。",a:true,e:"政策の学習会・講演会は政治活動として自由。中身が特定候補への投票依頼にならないことが条件です。"},
+/* ---------- B ---------- */
+{c:"B",t:"ox",q:"インターネットを使った選挙運動は、2013年から解禁された。",a:true,e:"2013年の公選法改正でネット選挙が解禁。ただし「何でもあり」ではなく細かいルールがあります。"},
+{c:"B",t:"ox",q:"一般の有権者も、選挙期間中ならSNSで「○○さんに投票を!」と呼びかけられる。",a:true,e:"ウェブサイト・SNSでの選挙運動は有権者もOK(18歳以上)。ネット選挙解禁の柱です。"},
+{c:"B",t:"ox",q:"一般の有権者が「○○さんに投票を」という電子メールを送ることは認められている。",a:false,e:"選挙運動用の電子メールを送れるのは候補者と政党等だけ。有権者はSNSはOKでもメールはNGです。"},
+{c:"B",t:"mc",q:"選挙運動用の電子メールを送信できるのは?",o:["誰でも","候補者と政党等のみ","誰もできない"],a:1,e:"メールは候補者・政党等に限定。しかも同意した人などにしか送れません。"},
+{c:"B",t:"ox",q:"LINEやXのDM(ダイレクトメッセージ)は「電子メール」にあたるため、有権者は使えない。",a:false,e:"法律上の「電子メール」はSMTP方式と電話番号SMS。LINEやSNSのDMはウェブサイト等に分類され、有権者も使えます。"},
+{c:"B",t:"ox",q:"電話番号宛てのSMS(ショートメッセージ)による選挙運動は、有権者にはできない。",a:true,e:"SMSは法律上「電子メール」扱い。送れるのは候補者・政党等のみで、有権者はNGです。"},
+{c:"B",t:"ox",q:"投票日当日に「○○候補へ投票を!」とSNSに投稿してもよい。",a:false,e:"当日の選挙運動は禁止。ネットも例外ではありません。"},
+{c:"B",t:"ox",q:"投票日の前日までにSNSへ投稿した選挙運動の書き込みは、当日削除しなくてよい。",a:true,e:"前日までの投稿はそのまま残してOK。当日に新規投稿・更新するのがNGです。"},
+{c:"B",t:"ox",q:"投票日当日でも、特定の候補に触れずに「投票に行こう!」と呼びかけるのはOK。",a:true,e:"一般的な投票参加の呼びかけは選挙運動ではないのでOK。「○○さんへ」と付けた瞬間にアウトです。"},
+{c:"B",t:"ox",q:"候補者の選挙運動ツイートを有権者がリポスト(リツイート)する行為も、選挙運動になり得る。",a:true,e:"拡散も投票を得させる目的の行為なら選挙運動。成人の有権者は期間中OK、18歳未満と当日はNGです。"},
+{c:"B",t:"ox",q:"18歳未満が候補者の投稿をシェア・リポストすると、違反になり得る。",a:true,e:"18歳未満は選挙運動禁止。「ボタンひとつのシェア」も選挙運動にあたり得ます。"},
+{c:"B",t:"mc",q:"選挙運動用のウェブサイトやSNS投稿に表示が義務付けられているのは?",o:["住所","電子メールアドレスなどの連絡先","顔写真"],a:1,e:"頒布する者の電子メールアドレス等の連絡先表示が義務。責任の所在を明らかにするためです。"},
+{c:"B",t:"ox",q:"候補者になりすましたSNSアカウントを作る行為は処罰の対象になる。",a:true,e:"氏名等の虚偽表示罪。なりすましは選挙の公正を害する行為として処罰されます。"},
+{c:"B",t:"ox",q:"候補者について虚偽の事実をネットに書き込むと、虚偽事項公表罪に問われることがある。",a:true,e:"当選させない目的で虚偽の事実を公表すると犯罪。「ネットだからセーフ」はありません。"},
+{c:"B",t:"ox",q:"落選させる目的でウソの悪評を拡散しても、選挙が終わってしまえば罪には問われない。",a:false,e:"選挙後でも捜査・処罰の対象です。当選無効や公民権停止につながることもあります。"},
+{c:"B",t:"ox",q:"候補者がネットに載せた選挙運動用ビラを、自分で印刷して近所に配ってもよい。",a:false,e:"印刷した瞬間に「法定外文書図画の頒布」で違反。紙のビラは枚数・証紙などの厳しい規制があります。"},
+{c:"B",t:"ox",q:"候補者は選挙期間中もウェブサイトやブログを更新できる。",a:true,e:"ネット解禁により期間中の更新はOK。むしろ期間中こそ発信が本番です。"},
+{c:"B",t:"mc",q:"「○○候補に投票を」という有料のインターネット広告を出せるのは?",o:["候補者本人","政党等の一定の広告に限られ、候補者は出せない","お金を払えば誰でも"],a:1,e:"選挙運動用の有料ネット広告は原則禁止。例外は政党等による一定の広告だけです。"},
+{c:"B",t:"ox",q:"演説のライブ配信など、動画サイトでの選挙運動は認められている。",a:true,e:"動画配信もウェブサイト等の利用としてOK。連絡先表示などのルールは守る必要があります。"},
+{c:"B",t:"ox",q:"告示前にSNSで「告示日からの選挙戦、応援と一票をよろしく」と投稿するのは事前運動になり得る。",a:true,e:"投稿がネット上でも、告示前の投票依頼は事前運動。時期の壁はSNSにも同じく存在します。"},
+{c:"B",t:"ox",q:"候補者から届いた選挙運動用メールを、友人に転送するのはOK。",a:false,e:"転送も「電子メールによる選挙運動」。有権者はできません。SNSでシェアするのはOKという非対称に注意。"},
+{c:"B",t:"ox",q:"候補者や政党も、受信を拒否した人に選挙運動用メールを送り続けることはできない。",a:true,e:"送信できる相手は同意者等に限定され、拒否されたら送れません。"},
+{c:"B",t:"ox",q:"SNSのプロフィール欄に「○○候補を応援しています」と書くことは、期間中なら可能。",a:true,e:"有権者のウェブ選挙運動としてOK(18歳以上・期間中)。"},
+{c:"B",t:"ox",q:"投票日当日、期日前投票を済ませた人が「私は○○さんに入れた。皆もぜひ!」と投稿するのはOK。",a:false,e:"「皆もぜひ」は投票依頼=当日の選挙運動でNG。誰に入れたかを言うこと自体は自由です。"},
+{c:"B",t:"ox",q:"選挙妨害の目的で候補者のウェブサイトを改ざんする行為は処罰の対象になり得る。",a:true,e:"不正アクセス禁止法や公選法の選挙の自由妨害罪などに問われ得ます。"},
+{c:"B",t:"mc",q:"ネット選挙で「できない」ことはどれ?",o:["SNSでの投票依頼","インターネット投票","演説動画の配信"],a:1,e:"ネット選挙解禁=運動の解禁であって、投票はネットではできません。よくある勘違いです。"},
+{c:"B",t:"ox",q:"18歳未満でも「選挙に行こう!」という一般的な啓発投稿はできる。",a:true,e:"特定候補への投票依頼でなければ選挙運動ではないのでOK。主権者教育の投稿は歓迎です。"},
+{c:"B",t:"ox",q:"匿名アカウントによる選挙運動の投稿は、それだけで直ちに違法である。",a:false,e:"匿名自体は違法ではありません。ただし連絡先(メールアドレス等)の表示義務はあり、なりすましや虚偽は処罰対象です。"},
+{c:"B",t:"ox",q:"「拡散希望!○○候補に一票を」と他の人に広めてもらうよう頼むことも、成人の有権者なら期間中OK。",a:true,e:"ウェブ上の拡散依頼は有権者の選挙運動として可能。ただし相手が18歳未満だと相手が違反になる点に注意。"},
+{c:"B",t:"ox",q:"AIで作った候補者の偽動画(ディープフェイク)を流して落選を狙う行為は、処罰され得る。",a:true,e:"虚偽事項公表罪や名誉毀損などに該当し得ます。技術が新しくても、ルールの網はかかります。"},
+/* ---------- C ---------- */
+{c:"C",t:"ox",q:"街頭演説ができるのは、午前8時から午後8時までである。",a:true,e:"8時〜20時のルール。20時を1分でも過ぎたらマイクは置きましょう。"},
+{c:"C",t:"ox",q:"選挙カーの走行中にできる選挙運動は、連呼行為(名前の連呼など)に限られる。",a:true,e:"走行中は連呼のみ。演説は停止してから行います。"},
+{c:"C",t:"mc",q:"市議選で候補者が使える選挙カーは原則何台?",o:["1台","3台","制限なし"],a:0,e:"原則1台。台数・乗車人数・拡声機にも決まりがあります。"},
+{c:"C",t:"ox",q:"国公立の学校や病院の構内でも演説してよい。",a:false,e:"国・地方公共団体が所有・管理する建物や病院・診療所などでの演説は禁止されています。"},
+{c:"C",t:"ox",q:"電車やバスの車内で演説することは禁止されている。",a:true,e:"電車・バス・駅の構内などでの演説は禁止です。"},
+{c:"C",t:"mc",q:"選挙運動用ポスターを貼れる場所は?",o:["自宅の塀","公営のポスター掲示場のみ","電柱"],a:1,e:"市議選などのポスターは公営掲示場だけ。応援者の塀でも貼ったら違反です。"},
+{c:"C",t:"ox",q:"選挙運動用ビラには、配れる枚数の上限と証紙(選管交付のシール)が必要。",a:true,e:"市議選は4,000枚まで・証紙必須。証紙のないビラを配ると法定外文書で違反です。"},
+{c:"C",t:"mc",q:"選挙運動用ビラの配り方として認められていないのはどれ?",o:["新聞折込","個人演説会場での配布","各家庭の郵便受けへのポスティング"],a:2,e:"頒布方法は新聞折込・演説会場・街頭演説の場所などに限定。ポスティングは認められていません。"},
+{c:"C",t:"ox",q:"候補者名入りの「たすき」は、候補者本人が使うことができる。",a:true,e:"たすき・胸章は候補者本人用として認められています。運動員が同じものを使うのはNG。"},
+{c:"C",t:"ox",q:"応援者なら誰でも、候補者名入りののぼり旗を持って街頭に立てる。",a:false,e:"のぼり旗のような文書図画の掲示は厳しく制限されています。「気持ちはうれしいが違反」の典型例。"},
+{c:"C",t:"ox",q:"施設を借りて個人演説会を開くことができる。",a:true,e:"個人演説会は選挙運動の柱のひとつ。公共施設は一定の手続きで利用できます。"},
+{c:"C",t:"ox",q:"選挙期間中、電話で投票を依頼することは認められている。",a:true,e:"電話作戦は合法な選挙運動。ただし相手への配慮は忘れずに。"},
+{c:"C",t:"ox",q:"投票所の中で「○○さんをお願いします」と声をかけてもよい。",a:false,e:"投票所内での選挙運動は厳禁。投票の自由を守る最後の砦です。"},
+{c:"C",t:"ox",q:"選挙事務所は、候補者1人につき原則1か所しか設置できない。",a:true,e:"市議選は原則1か所。看板の大きさなどにも規格があります。"},
+{c:"C",t:"ox",q:"企業が候補者個人に「陣中見舞い」として現金を渡すことは禁止されている。",a:true,e:"企業・団体から候補者個人への寄付は政治資金規正法で禁止。受け取る側も罪に問われ得ます。"},
+{c:"C",t:"ox",q:"有権者が無報酬のボランティアとして選挙を手伝うことは自由にできる。",a:true,e:"無報酬のボランティアは選挙の基本。ポスター貼りも電話かけも力になります。"},
+{c:"C",t:"mc",q:"報酬を支払ってよい選挙運動の従事者は?",o:["手伝ってくれた人全員","車上運動員(ウグイス)や事務員など法定の者のみ","親族のみ"],a:1,e:"報酬支払いは法定の範囲・金額に限定。それ以外に払うと買収(運動買収)になり得ます。"},
+{c:"C",t:"ox",q:"選挙運動を手伝ってくれた人へのお礼に商品券を配るのは、買収にあたる恐れがある。",a:true,e:"現金でなくても運動買収になり得ます。お礼は言葉で。"},
+{c:"C",t:"ox",q:"候補者は投票日当日、投票所の入口で有権者と握手して回れる。",a:false,e:"当日の選挙運動は禁止。投票所付近での働きかけは特に厳禁です。"},
+{c:"C",t:"ox",q:"出陣式で集まった支援者にお酒を振る舞うことは違反である。",a:true,e:"選挙運動に関する飲食物の提供禁止。お酒は特にアウトです。"},
+{c:"C",t:"ox",q:"選挙区内の人に候補者名入りの年賀状や暑中見舞いを出すことは、原則禁止されている。",a:true,e:"政治家の挨拶状は答礼のための自筆によるものを除き禁止です。"},
+{c:"C",t:"ox",q:"選挙公報は、各世帯に配布される。",a:true,e:"候補者の経歴や政策が載った選挙公報は各世帯へ配布(または新聞折込等)。必ず読みましょう。"},
+{c:"C",t:"ox",q:"期日前投票は、投票日の前日まで利用できる。",a:true,e:"告示日の翌日から投票日前日まで。仕事や旅行の予定があれば宣誓書ひとつで使えます。"},
+{c:"C",t:"mc",q:"期日前投票をするときに必要なのは?",o:["理由を書いた宣誓書","医師の診断書","推薦人2名"],a:0,e:"投票日に行けない見込みの理由を選ぶ簡単な宣誓書だけ。ハードルはとても低い制度です。"},
+{c:"C",t:"ox",q:"投票用紙に候補者名以外のこと(応援メッセージなど)を書き込むと、無効票になり得る。",a:true,e:"「他事記載」は無効票の代表例。名前だけを丁寧に書きましょう。"},
+{c:"C",t:"ox",q:"自分が誰に投票したかを人に話すのは違法である。",a:false,e:"投票の秘密は「守られる権利」であって、自分から話すのは自由です。"},
+{c:"C",t:"ox",q:"選挙運動に使える費用には、法律で上限額が定められている。",a:true,e:"法定選挙費用。上限を超えると出納責任者が処罰され、連座制で当選無効にもなり得ます。"},
+{c:"C",t:"ox",q:"選挙が終わった後、当選のお礼のために有権者の家を一軒一軒回るのは禁止されている。",a:true,e:"選挙後の挨拶行為にも規制があり、戸別訪問によるお礼回りはできません。"},
+{c:"C",t:"ox",q:"「当選ありがとうございました」という有料広告を新聞に出すことは禁止されている。",a:true,e:"当選・落選に関する挨拶目的の有料広告は禁止です。"},
+{c:"C",t:"ox",q:"投票日に用事がある人は、投票日前でも「期日前投票」で一票を投じられる。",a:true,e:"期日前投票の利用者は年々増加中。投票のハードルを下げる大切な仕組みです。"},
+/* ---------- D:お金と寄付 ---------- */
+{c:"D",t:"ox",q:"政治家が選挙区内の人にお金や物を贈る「寄付」は、原則として禁止されている。",a:true,e:"公選法199条の2。選挙の年かどうかに関係なく、一年中・原則禁止です。"},
+{c:"D",t:"ox",q:"有権者の側から政治家に寄付(祭りへの協賛など)をおねだりすることも、禁止されている。",a:true,e:"寄付の勧誘・要求も禁止。「贈らない・求めない・受け取らない」の三ない運動です。"},
+{c:"D",t:"ox",q:"政治家は選挙区内の葬儀に、本人が出席すれば通常の範囲の香典を出せる。",a:true,e:"本人出席の葬式での通常の香典は例外的にOK。ポイントは「本人が」「通常の範囲」です。"},
+{c:"D",t:"ox",q:"本人が出席できない葬儀に、秘書が香典を代わりに持って行くのはOK。",a:false,e:"代理持参はNG。例外が認められるのは本人出席の場合だけです。"},
+{c:"D",t:"ox",q:"政治家が選挙区内の結婚披露宴に祝電を打つことはできる。",a:true,e:"祝電・弔電は寄付にあたらないのでOK。「気持ちは電報で」が政治家の作法です。"},
+{c:"D",t:"mc",q:"政治家が「できない」のはどれ?",o:["結婚式への祝電","本人出席の葬儀での通常の香典","出席しない結婚式へのご祝儀"],a:2,e:"祝儀の例外も「本人出席」が条件。欠席なのに包んだら寄付禁止違反です。"},
+{c:"D",t:"ox",q:"町内会のお祭りへの「寸志」は、金額が少なければ政治家も出せる。",a:false,e:"金額の大小は関係ありません。少額でも寄付は寄付です。"},
+{c:"D",t:"ox",q:"政治家が地域のスポーツ大会に優勝カップを寄贈するのは禁止されている。",a:true,e:"物品の寄贈も寄付。トロフィーも花輪も差し入れもNGです。"},
+{c:"D",t:"ox",q:"政治家本人だけでなく、その後援会(後援団体)も選挙区内の人への寄付が禁止されている。",a:true,e:"後援団体の寄付も規制対象。「会からなら大丈夫」という抜け道はありません。"},
+{c:"D",t:"ox",q:"政治家が自分の親族の結婚式にご祝儀を出すのは問題ない。",a:true,e:"親族に対する寄付は禁止の例外です。"},
+{c:"D",t:"mc",q:"寄付禁止の「三ない運動」の正しい組み合わせは?",o:["贈らない・求めない・受け取らない","見ない・聞かない・言わない","飲まない・打たない・買わない"],a:0,e:"政治家は贈らない、有権者は求めない・受け取らない。双方向のルールです。"},
+{c:"D",t:"ox",q:"病気見舞いの品も、政治家から選挙区内の人へは原則禁止。",a:true,e:"お見舞いも寄付にあたります。回復を祈る気持ちは言葉で伝えましょう。"},
+{c:"D",t:"ox",q:"卒業式や成人式で、政治家が来賓として祝辞を述べることはできる。",a:true,e:"祝辞そのものは寄付ではないのでOK。"},
+{c:"D",t:"ox",q:"祝辞はOKでも、式典に記念品を持参して配るのはNG。",a:true,e:"モノを渡した瞬間に寄付。スピーチまでが政治家の仕事です。"},
+{c:"D",t:"ox",q:"企業が候補者個人に政治資金を寄付することは禁止されている。",a:true,e:"企業・団体献金は政党・政治資金団体に対してのみ可能。個人(資金管理団体含む)への企業献金は禁止です。"},
+{c:"D",t:"ox",q:"個人が一つの政治団体(後援会など)に寄付できる上限は、年間150万円である。",a:true,e:"政治資金規正法の個別制限。個人の寄付には総枠(年間1,000万円等)もあります。"},
+{c:"D",t:"ox",q:"名前を明かさない匿名の寄付は、原則として受け取れない。",a:true,e:"匿名寄付は原則禁止(街頭募金などのごく少額の例外あり)。受け取ってしまった分は国庫等に納付します。"},
+{c:"D",t:"ox",q:"外国人や外国法人からの政治献金は受け取れない。",a:true,e:"外国勢力からの影響を防ぐため、外国人・外国法人等からの寄付は禁止されています。"},
+{c:"D",t:"ox",q:"政治団体が受け取った寄付は、収支報告書に記載され公開される。",a:true,e:"政治資金の透明性の柱。誰でも閲覧できます。"},
+{c:"D",t:"mc",q:"年間5万円を超える寄付をした人について、収支報告書に記載されるのは?",o:["氏名・住所・職業など","血液型","家族構成"],a:0,e:"5万円超の寄付者は氏名・住所・職業・金額・年月日が公開対象になります。"},
+{c:"D",t:"ox",q:"個人が候補者の選挙運動を応援するために寄付(陣中見舞い)をすることは、法律の範囲内で可能。",a:true,e:"個人からの寄付は制限額の範囲内でOK。応援の気持ちを形にする正規ルートです。"},
+{c:"D",t:"ox",q:"政治家が選挙区内の人に「お車代」を渡すのは、寄付にあたる恐れがある。",a:true,e:"実費を超える「お車代」「お礼」は寄付や買収と評価されるリスクがあります。"},
+{c:"D",t:"ox",q:"政治家が会費制の会合に、定められた会費を払って出席するのはOK。",a:true,e:"会費は参加の対価なので寄付ではありません。ただし相場を大きく超えると危険です。"},
+{c:"D",t:"ox",q:"会費制でも、相場を大きく超える金額を包むと寄付とみなされる恐れがある。",a:true,e:"「会費」という名目より実態で判断されます。超過分は寄付と評価され得ます。"},
+{c:"D",t:"mc",q:"寄付禁止に違反した政治家はどうなり得る?",o:["何も起こらない","罰金などの刑罰を受け、公民権停止になることもある","注意だけで済む"],a:1,e:"罰則があり、公民権停止となれば議員の職も失います。寄付は政治生命に直結します。"},
+{c:"D",t:"ox",q:"有権者が政治家を威迫して寄付を求めると、有権者側が処罰されることがある。",a:true,e:"威迫による勧誘・要求には罰則。「求める側」にもルールがあります。"},
+{c:"D",t:"ox",q:"政治資金パーティーの会費(パーティー券の購入)は、法律上「寄付」とは別の扱いである。",a:true,e:"パーティー券は催しの対価=事業収入という扱い。ただし透明性のルールが別途あります。"},
+{c:"D",t:"ox",q:"秘書や配偶者が「政治家名義」で選挙区内に寄付するのも禁止。",a:true,e:"名義を使った寄付も本人の寄付と同じ扱い。抜け道にはなりません。"},
+{c:"D",t:"ox",q:"政治家から政党への寄付や、親族への寄付は、寄付禁止の例外とされている。",a:true,e:"政党・政治団体への寄付、親族への寄付、専ら政治上の主義の普及のための講習会での必要最小限の実費補償などが例外です。"},
+{c:"D",t:"ox",q:"「少額だから大丈夫」— 寄付禁止違反は金額にかかわらず違反である。",a:true,e:"100円でも寄付は寄付。金額の少なさは免罪符になりません。"},
+/* ---------- E:投票する側 ---------- */
+{c:"E",t:"ox",q:"選挙権は満18歳以上の日本国民に与えられる。",a:true,e:"2016年から18歳選挙権。高校3年生でも誕生日が来ていれば一票を持っています。"},
+{c:"E",t:"ox",q:"市議選で投票するには、その市に引き続き3か月以上住んでいる必要がある。",a:true,e:"住所要件。引っ越し直後は新しいまちではまだ投票できません。"},
+{c:"E",t:"ox",q:"引っ越したばかりで新住所の名簿に載っていない場合、旧住所地で投票できることがある。",a:true,e:"要件を満たせば旧住所地での投票が可能。「引っ越したから棄権」と諦めないで。"},
+{c:"E",t:"ox",q:"投票日に旅行の予定があっても、宣誓書を書けば期日前投票ができる。",a:true,e:"レジャーも立派な理由のひとつ。宣誓書は投票所で1分で書けます。"},
+{c:"E",t:"ox",q:"期日前投票ができるのは、告示日(公示日)の翌日から投票日の前日まで。",a:true,e:"市議選なら実質6日間。土日も利用できます。"},
+{c:"E",t:"ox",q:"出張先など、名簿登録地以外の市区町村からでも「不在者投票」ができる。",a:true,e:"滞在先の選管で投票する制度。事前の請求手続きが必要なので早めに。"},
+{c:"E",t:"ox",q:"入院中の人は、指定を受けた病院の中で不在者投票ができる。",a:true,e:"指定病院・老人ホームなどでは施設内で投票可能。病院に確認を。"},
+{c:"E",t:"ox",q:"重度の障害などがある人のために、郵便による投票の制度がある。",a:true,e:"郵便等投票。対象要件と事前の証明書交付手続きがあります。"},
+{c:"E",t:"ox",q:"字を書くことが難しい人のために、係員が代わりに記入する「代理投票」の制度がある。",a:true,e:"投票所の係員2名が補助。誰に入れたかの秘密は守られます。"},
+{c:"E",t:"ox",q:"代理投票では、付き添いの家族に代筆してもらうことができる。",a:false,e:"代筆できるのは投票所の係員(補助者)だけ。家族でも代筆はできません。"},
+{c:"E",t:"ox",q:"目の不自由な人は点字で投票できる。",a:true,e:"点字投票の制度があります。投票所で点字器を借りられます。"},
+{c:"E",t:"ox",q:"投票所には有権者本人しか入れないので、子どもは連れて入れない。",a:false,e:"18歳未満の子どもの同伴はOK。親子で投票所へ行くのは最高の主権者教育です。"},
+{c:"E",t:"mc",q:"投票用紙に書いてよいのは?",o:["候補者の氏名のみ","氏名+応援メッセージ","候補者の似顔絵"],a:0,e:"氏名以外の書き込み(他事記載)は無効票の原因。名前だけを丁寧に。"},
+{c:"E",t:"ox",q:"名字だけ書いた場合でも、同姓の候補者が他にいなければ有効になる。",a:true,e:"どの候補か特定できれば有効と扱われるのが原則です。"},
+{c:"E",t:"ox",q:"投票用紙を記入せずに家へ持ち帰ってもよい。",a:false,e:"投票用紙の持ち帰りはできません。書き損じたら係員に申し出て交換を。"},
+{c:"E",t:"ox",q:"誰に投票したかを他人に明かすよう強制されることはない。",a:true,e:"投票の秘密は憲法で保障。話すのも話さないのも自分の自由です。"},
+{c:"E",t:"ox",q:"「投票済証」を発行してくれる自治体がある。",a:true,e:"投票済証や選挙割(商店街のサービス)を実施する地域も。投票がちょっと楽しくなる仕組みです。"},
+{c:"E",t:"ox",q:"選挙人名簿は誰でも自由にコピーして持ち出せる。",a:false,e:"個人情報の塊なので閲覧は目的・手続きが厳格に制限されています。"},
+{c:"E",t:"ox",q:"投票所入場券(ハガキ)を忘れたら、その日は投票できない。",a:false,e:"本人確認ができれば投票できます。入場券は「あると速い」だけで必須ではありません。"},
+{c:"E",t:"ox",q:"18歳の高校生も有権者として投票できる。",a:true,e:"満18歳になっていれば高校生でも一票。ただし選挙運動のルールは別途あります。"},
+{c:"E",t:"ox",q:"投票日当日の投票時間は、原則として午前7時から午後8時まで。",a:true,e:"原則7時〜20時(地域により繰上げ等あり)。仕事帰りでも間に合います。"},
+{c:"E",t:"ox",q:"他人になりすまして投票すると「詐偽投票」として処罰される。",a:true,e:"なりすまし投票は犯罪。家族の分を「ついでに」もダメです。"},
+{c:"E",t:"ox",q:"同じ選挙で2回投票する「二重投票」は犯罪である。",a:true,e:"期日前+当日など、二重の投票は処罰対象です。"},
+{c:"E",t:"ox",q:"お金をもらって特定候補に投票する約束をした場合、有権者の側も処罰される。",a:true,e:"買収は「もらった側」も被買収罪。うまい話には裏があります。"},
+{c:"E",t:"mc",q:"開票の結果、最下位当選ラインで得票が同数だった場合は?",o:["くじで決める","再選挙","年長者が当選"],a:0,e:"公選法95条2項。最後は選挙長のくじ。実際に全国で時々起きています。"},
+{c:"E",t:"ox",q:"白紙のまま投票箱に入れることもできる(無効票にはなる)。",a:true,e:"白票も投じることは可能。ただし候補者選びに影響しない無効票として扱われます。"},
+{c:"E",t:"ox",q:"投票所には候補者の氏名一覧が掲示されていて、確認してから書ける。",a:true,e:"氏名掲示があるので、うろ覚えでも大丈夫。落ち着いて確認を。"},
+{c:"E",t:"ox",q:"海外に住んでいる日本人は、市議選でも在外投票ができる。",a:false,e:"在外投票の対象は国政選挙のみ。地方選挙は住所要件があるためできません。"},
+{c:"E",t:"ox",q:"災害時などには、投票時間の変更や投票日の繰上げが行われることがある。",a:true,e:"離島や災害地域などで繰上投票・時間変更が行われることがあります。"},
+{c:"E",t:"ox",q:"「一票では何も変わらない」— 実際には数票差・同数くじ引きの選挙も起きている。",a:true,e:"市議選は数票差の攻防がざら。あなたの一票が当落を分けた実例は全国にあります。"},
+/* ---------- F:うっかり違反ケース ---------- */
+{c:"F",t:"mc",q:"【告示1週間前】友人「SNSで『○○さんに一票を』って投稿していい?」",o:["まだダメ(事前運動になる)","友人ならOK","夜間ならOK"],a:0,e:"投票依頼は告示日の届出後から。それまでは政策の紹介や人柄の発信に留めましょう。"},
+{c:"F",t:"mc",q:"【善意の後援会員】自費で候補者名入りののぼり旗を10本作り、街角に立てた。",o:["違反の恐れ大(文書図画の掲示制限)","自費ならOK","10本以下ならOK"],a:0,e:"のぼり旗のような文書図画の掲示は厳格に制限。善意でも違反は違反です。"},
+{c:"F",t:"mc",q:"【差し入れ】選挙事務所への差し入れでセーフなのは?",o:["ビール1ケース","仕出し弁当20個","お茶と個包装のおせんべい"],a:2,e:"湯茶と通常の菓子まで。酒と食事はNG。「まんじゅうはセーフ、弁当はアウト」と覚えましょう。"},
+{c:"F",t:"mc",q:"【親切な申し出】「うちの塀にポスター貼っていいよ」と言われた。",o:["貼れない(公営掲示場のみ)","家主の許可があればOK","1枚だけならOK"],a:0,e:"選挙運動用ポスターは公営掲示場だけ。厚意はありがたく、お断りを。"},
+{c:"F",t:"mc",q:"【夜の選挙カー】20時を過ぎても名前を連呼しながら走っている。",o:["違反","22時まではOK","最終日ならOK"],a:0,e:"連呼行為は8時〜20時。時計を見る係を決めておくのが実務の知恵です。"},
+{c:"F",t:"mc",q:"【19歳の弟】「兄さんの選挙、手伝いたい!」— 19歳ができるのは?",o:["選挙運動も全般的にできる","一切できない","ビラ配りだけできる"],a:0,e:"ひっかけ問題! 禁止は「18歳未満」。19歳は選挙運動OKです。"},
+{c:"F",t:"mc",q:"【16歳の娘】父の選挙運動ツイートをリポストした。",o:["問題ない","違反になり得る","学校が休みならOK"],a:1,e:"18歳未満の選挙運動は禁止で、リポストも該当し得ます。家族会議で共有必須のルール。"},
+{c:"F",t:"mc",q:"【期間中・成人の有権者】候補者の演説動画をストーリーズで「この人に投票して!」と拡散。",o:["OK","違反","フォロワー数による"],a:0,e:"有権者のウェブ選挙運動は解禁済み。堂々と応援できます(当日と18歳未満はNG)。"},
+{c:"F",t:"mc",q:"【投票日の朝】「今日は投票日!○○さんをよろしく!」と投稿した。",o:["違反(当日の選挙運動)","朝ならOK","絵文字を使えばOK"],a:0,e:"当日の投票依頼はNG。前日の23時59分までが勝負です。"},
+{c:"F",t:"mc",q:"【投票日の朝】「今日は投票日!みんな投票に行こう!」と投稿(候補者名なし)。",o:["OK","違反","即削除が必要"],a:0,e:"特定候補に触れない投票参加の呼びかけは選挙運動ではないのでOKです。"},
+{c:"F",t:"mc",q:"【お礼】頑張ってくれた学生ボランティアに図書カード3,000円分を渡したい。",o:["買収(運動買収)の恐れがある","3,000円以下ならOK","学生ならOK"],a:0,e:"運動員への物品のお礼は運動買収になり得ます。感謝は言葉と握手で。"},
+{c:"F",t:"mc",q:"【報酬】車上運動員(ウグイス)に法定額の日当を払う。",o:["OK(法定の範囲内)","一切ダメ","現金だとダメ"],a:0,e:"車上運動員・事務員などへの法定内の報酬は適法。届出と記録を忘れずに。"},
+{c:"F",t:"mc",q:"【ご近所回り】「向かいと隣、あと3軒だけ回って投票をお願いしてくる」",o:["戸別訪問で違反","5軒以下ならOK","顔見知りならOK"],a:0,e:"軒数や親しさに関係なく、投票依頼の戸別訪問は禁止です。"},
+{c:"F",t:"mc",q:"【電話作戦】支援者名簿の人に「○○です、投票をお願いします」と電話をかける。",o:["OK","違反","固定電話のみOK"],a:0,e:"電話による選挙運動は適法。ネット時代でも定番の手法です。"},
+{c:"F",t:"mc",q:"【演説場所】スーパーの前(私有地)で、店の許可を得て街頭演説。",o:["OK(管理者の許可があれば)","私有地は全面禁止","スーパーだけ禁止"],a:0,e:"禁止場所(国公有建物・病院・電車内など)以外は、管理者の許可を得れば演説できます。"},
+{c:"F",t:"mc",q:"【病院で】入院中の親戚のために病院のロビーで演説したい。",o:["違反(病院での演説は禁止)","親戚がいればOK","5分以内ならOK"],a:0,e:"病院・診療所での演説は禁止。療養の場は選挙戦の外です。"},
+{c:"F",t:"mc",q:"【夫婦で】候補者の妻が、候補者と同じ「たすき」をかけて駅前に立った。",o:["違反の恐れ(たすきは候補者本人のみ)","配偶者ならOK","色を変えればOK"],a:0,e:"候補者名入りのたすきを使えるのは本人だけ。家族でも使えません。"},
+{c:"F",t:"mc",q:"【発信】選挙期間中、候補者が自分のブログに毎日活動報告を書く。",o:["OK","違反","写真なしならOK"],a:0,e:"ネット解禁により期間中の更新は問題なし。むしろ発信のゴールデンタイムです。"},
+{c:"F",t:"mc",q:"【祝勝会】「当選したら、投票してくれたお礼に盛大に酒を振る舞おう!」",o:["事後買収の恐れがある","当選後なら自由","会費制と言えばOK"],a:0,e:"投票へのお礼としての供応は選挙後でも買収(事後買収)になり得ます。"},
+{c:"F",t:"mc",q:"【取引?】「当選したらうちの前の道を直して。それなら入れるよ」「必ずやります、お約束します」",o:["利害誘導の恐れがある","普通の公約","握手すれば成立"],a:0,e:"特定の人への利益供与と引き換えの投票依頼は利害誘導罪に問われ得ます。政策は「みんなのため」に。"},
+{c:"F",t:"mc",q:"【経歴詐称】選挙公報の経歴に、取っていない資格を書いた。",o:["虚偽事項公表罪の恐れ","経歴欄は自由","資格は自己申告制"],a:0,e:"当選目的で経歴等の虚偽事項を公表すると犯罪。当選無効にもつながります。"},
+{c:"F",t:"mc",q:"【家族総出】候補者の小学生の子どもにもビラ配りを手伝わせたい。",o:["できない(18歳未満)","家族ならOK","休日ならOK"],a:0,e:"18歳未満は選挙運動できません。子どもは応援席から見守ってもらいましょう。"},
+{c:"F",t:"mc",q:"【出口調査】投票所の出口で「どなたに投票されましたか?」と聞かれた。答える義務は?",o:["ない","ある","市民の義務"],a:0,e:"投票の秘密はあなたの権利。答えるのも断るのも自由です。"},
+{c:"F",t:"mc",q:"【落選後】「ご支援ありがとうございました」と印刷したハガキを選挙区内へ大量送付。",o:["違反の恐れ(選挙後の挨拶の文書は自筆の信書等を除き禁止)","落選後なら自由","切手を貼ればOK"],a:0,e:"選挙後の挨拶行為にも文書規制があります。認められるのは自筆の信書などに限られます。"},
+{c:"F",t:"mc",q:"【勝手連】支援者が独断で「○○を応援する会」のチラシを印刷し新聞折込した(期間中)。",o:["法定外文書の頒布で違反の恐れ","自費なら自由","応援は無制限"],a:0,e:"選挙運動用の紙のビラは種類・枚数・証紙・頒布方法が法定。勝手連の印刷物は危険地帯です。"},
+{c:"F",t:"mc",q:"【買い物中】期間中、スーパーで「頑張ってね」と声をかけられ「ありがとうございます、投票お願いします!」",o:["問題ない(個々の面接での依頼はOK)","常に違反","店内は違反"],a:0,e:"たまたま出会った人への「個々面接」による依頼は適法。戸別訪問(こちらから訪ねる)との違いがポイント。"},
+{c:"F",t:"mc",q:"【告示前のチラシ】後援会入会チラシに「次の市議選に立候補予定!清き一票を!」と書いた。",o:["事前運動で違反の恐れ","予定と書けばOK","チラシは自由"],a:0,e:"「清き一票を」は投票依頼。告示前の文書に書いたら事前運動です。入会案内は政策と人柄で。"},
+{c:"F",t:"mc",q:"【LINE】期間中、成人の有権者が友人グループに「○○さんに投票お願い!」とLINEを送る。",o:["OK(LINEは電子メールにあたらない)","違反(メール扱い)","5人以下ならOK"],a:0,e:"LINEなどのメッセージアプリはウェブサイト等の扱いで有権者もOK。メール(SMTP・SMS)はNGという線引きです。"},
+{c:"F",t:"mc",q:"【記念に】投票所で記入済みの投票用紙をスマホで撮影してSNSにアップ。",o:["控えるべき(投票の秘密・投票所の秩序の観点で問題)","自由","夜ならOK"],a:0,e:"投票所内の撮影は秩序保持の面で制止対象になり得ます。投票済証の写真で楽しみましょう。"},
+{c:"F",t:"mc",q:"【当選後】お祝いに来た支援者に紅白まんじゅうを配った。",o:["寄付禁止違反の恐れ","まんじゅうはセーフ","10個以下ならOK"],a:0,e:"当選後でも選挙区内の人への物品提供は寄付。祝いの気持ちは言葉で返しましょう。"}
+];
+
+/* =====================================================
+   game constants
+===================================================== */
+const Q_PER_RUN = 10;
+const TIME_LIMIT = 15; // seconds
+const BASE_PT = 100;
+const COMBO_PT = 20;   // per combo step beyond 1
+const SPEED_MAX = 50;
+const TITLES = [
+  {min:10,name:"公選法の鬼",sub:"全問正解。もはや選管に勤められるレベル。",color:"var(--pink)"},
+  {min:8, name:"当確ライン",sub:"実戦投入OK。この調子で満点を狙おう。",color:"var(--blue)"},
+  {min:6, name:"惜敗率高め",sub:"あと一歩。解説を読めば当確が見える。",color:"var(--purple)"},
+  {min:4, name:"供託金没収ライン",sub:"危険水域。もう一周して巻き返そう。",color:"var(--yellow)"},
+  {min:0, name:"選挙違反予備軍!?",sub:"今知れてよかった…!ここから伸びるだけ。",color:"var(--red)"}
+];
+
+/* =====================================================
+   state & storage
+===================================================== */
+let S = { best:0, plays:0, maxCombo:0, collected:{}, catStats:{A:[0,0],B:[0,0],C:[0,0],D:[0,0],E:[0,0],F:[0,0]} }; // catStats: [correct, answered]
+const store = {
+  async get(k){ try{const v=localStorage.getItem(k); if(v!==null)return v;}catch(e){} try{const r=await window.storage.get(k); if(r&&r.value!=null)return r.value;}catch(e){} return null; },
+  async set(k,v){ try{localStorage.setItem(k,v);return;}catch(e){} try{await window.storage.set(k,v);}catch(e){} }
+};
+async function load(){ const v=await store.get("kosenho-quest"); if(v){try{S={...S,...JSON.parse(v)};}catch(e){}} Object.keys(CATS).forEach(k=>{ if(!S.catStats[k]) S.catStats[k]=[0,0]; }); }
+async function save(){ await store.set("kosenho-quest", JSON.stringify(S)); }
+
+/* =====================================================
+   run state
+===================================================== */
+let run = null; // {qs, idx, score, combo, results[], timer, tLeft, cat}
+
+const app = document.getElementById("app");
+function esc(s){return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+function shuffle(a){const b=[...a];for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]];}return b;}
+
+/* =====================================================
+   home
+===================================================== */
+function renderHome(){
+  stopTimer();
+  const total=BANK.length;
+  const got=Object.keys(S.collected).length;
+  const pct=Math.round(got/total*100);
+  const catLines=Object.entries(CATS).map(([k,c])=>{
+    const bankN=BANK.filter(q=>q.c===k).length;
+    const gotN=BANK.filter((q,i)=>q.c===k&&S.collected[i]).length;
+    return `<div class="zukan-label"><span>${c.name}</span><span>${gotN} / ${bankN}問 制覇</span></div>
+    <div class="zukan-bar"><div class="zukan-fill" style="width:${bankN?Math.round(gotN/bankN*100):0}%"></div></div>`;
+  }).join("");
+
+  app.innerHTML=`
+    <div class="stat-row">
+      <div class="stat"><div class="s-num">${S.best}</div><div class="s-label">ベストスコア</div></div>
+      <div class="stat"><div class="s-num">${S.maxCombo}</div><div class="s-label">最高コンボ</div></div>
+      <div class="stat"><div class="s-num">${S.plays}</div><div class="s-label">プレイ回数</div></div>
+    </div>
+
+    <h3 class="sec">クイズに挑戦 <span class="em">(ランダム10問)</span></h3>
+    <button class="big blue" data-mode="MIX">ミックス出題<span class="b-sub">3分野からまんべんなく。まずはこれ!</span></button>
+    <button class="big" data-mode="A">政治活動と選挙運動のちがい<span class="b-sub">「いつから何ができる?」の基本ルール</span></button>
+    <button class="big pink" data-mode="B">SNS・ネット選挙<span class="b-sub">リポストは? DMは? 当日の投稿は?</span></button>
+    <button class="big yellow" data-mode="C">選挙期間中のできる・できない<span class="b-sub">ポスター・選挙カー・差し入れの境界線</span></button>
+    <button class="big purple" data-mode="D">お金と寄付のルール<span class="b-sub">香典・祝儀・お祭り・献金…一番つまずく分野</span></button>
+    <button class="big green" data-mode="E">投票する側のルール<span class="b-sub">期日前・代理投票・無効票。一票の使い方全部</span></button>
+    <button class="big orange" data-mode="F">うっかり違反ケース<span class="b-sub">「良かれと思って」が命取り。実話風シナリオ</span></button>
+
+    <h3 class="sec">図鑑コンプ率</h3>
+    <div class="card">
+      <div class="zukan-label"><span class="disp">全${total}問コンプリート</span><span class="disp" style="color:var(--pink)">${pct}%</span></div>
+      <div class="zukan-bar"><div class="zukan-fill" style="width:${pct}%"></div></div>
+      ${catLines}
+      <p style="font-size:12px;font-weight:700;color:#8b7f6a;margin-top:10px;">一度でも正解した問題が図鑑に登録されます。全問制覇を目指せ!</p>
+    </div>
+
+    <p class="notice">本クイズは学習用の一般的な解説であり、法的助言ではありません。制度は改正されることがあります。実際の選挙運動・政治活動の可否は、必ず選挙管理委員会にご確認ください。</p>
+  `;
+  app.querySelectorAll("button[data-mode]").forEach(b=>b.addEventListener("click",()=>startRun(b.dataset.mode)));
+  window.scrollTo(0,0);
+}
+
+/* =====================================================
+   quiz run
+===================================================== */
+function startRun(mode){
+  let pool = BANK.map((q,i)=>({...q,bi:i}));
+  if(mode!=="MIX") pool=pool.filter(q=>q.c===mode);
+  let qs;
+  if(mode==="MIX"){
+    // balanced-ish: shuffle whole pool
+    qs=shuffle(pool).slice(0,Q_PER_RUN);
+  }else{
+    qs=shuffle(pool).slice(0,Q_PER_RUN);
+  }
+  run={qs,idx:0,score:0,combo:0,results:[],mode};
+  renderQuestion();
+}
+
+let timerId=null;
+function stopTimer(){ if(timerId){clearInterval(timerId);timerId=null;} }
+
+function renderQuestion(){
+  stopTimer();
+  const q=run.qs[run.idx];
+  const dots=run.qs.map((_,i)=>{
+    if(i<run.idx) return `<div class="dot ${run.results[i].ok?"hit":"miss"}"></div>`;
+    if(i===run.idx) return `<div class="dot now"></div>`;
+    return `<div class="dot"></div>`;
+  }).join("");
+  const comboHtml = run.combo>=2?`<div class="combo-pill hot" id="combo">🔥${run.combo}コンボ</div>`:`<div class="combo-pill" id="combo">コンボ ${run.combo}</div>`;
+
+  let answersHtml;
+  if(q.t==="ox"){
+    answersHtml=`<div class="ox-row">
+      <button class="big center" data-ans="true"><span class="ox-o">○</span></button>
+      <button class="big center" data-ans="false"><span class="ox-x">✕</span></button>
+    </div>`;
+  }else{
+    answersHtml=q.o.map((o,i)=>`<button class="big" data-ans="${i}">${esc(o)}</button>`).join("");
+  }
+
+  app.innerHTML=`
+    <div class="hud">
+      <div class="qcount disp">Q${run.idx+1}<span style="font-size:11px;">/${Q_PER_RUN}</span></div>
+      <div class="dots">${dots}</div>
+      ${comboHtml}
+      <div class="score-pill">${run.score}pt</div>
+    </div>
+    <div class="timer-wrap"><div class="timer-fill" id="tfill"></div></div>
+    <div class="card q-card pop" id="qcard">
+      <div class="judge" id="judge"></div>
+      <span class="cat-tag ${CATS[q.c].cls}">${CATS[q.c].name}</span>
+      <div class="q-text">${esc(q.q)}</div>
+      ${answersHtml}
+      <div class="expl-box" id="expl"><div class="ex-head">かいせつ</div><span id="expl-text"></span></div>
+      <div class="center" style="margin-top:14px;display:none;" id="next-wrap">
+        <button class="mini" id="next-btn">つぎへ ▶</button>
+      </div>
+    </div>
+  `;
+
+  // timer
+  let tLeft=TIME_LIMIT;
+  const tfill=document.getElementById("tfill");
+  const tick=()=>{
+    tLeft-=0.1;
+    const r=Math.max(0,tLeft/TIME_LIMIT);
+    tfill.style.width=(r*100)+"%";
+    tfill.className="timer-fill"+(r<0.25?" danger":(r<0.5?" warn":""));
+    if(tLeft<=0){ stopTimer(); judge(null,0); }
+  };
+  timerId=setInterval(tick,100);
+
+  app.querySelectorAll("button[data-ans]").forEach(b=>{
+    b.addEventListener("click",()=>{
+      stopTimer();
+      judge(b.dataset.ans, Math.max(0,tLeft));
+    });
+  });
+
+  function judge(ansRaw, remain){
+    const qcard=document.getElementById("qcard");
+    let ok=false, chosen;
+    if(ansRaw===null){ chosen=null; ok=false; }
+    else if(q.t==="ox"){ chosen=(ansRaw==="true"); ok=(chosen===q.a); }
+    else{ chosen=+ansRaw; ok=(chosen===q.a); }
+
+    // reveal buttons
+    app.querySelectorAll("button[data-ans]").forEach(b=>{
+      b.disabled=true;
+      const v=q.t==="ox"?(b.dataset.ans==="true"):+b.dataset.ans;
+      const isCorrect=q.t==="ox"?(v===q.a):(v===q.a);
+      if(isCorrect) b.classList.add("reveal-correct");
+      else if(chosen!==null && v===chosen) b.classList.add("reveal-wrong");
+      else b.classList.add("dim");
+    });
+
+    // scoring
+    let pts=0;
+    if(ok){
+      run.combo++;
+      const speed=Math.round(remain/TIME_LIMIT*SPEED_MAX);
+      pts=BASE_PT+speed+(run.combo-1)*COMBO_PT;
+      run.score+=pts;
+      S.maxCombo=Math.max(S.maxCombo,run.combo);
+      S.collected[q.bi]=true;
+      const fp=document.createElement("div");
+      fp.className="float-pt";fp.textContent="+"+pts;
+      qcard.appendChild(fp);
+      const cb=document.getElementById("combo");
+      cb.classList.add("bump");setTimeout(()=>cb.classList.remove("bump"),200);
+    }else{
+      run.combo=0;
+      qcard.classList.remove("pop");
+      void qcard.offsetWidth;
+      qcard.classList.add("shake");
+    }
+    S.catStats[q.c][1]++;
+    if(ok)S.catStats[q.c][0]++;
+
+    const jd=document.getElementById("judge");
+    jd.textContent = ansRaw===null?"時間切れ!":(ok?"正解!":"ざんねん!");
+    jd.className="judge on "+(ok?"good":"bad");
+
+    const ex=document.getElementById("expl");
+    document.getElementById("expl-text").textContent=q.e;
+    ex.classList.add("on");
+
+    run.results.push({q,ok,chosen});
+    document.getElementById("next-wrap").style.display="block";
+    const nb=document.getElementById("next-btn");
+    nb.textContent = run.idx===Q_PER_RUN-1?"けっか発表 🎉":"つぎへ ▶";
+    nb.focus();
+    nb.addEventListener("click",async()=>{
+      run.idx++;
+      if(run.idx>=Q_PER_RUN){ await finishRun(); }
+      else renderQuestion();
+    });
+    save();
+  }
+}
+
+/* =====================================================
+   result
+===================================================== */
+async function finishRun(){
+  stopTimer();
+  S.plays++;
+  const correct=run.results.filter(r=>r.ok).length;
+  const isBest=run.score>S.best;
+  if(isBest)S.best=run.score;
+  await save();
+
+  const title=TITLES.find(t=>correct>=t.min);
+  const review=run.results.map((r,i)=>{
+    const ans=r.q.t==="ox"?(r.q.a?"○":"✕"):r.q.o[r.q.a];
+    return `<div class="review-item">
+      <div class="rv-q"><span class="rv-mark ${r.ok?"rv-good":"rv-bad"}">${r.ok?"○":"✕"}</span>Q${i+1}. ${esc(r.q.q)}</div>
+      <div class="rv-a">正解:${esc(ans)} — ${esc(r.q.e)}</div>
+    </div>`;
+  }).join("");
+
+  const shareText=`公選法クエストで「${title.name}」を獲得!(${correct}/10問正解・${run.score}pt) #公選法クエスト`;
+
+  app.innerHTML=`
+    <div class="card result-hero">
+      <div style="font-weight:900;font-size:13px;color:#8b7f6a;">あなたの称号</div>
+      <div class="r-title" style="color:${title.color}">${title.name}</div>
+      <div class="r-sub">${title.sub}</div>
+      <div class="r-score">${run.score}<span style="font-size:18px;">pt</span></div>
+      <div class="r-sub">${correct} / ${Q_PER_RUN}問正解 ・ 最大コンボ ${Math.max(...runComboSeq())}</div>
+      ${isBest?'<div class="r-new">✦ ベストスコア更新!! ✦</div>':""}
+    </div>
+    <button class="big blue center" id="retry">もういちど挑戦(問題はランダム!)</button>
+    <button class="big center" id="share">結果をコピーしてシェア 📋</button>
+    <button class="big yellow center" id="home">トップへもどる</button>
+    <h3 class="sec">ふりかえり</h3>
+    <div class="card">${review}</div>
+    <p class="notice">本クイズは学習用の一般的な解説であり、法的助言ではありません。実際の可否は選挙管理委員会にご確認ください。</p>
+  `;
+  document.getElementById("retry").addEventListener("click",()=>startRun(run.mode));
+  document.getElementById("home").addEventListener("click",renderHome);
+  document.getElementById("share").addEventListener("click",e=>{
+    const btn=e.currentTarget;
+    const done=()=>{btn.textContent="コピーしました! ✔";setTimeout(()=>btn.textContent="結果をコピーしてシェア 📋",1600);};
+    if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(shareText).then(done).catch(()=>{prompt("この文をコピーしてシェア:",shareText);}); }
+    else prompt("この文をコピーしてシェア:",shareText);
+  });
+
+  if(correct===Q_PER_RUN||isBest) confetti();
+  window.scrollTo(0,0);
+}
+function runComboSeq(){
+  let c=0,max=0;
+  run.results.forEach(r=>{ if(r.ok){c++;max=Math.max(max,c);}else c=0; });
+  return [max];
+}
+function confetti(){
+  const colors=["#3A6FF0","#FF4D8D","#FFC53D","#25B86F","#8A5CF6"];
+  for(let i=0;i<60;i++){
+    const d=document.createElement("div");
+    d.className="confetti";
+    d.style.left=Math.random()*100+"vw";
+    d.style.background=colors[i%colors.length];
+    d.style.animationDuration=(2+Math.random()*2)+"s";
+    d.style.animationDelay=(Math.random()*0.8)+"s";
+    d.style.borderRadius=Math.random()>0.5?"50%":"3px";
+    document.body.appendChild(d);
+    setTimeout(()=>d.remove(),5000);
+  }
+}
+
+/* =====================================================
+   boot
+===================================================== */
+const hl=document.getElementById("home-link");
+hl.addEventListener("click",renderHome);
+hl.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();renderHome();}});
+(async()=>{ await load(); renderHome(); })();
+</script>
+</body>
+</html>

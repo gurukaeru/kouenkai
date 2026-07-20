@@ -1,0 +1,1207 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>奇跡の10万人都市 v2 — 二元代表制で街を動かせ</title>
+<link href="https://fonts.googleapis.com/css2?family=Mochiy+Pop+One&family=Zen+Maru+Gothic:wght@500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#2B2440;--bg:#FDF3E3;--blue:#3A6FF0;--pink:#FF4D8D;--yellow:#FFC53D;--green:#25B86F;--red:#FF5A5F;--purple:#8A5CF6;--orange:#FF8A3D;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);background-image:radial-gradient(#EFE2C8 1.5px,transparent 1.5px);background-size:22px 22px;
+color:var(--ink);font-family:'Zen Maru Gothic',sans-serif;font-size:15px;line-height:1.7;}
+.wrap{max-width:640px;margin:0 auto;padding:14px 16px 70px;}
+.disp{font-family:'Mochiy Pop One',sans-serif;font-weight:400;}
+.card{background:#fff;border:3px solid var(--ink);border-radius:16px;box-shadow:5px 5px 0 var(--ink);padding:16px;margin:12px 0;}
+button.act{font-family:'Zen Maru Gothic';font-weight:900;font-size:15px;background:var(--blue);color:#fff;
+border:3px solid var(--ink);border-radius:14px;box-shadow:4px 4px 0 var(--ink);padding:12px 22px;cursor:pointer;width:100%;}
+button.act:active{transform:translate(3px,3px);box-shadow:1px 1px 0 var(--ink);}
+button.act:disabled{opacity:.5;}
+button.act.pink{background:var(--pink);} button.act.ghost{background:#fff;color:var(--ink);} button.act.green{background:var(--green);}
+.hud{display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:4px 0;}
+.hud .h-item{background:#fff;border:2.5px solid var(--ink);border-radius:12px;box-shadow:3px 3px 0 var(--ink);
+padding:5px 12px;font-size:12px;font-weight:900;}
+.hud .h-item .big{font-family:'Mochiy Pop One';font-size:16px;color:var(--blue);}
+.hud .pop .big{color:var(--pink);}
+h2.scr{font-family:'Mochiy Pop One';font-size:19px;margin:10px 0 2px;}
+h2.scr .em{color:var(--pink);}
+.sub{font-size:12px;font-weight:700;color:#8b7f6a;margin-bottom:6px;}
+.stat-line{display:flex;align-items:center;gap:8px;margin:5px 0;font-size:12.5px;font-weight:900;}
+.stat-line label{width:96px;flex-shrink:0;}
+.sbar{flex:1;height:13px;border:2.5px solid var(--ink);border-radius:99px;background:#F0E8D8;overflow:hidden;}
+.sfill{height:100%;border-radius:99px;transition:width .5s;}
+.stat-line .sv{width:56px;text-align:right;font-variant-numeric:tabular-nums;}
+.delta{font-size:11px;} .up{color:var(--green);} .down{color:var(--red);}
+.b-row{margin:12px 0;}
+.b-row .b-head{display:flex;justify-content:space-between;font-size:13px;font-weight:900;}
+.b-row .b-head .amt{font-family:'Mochiy Pop One';color:var(--blue);}
+.b-row .b-desc{font-size:11px;color:#8b7f6a;font-weight:700;}
+input[type=range]{width:100%;accent-color:var(--blue);height:26px;}
+.budget-summary{display:flex;justify-content:space-between;align-items:center;border-top:2.5px dashed var(--ink);
+margin-top:12px;padding-top:10px;font-weight:900;font-size:13.5px;}
+.budget-summary .rest{font-family:'Mochiy Pop One';font-size:19px;}
+.rest.ok{color:var(--green);} .rest.over{color:var(--red);}
+.fisc{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;}
+.chip{font-size:11px;font-weight:900;border:2px solid var(--ink);border-radius:99px;padding:2px 10px;background:#F0E8D8;}
+.chip.warn{background:var(--yellow);} .chip.danger{background:var(--red);color:#fff;}
+.build-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;}
+.bd{font-size:11.5px;font-weight:900;border:2.5px solid var(--ink);border-radius:12px;padding:7px 10px;background:#fff;cursor:pointer;text-align:left;}
+.bd.sel{background:var(--yellow);}
+.bd.done{background:#E5E0D2;opacity:.6;cursor:default;}
+.bd .cost{color:var(--red);}
+/* 議会 */
+.faction{display:flex;align-items:center;gap:10px;border:2.5px solid var(--ink);border-radius:12px;padding:9px 12px;margin:7px 0;background:#FAF7EE;}
+.faction .f-seat{font-family:'Mochiy Pop One';font-size:13px;width:52px;text-align:center;border-right:2px dashed var(--ink);padding-right:8px;}
+.faction .f-body{flex:1;font-size:12px;font-weight:700;}
+.faction .f-name{font-size:13px;font-weight:900;}
+.faction .f-vote{font-family:'Mochiy Pop One';font-size:15px;width:44px;text-align:center;}
+.f-vote.yes{color:var(--green);} .f-vote.no{color:var(--red);}
+.vote-result{text-align:center;font-family:'Mochiy Pop One';font-size:22px;margin:8px 0;}
+.vote-result.pass{color:var(--green);} .vote-result.fail{color:var(--red);}
+.demand{border:2.5px solid var(--ink);border-radius:12px;background:#fff;padding:10px 14px;margin:7px 0;cursor:pointer;font-size:13px;font-weight:900;}
+.demand:hover{background:var(--yellow);}
+.demand .d-note{font-size:11px;font-weight:700;color:#8b7f6a;}
+.rep-pop{text-align:center;padding:6px 0;}
+.rep-pop .rp-num{font-family:'Mochiy Pop One';font-size:38px;color:var(--pink);}
+.rep-pop .rp-delta{font-weight:900;font-size:15px;}
+.two{display:flex;gap:10px;}
+.two .card{flex:1;margin:8px 0;padding:12px;}
+.mini-h{font-size:11px;font-weight:900;color:#8b7f6a;letter-spacing:.08em;}
+.mini-v{font-family:'Mochiy Pop One';font-size:17px;}
+.ev{background:#FFF1C9;border:2.5px dashed var(--ink);border-radius:12px;padding:9px 13px;font-size:12.5px;font-weight:700;margin:8px 0;}
+svg.spark{display:block;width:100%;height:64px;margin-top:6px;}
+.el-vote{text-align:center;}
+.el-vote .v-num{font-family:'Mochiy Pop One';font-size:46px;}
+.v-num.win{color:var(--green);} .v-num.lose{color:var(--red);}
+.el-detail{font-size:12.5px;font-weight:700;background:#F0E8D8;border-radius:12px;padding:10px 14px;margin:10px 0;}
+.notice{font-size:11px;font-weight:700;color:#9a8f7a;margin-top:18px;border-top:2px dashed #D8CDB6;padding-top:10px;}
+.center{text-align:center;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hud" id="hud"></div>
+  <main id="app"></main>
+</div>
+<script>
+/* ============ エンジン ============ */
+function rngf(seed){let s=seed>>>0;return()=>{s=(s*1664525+1013904223)>>>0;return s/4294967296;};}
+const BUILDINGS={
+  indpark:{name:"産業団地",cost:40,mnt:1.2,desc:"3年後に産業+15と税収増。分譲リスクあり"},
+  kodomo:{name:"こども園",cost:20,mnt:0.8,desc:"子育て環境が即+10"},
+  hall:{name:"文化ホール",cost:30,mnt:1.5,desc:"高齢支持+10・インフラ+5"},
+  stadium:{name:"スタジアム",cost:60,mnt:2.4,desc:"産業+12・現役支持+8"},
+  ekimae:{name:"駅前再開発",cost:80,mnt:3.0,desc:"産業+10・インフラ+10・子育て+5"},
+};
+const clamp=(v,lo=0,hi=100)=>Math.max(lo,Math.min(hi,v));
+let G;
+function newGame(){
+  G={year:0,POP:50000,AGED:34,WORK:55,CHILD:11,IND:45,FAM:40,INF:55,WEL:50,DX:20,
+  SUP_W:50,SUP_A:50,CLEAN:70,FUND:20,DEBT:200,STAFF:480,
+  famHist:[40,40],prevWelSpend:8,promo:0,built:{},indParkTimer:-1,taxBonus:0,
+  infraLowYears:0,famLowYears:0,neighborDrain:false,prevPOP:50000,
+  popHist:[50000],alive:true,deathCause:null,electionsWon:0,lastVote:null,
+  bias:{fukushi:0,keizai:0,chiiki:0,kaikaku:0},   // 会派の心証(政策判断の補助線、毎年半減)
+  builtLastYear:null, hykjoDone:false, evSeen:{}, pendingBuilds:[], rushedLast:false, renew:{},
+  rand:rngf(Date.now()%100000)};
+}
+function effIND(s){return Math.min(s.IND, 42+s.FAM*0.7);} // 労働力(人材の供給源=子育て環境)が産業の天井
+function revenues(s){
+  const TAX=s.POP*0.0015*(s.WORK/55)*(0.7+0.6*effIND(s)/100)+s.taxBonus;
+  const need=90*(0.6+0.4*s.POP/50000);
+  const LAT=Math.max(30,need-TAX*0.75)+25;
+  const OTHER=117*(0.45+0.55*s.POP/50000);
+  return{TAX,LAT,OTHER,REV:TAX+LAT+OTHER};
+}
+function mandatory(s,yr){
+  const dxeff=Math.min(0.25,Math.max(0,s.DX-20)*0.005);
+  const PAY=s.STAFF*0.075*(1-dxeff);
+  const AID=30*Math.pow(s.AGED/34,1.5)*(0.5+0.5*s.POP/50000)+Math.max(0,s.WEL-50)*0.3;
+  const SVC=s.DEBT/20+s.DEBT*0.015;
+  const MNT=(18+0.28*yr)+Object.keys(s.built).reduce((a,k)=>a+BUILDINGS[k].mnt*(s.renew[k]==="degraded"?2.2:1),0);
+  const FIX=(95+0.5*yr)*(0.55+0.45*s.POP/50000);
+  return{PAY,AID,SVC,MNT,FIX,TOTAL:PAY+AID+SVC+MNT+FIX};
+}
+function fiscal(s,rev,man){
+  const std=rev.TAX+rev.LAT;
+  return{std,jkh:man.SVC/std*100,keijo:(man.TOTAL-73*(0.45+0.55*s.POP/50000))/std*100};
+}
+function preview(){
+  const yr=G.year+1;
+  const rev=revenues(G),man=mandatory(G,yr),fi=fiscal(G,rev,man);
+  return{yr,rev,man,fi,policy:Math.max(0,rev.REV-man.TOTAL)};
+}
+function step(alloc,build,buildMode){
+  const s=G,pre=preview(),rand=s.rand;
+  s.year=pre.yr;
+  const{rev,man}=pre,fi=fiscal(s,rev,man);
+  const events=[];
+  const before={IND:s.IND,FAM:s.FAM,INF:s.INF,WEL:s.WEL,DX:s.DX};
+  s.builtLastYear=null;
+
+  // 精査型で可決済みの建設が竣工を迎える
+  s.pendingBuilds=s.pendingBuilds.filter(pb=>{
+    pb.timer--;
+    if(pb.timer<=0){
+      applyBuildEffects(pb.k);
+      s.built[pb.k]=s.year;s.builtLastYear=pb.k;s.rushedLast=false;
+      events.push(`🏗 ${BUILDINGS[pb.k].name}が竣工! 丁寧な合意形成を経た施設だ`);
+      return false;
+    }
+    events.push(`📐 ${BUILDINGS[pb.k].name}:住民説明会と詳細設計が進行中(来年度竣工)`);
+    return true;
+  });
+
+  if(build&&!s.built[build]&&!s.pendingBuilds.some(pb=>pb.k===build)&&fi.jkh<=18){
+    const b=BUILDINGS[build];
+    s.DEBT+=b.cost;
+    if(buildMode==="brief"){
+      s.built[build]=s.year;s.builtLastYear=build;s.rushedLast=true;
+      applyBuildEffects(build);
+      if(build==="indpark")s.indParkTimer=3;
+      events.push(`🏗 ${b.name}がスピード竣工(市債${b.cost}億円)。効果は今年から、だが…`);
+    }else{
+      s.pendingBuilds.push({k:build,timer:1});
+      events.push(`📐 ${b.name}の建設が議決(市債${b.cost}億円)。試算公表と住民説明会を経て、竣工は来年度`);
+    }
+  }
+  function applyBuildEffects(k){
+    if(k==="kodomo")s.FAM=clamp(s.FAM+10);
+    if(k==="hall"){s.SUP_A=clamp(s.SUP_A+10);s.INF=clamp(s.INF+5);}
+    if(k==="stadium"){s.IND=clamp(s.IND+12);s.SUP_W=clamp(s.SUP_W+8);s.SUP_A=clamp(s.SUP_A+4);}
+    if(k==="ekimae"){s.IND=clamp(s.IND+10);s.INF=clamp(s.INF+10);s.FAM=clamp(s.FAM+5);}
+    if(k==="indpark")s.indParkTimer=3;
+  }
+  if(s.indParkTimer>0){s.indParkTimer--;
+    if(s.indParkTimer===0){s.IND=clamp(s.IND+15);s.taxBonus+=4;events.push("🏭 産業団地が稼働開始! 産業+15・税収増");
+      if(rand()<0.30){s.taxBonus-=2;events.push("⚠️ 産業団地の分譲が一部埋まらず、効果半減…");}}}
+
+  const spend=alloc.ind+alloc.fam+alloc.inf+alloc.wel+alloc.dx+alloc.promo;
+  s.FUND+=pre.policy-spend;
+  if(s.FUND<-0.5){s.alive=false;s.deathCause="fiscal";return{events};}
+  s.FUND=Math.max(0,s.FUND);
+
+  const scale=Math.pow(s.POP/50000,0.6);
+  const gain=(sp,c,st)=>sp*c*(115-st)/75/scale;
+  s.IND=clamp(s.IND+gain(alloc.ind,0.8,s.IND)-4*(0.82+0.28*s.POP/50000));
+  s.FAM=clamp(s.FAM+gain(alloc.fam,0.9,s.FAM)-3*(0.82+0.28*s.POP/50000));
+  s.INF=clamp(s.INF+gain(alloc.inf,0.7,s.INF)-(4+Math.max(0,s.POP/50000-1)*6));
+  s.WEL=clamp(s.WEL+gain(alloc.wel,1.0,s.WEL)-2);
+  s.DX=clamp(s.DX+gain(alloc.dx,1.2,s.DX));
+  if(alloc.wel<s.prevWelSpend-0.5){const hit=(s.prevWelSpend-alloc.wel)*2.5;s.SUP_A-=hit;
+    events.push(`😠 高齢者福祉の減額に反発! 高齢層支持 −${hit.toFixed(0)}`);}
+  else if(alloc.wel>s.prevWelSpend+0.5){s.SUP_A+=(alloc.wel-s.prevWelSpend)*1.5;}
+  // 維持しているだけでは加点なし——「やって当たり前」がラチェットの本質
+  s.prevWelSpend=alloc.wel;
+  if(alloc.dx>=5){s.SUP_A-=2;events.push("💻 DX推進に「ついていけない」の声(高齢層支持 −2)");}
+  let pc=alloc.promo*0.035/scale;
+  if((s.IND<50||s.FAM<50)&&alloc.promo>0){pc*=0.5;events.push("📢 移住PRの効果が半減…「仕事と子育ての受け皿」が足りない");}
+  s.promo=Math.min(0.45,pc);
+
+  // 人手不足:産業が労働力の天井を超えている
+  if(s.IND-effIND(s)>=10&&rand()<0.6){
+    events.push(`🏭 深刻な人手不足——求人はあるのに、働く人が足りない(実効産業力 ${effIND(s).toFixed(0)}/${s.IND.toFixed(0)})。子育て・移住政策なしに産業は伸びない`);
+  }
+  // 施設の経年劣化(竣工9年で大規模改修が必要になる)
+  Object.keys(s.built).forEach(k=>{
+    if(s.year-s.built[k]===9&&!s.renew[k]){
+      s.renew[k]="degraded";
+      events.push(`🏚 ${BUILDINGS[k].name}が老朽化——維持費が2.2倍に膨張。大規模改修の判断が必要だ`);
+    }
+  });
+  if(s.INF<30)s.infraLowYears++;else s.infraLowYears=0;
+  if(s.infraLowYears>=2&&rand()<0.4){
+    s.FUND-=15;s.INF=clamp(s.INF-10);s.SUP_W-=8;s.SUP_A-=8;
+    events.push("🚨 老朽化した橋が崩落! 復旧費15億円・全支持率が急落");
+    if(s.FUND<0){s.DEBT+=-s.FUND;s.FUND=0;}}
+  if(s.FAM<45)s.famLowYears++;else{if(s.neighborDrain)events.push("✅ 子育て環境の改善で、隣市への流出が止まった");s.famLowYears=0;s.neighborDrain=false;}
+  if(s.famLowYears>=3&&!s.neighborDrain){s.neighborDrain=true;events.push("🏃 隣の市が子育て支援を強化。ファミリー層の流出が始まった(年300人)");}
+  if(effIND(s)>=65&&rand()<0.25&&s.FUND>=12){s.FUND-=10;s.taxBonus+=4;s.IND=clamp(s.IND+10);
+    events.push("🎉 大手企業の工場誘致に成功! (誘致費10億円・以後税収+4億/年)");}
+
+  const famLag2=s.famHist.shift();s.famHist.push(s.FAM);
+  const BIRTH=s.POP*(s.WORK/100)*0.0140*(0.55+0.9*famLag2/100);
+  const DEATH=s.POP*(s.AGED/100)*0.052;
+  const eI=effIND(s);
+  const OUT=s.POP*0.022*(1.6-eI/100*0.85)*(1.1-s.INF/200)+(s.neighborDrain?300:0);
+  const IN=s.POP*0.0223*(0.40+eI/130+s.FAM/150)*(1+s.promo)*(0.55+s.INF/110);
+  const natural=BIRTH-DEATH,social=IN-OUT;
+  s.prevPOP=s.POP;
+  s.POP=Math.round(s.POP+natural+social);
+  s.popHist.push(s.POP);
+  s.AGED=clamp(s.AGED+0.45-Math.max(0,social)/s.POP*30,15,55);
+  s.CHILD=clamp(s.CHILD+(BIRTH*14/s.POP*100-s.CHILD)*0.08,5,20);
+  s.WORK=100-s.AGED-s.CHILD;
+  const shrink=(s.prevPOP-s.POP)/s.prevPOP;
+  const pen=shrink>0.008?3:(shrink>0.003?1.5:0);
+  const idxW=0.3*s.IND+0.25*s.FAM+0.2*s.INF+0.1*s.DX+0.15*60;
+  const idxA=0.5*s.WEL+0.3*s.INF+0.2*52;
+  s.SUP_W=clamp(s.SUP_W*0.7+0.3*idxW-pen);
+  s.SUP_A=clamp(s.SUP_A*0.7+0.3*idxA-pen*0.3);
+  // 会派の心証は年々薄れる
+  Object.keys(s.bias).forEach(k=>s.bias[k]*=0.5);
+
+  if(fi.jkh>25){s.alive=false;s.deathCause="saisei";return{events};}
+  return{events,natural,social,before,fi,rev,man,policy:pre.policy,spend};
+}
+function electionCheck(){
+  const s=G;
+  let vote=(s.SUP_W*s.WORK*0.42+s.SUP_A*s.AGED*0.72)/(s.WORK*0.42+s.AGED*0.72)+(s.CLEAN-70)*0.15;
+  vote-=s.electionsWon*2.2;   // 多選批判:「そろそろ変えよう」の空気
+  s.challenger=(s.rand()-0.5)*7; // 対立候補の勢い(±3.5pt)
+  vote-=s.challenger;
+  vote=clamp(vote,2,98);            // 対立候補が存在する以上、100%はあり得ない
+  const fair=clamp((s.SUP_W*s.WORK+s.SUP_A*s.AGED)/(s.WORK+s.AGED),2,98);
+  s.lastVote=vote;
+  if(vote<50){s.alive=false;s.deathCause="election";}
+  else s.electionsWon++;
+  return{vote,fair};
+}
+
+/* ============ 議会(二元代表制) ============ */
+/* 会派は「あなたとの関係」ではなく、政策の中身と市の実態で是々非々を判断する */
+const FACTIONS={
+  fukushi:{name:"福祉市民の会",seats:9,icon:"💚"},
+  keizai:{name:"産業振興クラブ",seats:8,icon:"🏭"},
+  chiiki:{name:"地域の声",seats:7,icon:"🏘"},
+  kaikaku:{name:"改革フォーラム",seats:6,icon:"⚡"},
+};
+// 予算議案への各会派の判断(政策整合性ルール)
+function judgeBudget(ctx){
+  const a=ctx.alloc, fi=ctx.fi;
+  const j={};
+  // 要求水準は市の状況とともに上がる(高齢化→福祉、都市成長→インフラ、硬直→行革)
+  const welNeed=Math.ceil(Math.max(ctx.prevWel, 5+(G.AGED-34)*0.35));
+  const indNeed=G.IND<50?8:6;
+  const infNeed=Math.ceil(6+Math.max(0,G.POP/50000-1)*7);
+  const dxNeed=G.DX<70?4:0;
+  j.fukushi=(a.wel>=welNeed-0.5)
+    ?{ok:true,reason:`高齢化率${G.AGED.toFixed(0)}%の現実に見合う福祉水準だ`}
+    :{ok:false,reason:`高齢化率${G.AGED.toFixed(0)}%。この街に必要なのは${welNeed}億円だ`,
+      demand:{label:`福祉予算を${welNeed}億円に(高齢化の実態対応)`,fix:al=>{al.wel=Math.min(20,welNeed);}}};
+  j.keizai=(a.ind>=indNeed)
+    ?{ok:true,reason:"産業政策への投資姿勢を評価する"}
+    :{ok:false,reason:G.IND<50?"地域経済は待ったなし。この額では話にならない":"稼ぐ力への投資が細っている",
+      demand:{label:`産業・雇用に${indNeed}億円を確保`,fix:al=>{al.ind=Math.max(al.ind,indNeed);}}};
+  j.chiiki=(a.inf>=infNeed)
+    ?{ok:true,reason:"都市の規模に見合ったインフラ予算だ"}
+    :{ok:false,reason:`人口${(G.POP/10000).toFixed(1)}万人の街を支えるには${infNeed}億円が要る`,
+      demand:{label:`インフラ維持に${infNeed}億円を確保(都市規模対応)`,fix:al=>{al.inf=Math.max(al.inf,infNeed);}}};
+  j.kaikaku=((dxNeed===0||a.dx>=dxNeed)&&fi.keijo<96&&G.FUND>=3)
+    ?{ok:true,reason:"行革・財政規律・備え、いずれも及第点だ"}
+    :{ok:false,reason:fi.keijo>=96?"経常収支比率"+fi.keijo.toFixed(0)+"%。硬直を放置した予算は認められない":(G.FUND<3?"基金がほぼ空だ。備えなき予算に賛成はできない":"行政改革への意思が見えない"),
+      demand:{label:dxNeed>0?`行革・DXに${dxNeed}億円+基金積立を確保`:"基金への積立を確保(3億円以上残す)",
+        fix:al=>{if(dxNeed>0)al.dx=Math.max(al.dx,dxNeed);const sum=al.ind+al.fam+al.inf+al.wel+al.dx+al.promo;if(ctx.P-sum<3){al.promo=Math.max(0,al.promo-3);}}}};
+  // 心証は判断を一度だけ傾け、消費される
+  Object.keys(j).forEach(k=>{
+    if(!j[k].ok&&G.bias[k]>=1){G.bias[k]-=1;j[k]={ok:true,reason:j[k].reason+"…だが、これまでの誠実な対応に免じて今回は賛成する"};}
+    else if(j[k].ok&&G.bias[k]<=-1){G.bias[k]+=1;j[k]={ok:false,reason:"内容以前に、市長の姿勢への不信が拭えない",demand:{label:"信頼回復:全会派への丁寧な事前説明(効果:心証回復)",fix:al=>{Object.keys(G.bias).forEach(b=>G.bias[b]=Math.max(G.bias[b],0));}}};}
+  });
+  return j;
+}
+// 建設議案への判断(disclosure: full=精査型(竣工は来年) / brief=スピード型(即竣工))
+function judgeBuild(build,disclosure,fi){
+  const j={};
+  const likes={fukushi:["kodomo","hall"],keizai:["indpark","stadium","ekimae"],chiiki:["ekimae","hall","kodomo"],kaikaku:[]};
+  j.fukushi=likes.fukushi.includes(build)||G.WEL>=55
+    ?{ok:true,reason:"市民の暮らしに資する施設だ"}:{ok:false,reason:"福祉が細る中でのハコモノには賛成できない"};
+  j.keizai=(disclosure==="brief")
+    ?{ok:true,reason:"このスピード感こそ地域経済に必要だ。1年の遅れは商機の喪失"}
+    :(likes.keizai.includes(build)||G.IND>=55
+      ?{ok:true,reason:"経済波及は見込めるが、着工の遅れは惜しい"}
+      :{ok:false,reason:"経済効果も薄く、スピードもない議案だ"});
+  j.chiiki=(disclosure==="full")
+    ?((likes.chiiki.includes(build)||G.INF>=45)
+      ?{ok:true,reason:"維持費と説明会がセット。地域として安心して判断できる"}
+      :{ok:false,reason:"既存インフラの劣化対応が先だ"})
+    :{ok:false,reason:"地元への説明会もなしに着工とは、住民を軽んじている"};
+  j.kaikaku=(disclosure==="full"&&fi.jkh<=15)
+    ?{ok:true,reason:"財政規律の範囲内であり、情報公開も十分"}
+    :{ok:false,reason:disclosure!=="full"?"ライフサイクルコストの試算なき議案は審議に値しない":"公債費比率からみて起債は慎重であるべきだ"};
+  return j;
+}
+function tallyVotes(j){
+  let yes=0;Object.keys(FACTIONS).forEach(k=>{if(j[k].ok)yes+=FACTIONS[k].seats;});
+  return{yes,total:30,pass:yes>=16};
+}
+
+/* ============ イベント ============ */
+function applyFx(fx){
+  const msgs=[];
+  const map=[["supW","SUP_W","現役支持"],["supA","SUP_A","高齢支持"],["clean","CLEAN","クリーン度"],
+             ["ind","IND","産業"],["fam","FAM","子育て"],["inf","INF","インフラ"],["wel","WEL","福祉"],["dx","DX","DX"]];
+  map.forEach(([k,gk,label])=>{
+    if(fx[k]){G[gk]=clamp(G[gk]+fx[k]);msgs.push(`${label}${fx[k]>0?"+":""}${fx[k]}`);}
+  });
+  if(fx.fund){G.FUND=Math.max(0,G.FUND+fx.fund);msgs.push(`基金${fx.fund>0?"+":""}${fx.fund}億`);}
+  ["fukushi","keizai","chiiki","kaikaku"].forEach(k=>{
+    if(fx["bias_"+k]){G.bias[k]+=fx["bias_"+k];
+      msgs.push(`${FACTIONS[k].name}の心証${fx["bias_"+k]>0?"↑":"↓"}`);}
+  });
+  if(fx.resetInfraRisk){G.infraLowYears=0;msgs.push("事故リスク解消");}
+  return msgs.join(" / ");
+}
+const YEAR_EVENTS=[
+ // ---- 議会質問(条件反応) ----
+ {p:1,cond:c=>c.alloc.dx>=8,tag:"9月議会",title:"福祉系会派がDX予算を追及",
+  desc:"「機械より、目の前の高齢者を見よ」——本会議で厳しい一般質問が飛んだ。",
+  ch:[{l:"「行革なくして福祉なし」と正面から論戦",fx:{bias_fukushi:-1,supW:+2,clean:+2},note:"議論は平行線。だが逃げない姿勢は記録に残った。"},
+      {l:"高齢者向けスマホ教室を予算化(1億円)",fx:{fund:-1,bias_fukushi:+1,supA:+3},note:"「置いていかない」約束が議事録に刻まれた。"},
+      {l:"答弁を官僚作文で乗り切る",fx:{clean:-4},note:"「木で鼻をくくった答弁」と地元紙に書かれた。"}]},
+ {p:1,cond:c=>c.alloc.wel<c.prevWel-0.5,tag:"9月議会",title:"福祉削減をめぐる緊急質問",
+  desc:"「市長は数字の先にいる一人ひとりが見えているのか」議場の空気が張り詰める。",
+  ch:[{l:"財政データを示し、削減の理由を丁寧に説明",fx:{clean:+3,bias_fukushi:-1,supA:-2},note:"議論は成立した。納得はされていない。"},
+      {l:"低所得者向けの重点化で「削減でなく再配分」と説明",fx:{bias_fukushi:+1,supA:+1,fund:-1},note:"再配分の設計が評価された。"}]},
+ {p:1,cond:c=>G.FUND>=40,tag:"6月議会",title:"「基金の貯め込み」を問う質問",
+  desc:"「市民が苦しい今、貯金を積み増す理由を説明せよ」複数会派が足並みを揃えた。",
+  ch:[{l:"災害・老朽化更新の将来推計を公表して説明",fx:{clean:+4,bias_kaikaku:+1,supA:-1},note:"数字で語る市長、の評価が定着してきた。"},
+      {l:"5億円を全世代事業に還元",fx:{fund:-5,supA:+4,supW:+3},note:"歓迎された。基金は減った。"}]},
+ {p:1,cond:c=>c.alloc.ind>=16,tag:"6月議会",title:"「産業偏重、暮らし置き去り」批判",
+  desc:"生活分野の会派が予算の偏りを質した。",
+  ch:[{l:"「まず稼がねば配れない」と持論を展開",fx:{supW:+3,supA:-3,bias_fukushi:-1,bias_chiiki:-1},note:"現役層は喝采。議場は静かだ。"},
+      {l:"生活分野の中期計画を併せて示す",fx:{clean:+2,bias_chiiki:+1},note:"「順番の説明」が信頼を生んだ。"}]},
+ {p:0.6,cond:c=>true,tag:"6月議会",title:"一般質問「人口ビジョンの根拠を問う」",
+  desc:"「10万人構想は大風呂敷ではないのか」と若手議員。",
+  ch:[{l:"強気のシナリオを堂々と語る",fx:{supW:+3,clean:-2},note:"沸いた。実現できなければ嘘になる。"},
+      {l:"根拠データを淡々と示す",fx:{clean:+2,bias_kaikaku:+1},note:"地味だが、信頼は積み上がる。"}]},
+ // ---- 議会の監視機能(ポジティブに描く) ----
+ {p:0.5,cond:c=>G.INF<38,tag:"決算委員会",title:"「地域の声」が橋梁点検データの異常を指摘",
+  desc:"決算審査の中で、会派の調査により危険な劣化箇所が明るみに。議会のチェックが機能した瞬間だ。",
+  ch:[{l:"指摘に感謝し、緊急点検・補修(2億円)",fx:{fund:-2,inf:+4,clean:+3,resetInfraRisk:1,bias_chiiki:+1},note:"事故は未然に防がれた。二元代表制が市民を守った。"},
+      {l:"「計画的に対応中」と受け流す",fx:{bias_chiiki:-2,clean:-3},note:"議事録に「市長、具体策示さず」と残った。"}]},
+ {p:0.35,cond:c=>G.CLEAN<62,tag:"決算委員会",title:"改革フォーラムが随意契約の多さを指摘",
+  desc:"競争入札によらない契約の比率が近隣市より高い——決算審査で数字を突きつけられた。",
+  ch:[{l:"入札制度改革を約束し、工程表を提出",fx:{clean:+5,bias_kaikaku:+1},note:"監視が市政を正した。これも議会の仕事だ。"},
+      {l:"「適正に処理している」の一点張り",fx:{clean:-5,bias_kaikaku:-2},note:"不信の種が撒かれた。"}]},
+ // ---- ハコモノ関連(建設翌年) ----
+ {p:0.5,cond:c=>!!G.builtLastYear&&G.rushedLast,tag:"疑惑",title:"スピード竣工の裏で——談合疑惑が浮上",
+  desc:"異例の短工期と高い落札率。市民オンブズマンが「検証なき発注」を突いてきた。急いだツケが回ってきた形だ。",
+  ch:[{l:"第三者委員会を設置。関連工事は凍結",fx:{fund:-1,clean:+6,supW:-3,supA:-3,ind:-2},note:"「急がせたのは私の判断」と頭を下げた。信頼は少し戻り、勢いは失われた。"},
+      {l:"「適正な手続きだった」と押し切る",fx:{clean:-8,bias_kaikaku:-2},note:"施設は動き続ける。疑念も、動き続ける。"}]},
+ {p:0.2,cond:c=>!!G.builtLastYear&&!G.rushedLast,tag:"疑惑",title:"建設工事をめぐる談合疑惑が浮上",
+  desc:"落札率の高さを市民オンブズマンが指摘。だが調査すれば工事関連は止まり、完成を待つ市民の期待も宙に浮く。",
+  ch:[{l:"第三者委員会を設置。関連事業は中断",fx:{fund:-1,clean:+6,supW:-3,supA:-3,ind:-2},note:"「隠さない市長」。だが工期は遅れ、現場の職人と楽しみに待つ市民が泣いた。"},
+      {l:"調査は並行に留め、事業を続行",fx:{clean:-7,bias_kaikaku:-1,supW:+1},note:"事業は予定通り進む。ただ、拭えない疑念が市政の底に沈殿した。"}]},
+ {p:0.5,cond:c=>G.CLEAN<52&&!G.hykjoDone,tag:"百条委員会",title:"議会が百条委員会の設置を可決",
+  desc:"度重なる不透明さに、議会が地方自治法100条の調査権を発動。市政は事実上、数ヶ月停滞する。",
+  once:"hykjo",
+  ch:[{l:"すべての資料を提出し、説明を尽くす",fx:{clean:+9,supW:-5,supA:-5,ind:-2,fam:-2},note:"膿を出し切った。だが調査対応に忙殺され、市政は一年分、前に進めなかった。"},
+      {l:"「調査には協力するが資料は精査中」と時間を稼ぐ",fx:{clean:-10,supW:-2,supA:-2},note:"今日の傷は浅い。だが「隠す市長」の烙印は、選挙の日まで消えない。"}]},
+ // ---- 陳情・地域・不祥事 ----
+ {p:0.25,cond:c=>true,tag:"陳情",title:"地元有力者「うちの地区の道路を先に」",
+  desc:"後援会にも顔が利く重鎮からの陳情。断れば角が立つ。",
+  ch:[{l:"要望に応じる",fx:{inf:+2,clean:-6,bias_chiiki:+1},note:"重鎮はご満悦。「えこひいき」の噂が流れ始めた。"},
+      {l:"「劣化度順」の優先順位ルールで判断",fx:{clean:+4,bias_chiiki:-1},note:"筋を通した。重鎮の顔は険しい。"}]},
+ {p:0.2,cond:c=>true,tag:"陳情",title:"商店街「アーケード改修に補助を」",
+  desc:"シャッターが目立つ商店街から、改修費2億円の補助要望。",
+  ch:[{l:"補助する(2億円)",fx:{fund:-2,ind:+3,supA:+3,supW:+2},note:"商店街に少し灯りが戻った。"},
+      {l:"見送る",fx:{bias_keizai:-1,clean:+1},note:"「またか」とため息が漏れた。"}]},
+ {p:0.18,cond:c=>true,tag:"陳情",title:"敬老会「記念品を増額してほしい」",
+  desc:"「隣の市は商品券まで付く」——比較されてしまった。",
+  ch:[{l:"増額する(1億円)",fx:{fund:-1,supA:+3,supW:-2},note:"「またシルバー優遇か」若者のSNSが冷たい。"},
+      {l:"心のこもった手紙に切り替える",fx:{supA:-2,clean:+2},note:"賛否両論。だが姿勢は伝わった。"}]},
+ {p:0.15,cond:c=>G.INF<60,tag:"地域",title:"老朽公民館、統廃合か存続か",
+  desc:"利用者は減る一方、修繕費はかさむ。地区は「心の拠り所」と存続を訴える。",
+  ch:[{l:"統廃合を断行",fx:{fund:+2,supA:-5,clean:+2},note:"財政的には正しい。地区の掲示板に批判ビラが貼られた。"},
+      {l:"存続させ、改修する",fx:{fund:-2,supA:+4},note:"喜ばれた。同じ悩みの施設は他に12ある。"}]},
+ {p:0.25,cond:c=>c.alloc.promo>=10,tag:"炎上",title:"移住PR動画が「地方を馬鹿にしている」と炎上",
+  desc:"話題化を狙った動画が裏目に出た。",
+  ch:[{l:"即座に謝罪し、動画を削除",fx:{clean:+2,supW:-2},note:"鎮火は早かった。"},
+      {l:"「議論を呼ぶのも広報」と静観",fx:{clean:-5,supW:-3,ind:+2},note:"知名度だけは全国区になった。"}]},
+ {p:0.2,cond:c=>c.alloc.dx>=10,tag:"障害",title:"行政システムに大規模障害、窓口が大混乱",
+  desc:"急ピッチのDX導入が仇に。窓口に行列ができた。",
+  ch:[{l:"ベンダーを追及しつつ即復旧(2億円)",fx:{fund:-2,dx:+2,clean:+2},note:"対応の速さは評価された。"},
+      {l:"「一時的な不具合」で片付ける",fx:{clean:-5,supW:-3},note:"行列写真がSNSに拡散した。"}]},
+ {p:0.2,cond:c=>G.IND>=70,tag:"苦情",title:"誘致した工場に騒音苦情が殺到",
+  desc:"雇用か、静かな暮らしか。板挟みに。",
+  ch:[{l:"防音対策費を企業と折半(1億円)",fx:{fund:-1,clean:+3,supW:+2},note:"双方の顔を立てた。"},
+      {l:"「雇用のためだ」と企業側に立つ",fx:{clean:-5,supA:-3,ind:+2},note:"企業は感謝。住民の視線は冷たい。"}]},
+ {p:0.1,cond:c=>true,tag:"不祥事",title:"市職員が酒気帯び運転で検挙された",
+  desc:"月曜朝、地元紙の一面。調べると本人は親の介護で追い詰められた末の過ちだった。処分の重さを、あなたが決める。",
+  ch:[{l:"懲戒免職。組織の信頼を守る",fx:{clean:+3,supW:-2,supA:-3,dx:-2},note:"世間は納得した。だが庁内は凍りつき、「守ってくれない役所」で挑戦する者が減った。"},
+      {l:"停職に留め、家庭の支援につなぐ",fx:{clean:-5,supA:+2},note:"一つの家庭は守られた。「身内に甘い」の批判は、甘んじて受けるしかない。"}]},
+ {p:0.15,cond:c=>G.IND>=60,tag:"朗報",title:"ふるさと納税の返礼品が全国的ヒット!",
+  desc:"地元産品がテレビで紹介され、寄付4億円が舞い込んだ。",
+  ch:[{l:"全額を基金に積む",fx:{fund:+4},note:"堅実。未来の自分が感謝するだろう。"},
+      {l:"全世代向け記念事業を開催",fx:{fund:+1,supW:+3,supA:+3},note:"街が沸いた。"}]},
+ {p:0.15,cond:c=>true,tag:"地域",title:"高校生議会が「通学バスの増便」を提案",
+  desc:"未来の有権者たちの、堂々たる政策提案。",
+  ch:[{l:"提案を採用する(1億円)",fx:{fund:-1,fam:+3,supW:+2},note:"「声が届いた」——彼らは一生覚えている。"},
+      {l:"講評だけで終える",fx:{supW:-1},note:"儀式で終わった。"}]},
+ {p:0.2,cond:c=>G.POP<G.prevPOP&&G.year>=3,tag:"報道",title:"全国紙が「消滅可能性都市」と報じた",
+  desc:"人口減少データとともに、街の名前が全国に流れた。",
+  ch:[{l:"データの誤りを冷静に反論",fx:{supW:+2,clean:+1},note:"沈静化した。だが数字は現実だ。"},
+      {l:"「危機は本物」と改革の追い風に使う",fx:{supW:+3,supA:-3},note:"賛否を呼んだが、空気は変わった。"}]},
+ {p:1.0,always:true,cond:c=>(G.year%4===0)&&c.alloc.wel>=c.prevWel+4,tag:"報道",title:"「選挙前のバラマキでは」地元紙が報道",
+  desc:"選挙の年の福祉大幅増額に、記者の目が光った。",
+  ch:[{l:"「政策的必然」と丁寧に説明",fx:{clean:-2},note:"記事は小さな扱いで済んだ。"},
+      {l:"一部を撤回して火消し",fx:{supA:-4,clean:+2},note:"疑惑は晴れたが、期待の反動が来た。"}]},
+ // ---- 切実なジレンマ(どちらを選んでも誰かが泣く) ----
+ {p:0.25,cond:c=>G.year>=2,tag:"苦渋",title:"市立病院、産科か救急か",
+  desc:"医師不足が限界に達した。維持できるのはどちらか一つ。産科を閉じれば妊婦は隣市まで50分、救急を縮小すれば「間に合わない夜」が生まれる。",
+  ch:[{l:"産科を守る(救急は夜間縮小)",fx:{fam:+4,supA:-5,supW:+2},note:"この街で子どもを産める未来は守られた。数ヶ月後、救急搬送の遅れを伝える記事が載った。"},
+      {l:"救急を守る(産科は休止)",fx:{supA:+4,fam:-4},note:"「夜の安心」は守られた。妊婦健診のたび、若い夫婦が高速道路を走っている。"}]},
+ {p:0.25,cond:c=>G.year>=3,tag:"苦渋",title:"山あいの小学校、数字の上の「正解」と地区の灯",
+  desc:"全校児童12人。統合すれば子どもたちは友達と部活動を得るが、学校を失った集落から人が消えるのは全国が証明している。",
+  ch:[{l:"統合する。子どもの教育環境を優先",fx:{fam:+3,fund:+2,supA:-5,clean:+2},note:"子どもたちに同級生ができた。廃校の体育館に、地区最後の運動会の万国旗が残された。"},
+      {l:"存続させる。地域の灯を優先",fx:{fund:-2,supA:+4,fam:-2},note:"集落は守られた。12人の子どもたちは今日も、全学年ひとつの教室で学んでいる。"}]},
+ {p:0.22,cond:c=>G.year>=2,tag:"苦渋",title:"赤字バス路線の廃止判断",
+  desc:"1便あたり乗客2.3人。廃止すれば年2億円が浮くが、免許を返納した高齢者の「足」が消える。守れば、その2億円で保育士を増やせたはずだ。",
+  ch:[{l:"路線を守る(年2億円の補填継続)",fx:{fund:-2,supA:+4,fam:-2},note:"お年寄りの通院は守られた。保育園の待機児童は、また少し増えた。"},
+      {l:"廃止し、予約制デマンド交通へ移行",fx:{fund:+1,dx:+2,supA:-4,clean:+2},note:"合理的な判断だ。「電話予約は難しい」——操作に迷う高齢者が、外出を諦め始めた。"}]},
+ {p:0.22,cond:c=>G.FAM>=40,tag:"苦渋",title:"限られた2億円——保育士の処遇か、学校のエアコンか",
+  desc:"保育士は低賃金で隣市へ流出中。一方、猛暑の教室は32度を超えた。予算はどちらか一方分しかない。",
+  ch:[{l:"保育士の処遇改善",fx:{fam:+4,supW:+2,supA:-2},note:"保育の担い手は残った。夏、扇風機だけの教室で、子どもたちが下敷きで顔を扇いでいる。"},
+      {l:"全教室にエアコン整備",fx:{fam:+3,inf:+2,supW:-2},note:"教室は涼しくなった。春、ベテラン保育士がまた一人、隣市の求人に応募した。"}]},
+ {p:0.2,cond:c=>G.year>=2,tag:"苦渋",title:"豪雪の朝——除雪車を先にどこへ",
+  desc:"記録的な大雪。除雪車の数は限られる。通勤幹線を優先すれば経済は止まらないが、高齢世帯の生活道路は昼まで雪に閉ざされる。",
+  ch:[{l:"通勤幹線・通学路を優先",fx:{ind:+2,supW:+3,supA:-4},note:"経済と通学は守られた。独居の老人が、雪かきの最中に倒れたという報せが昼過ぎに届いた。"},
+      {l:"高齢世帯の生活道路を優先",fx:{supA:+4,ind:-2,supW:-3},note:"命綱の道は開いた。工場は午前中止まり、パートの給料が減った家庭から溜め息が漏れた。"}]},
+ {p:0.2,cond:c=>G.year>=2,tag:"苦渋",title:"水道料金、20%値上げの判断",
+  desc:"老朽管の更新費が限界だ。値上げすれば家計を直撃し、先送りすれば「ある日突然、水が出ない街」に一歩近づく。",
+  ch:[{l:"値上げを決断する",fx:{inf:+5,supW:-4,supA:-4,clean:+3},note:"未来の水は守られた。今月の家計簿とにらめっこする家庭が増えた。"},
+      {l:"一般会計から補填して先送り",fx:{fund:-3,supA:+2},note:"家計は守られた。地中では今日も、60年前の水道管が静かに軋んでいる。"}]},
+ {p:0.18,cond:c=>G.year>=3,tag:"苦渋",title:"メガソーラー計画、山を削るか",
+  desc:"事業者が山林開発を申請。固定資産税と雇用が入るが、景観は変わり、土砂災害への不安の声もある。",
+  ch:[{l:"誘致する(税収・雇用を優先)",fx:{ind:+4,fund:+2,supA:-3,clean:-2},note:"税収は増えた。「ふるさとの山が消えた」——老人会の句会で、そんな句が詠まれた。"},
+      {l:"環境条例で規制する",fx:{clean:+3,supA:+3,ind:-3},note:"山は守られた。事業者は隣の市へ行き、税収と雇用も一緒に行った。"}]},
+ {p:0.18,cond:c=>G.IND>=55,tag:"苦渋",title:"人手不足——外国人材の受け入れ拡大",
+  desc:"工場長たちが陳情に来た。「人がいなければ、あるのは廃業だけです」。一方、急な変化への地域の戸惑いも本物だ。",
+  ch:[{l:"受け入れを支援(共生施策2億円)",fx:{fund:-2,ind:+4,supA:-3,fam:+1},note:"工場のラインは守られた。夜の集会所で、日本語教室の灯りがともり始めた。"},
+      {l:"慎重姿勢を維持",fx:{supA:+2,ind:-3},note:"変化は避けられた。春、また一つの町工場が、静かにシャッターを下ろした。"}]},
+ {p:0.15,cond:c=>G.year>=4,tag:"苦渋",title:"議員定数の削減論",
+  desc:"「議員を減らせば経費が浮く」と削減論が沸騰。だが定数減は、小さな声が議会に届く回路を細くもする。民主主義のコストをどう考えるか。",
+  ch:[{l:"削減に賛同する",fx:{fund:+1,supW:+3,clean:-2,bias_chiiki:-1,bias_fukushi:-1},note:"「身を切る改革」は拍手された。次の議会、山あいの集落出身の議員はいなくなった。"},
+      {l:"「議会は民主主義のコスト」と維持を訴える",fx:{supW:-3,clean:+3,bias_chiiki:+1,bias_fukushi:+1},note:"世論の逆風に立った。だが議場には、多様な声が残った。"}]},
+ {p:0.18,cond:c=>G.year>=2,tag:"地域",title:"空き家対策——解体か、再生か",
+  desc:"倒壊寸前の空き家が通学路沿いに並ぶ。解体補助は即効だが後に残るのは更地。改修して移住者に貸す道は、時間もカネもかかる。",
+  ch:[{l:"解体補助で危険を除去(2億円)",fx:{fund:-2,inf:+3,supA:+2},note:"通学路は安全になった。歯抜けの更地に、夕日が長く差し込む。"},
+      {l:"空き家バンクで移住者へ再生(2億円)",fx:{fund:-2,fam:+2,ind:+1,inf:-1},note:"1年後、3軒に移住者の表札がかかった。残りの危険家屋は、まだそこにある。"}]},
+ {p:0.15,cond:c=>G.FAM>=45,tag:"地域",title:"大学サテライトキャンパス誘致の打診",
+  desc:"県内大学から打診。若者の流出に効くが、要求される負担金は年1.5億円。効果が出るのは何年も先だ。",
+  ch:[{l:"誘致する(年1.5億円の負担)",fx:{fund:-2,fam:+3,ind:+2,supW:+2},note:"駅前に学生の姿が戻り始めた。財政課の顔は、少しだけ曇っている。"},
+      {l:"見送る",fx:{supW:-2},note:"堅実な判断だ。進学で街を出た18歳は、たぶんもう戻らない。"}]},
+ {p:0.15,cond:c=>true,tag:"地域",title:"図書館に指定管理者制度を導入するか",
+  desc:"民間委託で年8千万円浮く試算。だがベテラン司書の雇用は継続されない可能性が高い。「安くなった図書館」は同じ図書館か。",
+  ch:[{l:"導入する(経費削減)",fx:{fund:+1,dx:+1,fam:-2,clean:-1},note:"開館時間は延びた。「あの司書さんに選書を教わった」——常連の老人が寂しそうに言った。"},
+      {l:"直営を維持する",fx:{fund:-1,fam:+2},note:"司書は残った。行革の観点からは、宿題を一つ先送りした。"}]},
+ {p:0.15,cond:c=>G.IND<60,tag:"苦渋",title:"イノシシ被害が深刻化——農家の悲鳴",
+  desc:"収穫前の田畑が一晩で荒らされる。捕獲を強化すれば農家は守られるが、動物愛護の抗議も殺到している。",
+  ch:[{l:"捕獲を強化し、狩猟者に報奨金(1億円)",fx:{fund:-1,ind:+2,supA:+3,clean:-1},note:"畑は守られた。市役所の代表メールには、県外からの抗議が3日間鳴り止まなかった。"},
+      {l:"防護柵の補助に留める",fx:{fund:-1,supA:-2},note:"穏当な策だ。柵の切れ目を、イノシシは今夜も知っている。"}]},
+ {p:1.0,always:true,cond:c=>Object.keys(G.renew).some(k=>G.renew[k]==="degraded"),tag:"12月議会",title:"老朽化施設の大規模改修議案",
+  desc:"維持費が膨張した施設をどうするか。改修すれば大金が飛び、放置すれば毎年ジワジワと財政を蝕む。「建てた日の拍手」の請求書が届いた。",
+  ch:[{l:"大規模改修を実施(建設費の4割を基金から)",fx:{},note:"改修費を投じ、維持費は正常化した。あの日「30年後」を想像していた者が、何人いただろう。",
+       run:()=>{const k=Object.keys(G.renew).find(k=>G.renew[k]==="degraded");const cost=Math.ceil(BUILDINGS[k].cost*0.4);
+         G.FUND=Math.max(0,G.FUND-cost);G.renew[k]="renewed";return `${BUILDINGS[k].name}を改修(−${cost}億円)/維持費が正常化`;}},
+      {l:"改修を先送りする",fx:{clean:-2},note:"今年の財布は守られた。施設の廊下の雨漏りバケツが、ひとつ増えた。",
+       run:()=>{return "維持費2.2倍が継続中…";}}]},
+ {p:0.3,cond:c=>G.year>=10&&G.taxBonus>=4,tag:"衝撃",title:"誘致企業が撤退を検討——本社の構造改革",
+  desc:"かつて誘致に成功したあの企業から、拠点統廃合の打診。引き留めには追加支援が要る。",
+  ch:[{l:"追加支援で引き留める(5億円)",fx:{fund:-5,ind:+2},note:"雇用は守られた。「企業に貢いでいる」との批判も、また事実だ。",run:null},
+      {l:"撤退を受け入れ、跡地活用に切り替える",fx:{supW:-4},note:"数百人の雇用が消えた。跡地の再生は、次の10年の宿題になった。",
+       run:()=>{G.taxBonus=Math.max(0,G.taxBonus-4);return "税収−4億円/年";}}]},
+ {p:0.3,cond:c=>G.year>=8&&G.AGED>=32,tag:"構造",title:"介護需要の急増——特養の待機者が3倍に",
+  desc:"団塊世代が後期高齢期に入り、介護需要が跳ね上がった。制度の給付は待ってくれない。",
+  ch:[{l:"施設整備と人材確保に緊急対応(4億円)",fx:{fund:-4,wel:+4,supA:+3},note:"待機者は減った。この4億円は、来年も再来年も必要になる。",run:null},
+      {l:"広域連携と在宅シフトで凌ぐ",fx:{supA:-4,clean:+1},note:"支出は抑えた。「家で看ろということか」——介護離職した娘の声が、市長への手紙に綴られていた。",run:null}]},
+ {p:0.15,cond:c=>G.year>=3,tag:"地域",title:"移住者と自治会の軋轢",
+  desc:"「草刈りにも祭りにも出ない」と地元。「強制されるのは息苦しい」と移住者。どちらの言い分にも、一理ある。",
+  ch:[{l:"自治会側に立ち、加入を働きかける",fx:{supA:+3,fam:-2},note:"地元は安堵した。移住者のSNSに「この街は閉鎖的」と書かれ、静かに拡散した。"},
+      {l:"「ゆるやかな参加」の新ルールを仲介",fx:{fam:+2,supA:-2,clean:+2},note:"若い世帯は歓迎した。「昔からのやり方が壊れる」——老人会の会長は口を結んだ。"}]},
+];
+function pickEvents(ctx){
+  YEAR_EVENTS.forEach((e,i)=>e.id=i);
+  const fresh=e=>e.always||((G.year-(G.evSeen[e.id]??-99))>=5); // 同一イベントは5年間再登場しない
+  const pickFrom=arr=>{ // 未見のイベントを優先して抽選
+    if(!arr.length)return null;
+    const unseen=arr.filter(e=>G.evSeen[e.id]===undefined);
+    const pool=unseen.length?unseen:arr;
+    return pool[Math.floor(G.rand()*pool.length)];
+  };
+  const q=[];
+  const eligible=YEAR_EVENTS.filter(e=>e.cond(ctx)&&fresh(e)&&G.rand()<e.p);
+  const gikai=eligible.filter(e=>/議会|委員会|百条/.test(e.tag));
+  const other=eligible.filter(e=>!/議会|委員会|百条/.test(e.tag));
+  if(gikai.length&&(G.rand()<0.7||gikai.some(e=>e.always)))q.push(pickFrom(gikai));
+  const o1=pickFrom(other);if(o1)q.push(o1);
+  if(other.length>1&&G.rand()<0.3){const o2=pickFrom(other.filter(e=>e!==o1));if(o2)q.push(o2);}
+  const out=q.filter(Boolean).slice(0,3);
+  out.forEach(e=>G.evSeen[e.id]=G.year);
+  return out;
+}
+
+/* ============ 街ビュー(アイソメトリック・品質版) ============ */
+function renderCity(){
+  const TW=56,TH=28,N=13;
+  const OX=390,OY=96;
+  const W=780,H=560;
+  let seed=42;const r=()=>{seed=(seed*9301+49297)%233280;return seed/233280;};
+  const px=(c,row)=>[OX+(c-row)*TW/2, OY+(c+row)*TH/2];
+  const e=[];
+
+  // ---- defs:面ごとのグラデーション ----
+  e.push(`<defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="${G.IND>=60?"#A8D8FF":(G.IND>=35?"#C2D8E8":"#C4C8CF")}"/>
+      <stop offset="1" stop-color="#F5F0DF"/></linearGradient>
+    <linearGradient id="gT1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#C4D8F0"/><stop offset="1" stop-color="#9FB8DA"/></linearGradient>
+    <linearGradient id="gL1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5F779E"/><stop offset="1" stop-color="#4A5F82"/></linearGradient>
+    <linearGradient id="gR1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8FA9CE"/><stop offset="1" stop-color="#7690B8"/></linearGradient>
+    <linearGradient id="gT2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#EAE2D2"/><stop offset="1" stop-color="#D4C9B2"/></linearGradient>
+    <linearGradient id="gL2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9C8F77"/><stop offset="1" stop-color="#877A63"/></linearGradient>
+    <linearGradient id="gR2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#C9BCA1"/><stop offset="1" stop-color="#B3A588"/></linearGradient>
+    <linearGradient id="gT3" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#E8D5D0"/><stop offset="1" stop-color="#D3B8B0"/></linearGradient>
+    <linearGradient id="gL3" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9A6F66"/><stop offset="1" stop-color="#845C54"/></linearGradient>
+    <linearGradient id="gR3" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#C79A90"/><stop offset="1" stop-color="#B08279"/></linearGradient>
+    <radialGradient id="vign" cx=".5" cy=".42" r=".75">
+      <stop offset=".72" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#3a2f18" stop-opacity=".14"/></radialGradient>
+  </defs>`);
+  e.push(`<rect width="${W}" height="${H}" fill="url(#sky)"/>`);
+  e.push(`<circle cx="655" cy="58" r="${17+G.IND*0.12}" fill="#FFD75E" opacity="${0.55+G.IND*0.004}"/>
+    <circle cx="655" cy="58" r="${25+G.IND*0.12}" fill="#FFD75E" opacity=".18"/>`);
+  // 雲
+  const cloud=(x,y,s)=>`<g fill="#fff" opacity=".85"><ellipse cx="${x}" cy="${y}" rx="${26*s}" ry="${9*s}"/><ellipse cx="${x-14*s}" cy="${y+3*s}" rx="${14*s}" ry="${7*s}"/><ellipse cx="${x+16*s}" cy="${y+2*s}" rx="${16*s}" ry="${7*s}"/></g>`;
+  e.push(cloud(140,64,1)+cloud(420,44,0.8)+cloud(600,110,0.6));
+  e.push(`<path d="M20 170 L140 90 L260 170 Z" fill="#A6BFA0" opacity=".5"/>
+    <path d="M500 160 L650 72 L800 160 Z" fill="#8FAF8C" opacity=".45"/>`);
+
+  // ---- ヘルパー ----
+  const shadow=(c,row,scale=1)=>{
+    const[x,y]=px(c,row);
+    return `<polygon points="${x+5},${y-TH/2*scale+4} ${x+TW/2*scale+5},${y+4} ${x+5},${y+TH/2*scale+4} ${x-TW/2*scale+5},${y+4}" fill="#2B2440" opacity=".13"/>`;
+  };
+  const isoBox=(c,row,h,top,left,right,sw=2)=>{
+    const[x,y]=px(c,row);
+    return `<polygon points="${x-TW/2},${y} ${x-TW/2},${y-h} ${x},${y+TH/2-h} ${x},${y+TH/2}" fill="${left}" stroke="#2B2440" stroke-width="${sw}"/>`
+    +`<polygon points="${x},${y+TH/2} ${x},${y+TH/2-h} ${x+TW/2},${y-h} ${x+TW/2},${y}" fill="${right}" stroke="#2B2440" stroke-width="${sw}"/>`
+    +`<polygon points="${x},${y-TH/2-h} ${x+TW/2},${y-h} ${x},${y+TH/2-h} ${x-TW/2},${y-h}" fill="${top}" stroke="#2B2440" stroke-width="${sw}"/>`
+    +`<polyline points="${x-TW/2},${y-h} ${x},${y+TH/2-h} ${x+TW/2},${y-h}" fill="none" stroke="#fff" stroke-width="1" opacity=".45"/>`;
+  };
+  const litWin=(x,y,side)=>side==="L"
+    ?`<polygon points="${x},${y} ${x+6},${y+3} ${x+6},${y-2} ${x},${y-5}" fill="#FFE9A8" stroke="#B8912F" stroke-width=".5"/>`
+    :`<polygon points="${x},${y} ${x+6},${y-3} ${x+6},${y-8} ${x},${y-5}" fill="#FFE9A8" stroke="#B8912F" stroke-width=".5"/>`;
+  const darkWin=(x,y,side)=>side==="L"
+    ?`<polygon points="${x},${y} ${x+6},${y+3} ${x+6},${y-2} ${x},${y-5}" fill="#2E3A52" opacity=".8"/>`
+    :`<polygon points="${x},${y} ${x+6},${y-3} ${x+6},${y-8} ${x},${y-5}" fill="#2E3A52" opacity=".8"/>`;
+  const tree=(c,row,dx=0,dy=0)=>{
+    const[x0,y0]=px(c,row);const x=x0+dx,y=y0+dy;
+    return `<ellipse cx="${x+3}" cy="${y+2}" rx="8" ry="3" fill="#2B2440" opacity=".12"/>
+    <line x1="${x}" y1="${y}" x2="${x}" y2="${y-11}" stroke="#7A5C42" stroke-width="3"/>
+    <circle cx="${x}" cy="${y-17}" r="9" fill="#5E9C50" stroke="#2B2440" stroke-width="1.8"/>
+    <circle cx="${x-3}" cy="${y-20}" r="5" fill="#79B569"/>`;
+  };
+  const person=(x,y,young)=>{
+    let s=`<ellipse cx="${x}" cy="${y+3}" rx="4" ry="1.6" fill="#2B2440" opacity=".15"/>
+    <circle cx="${x}" cy="${y-9}" r="3.2" fill="#F6C9A8" stroke="#2B2440" stroke-width="1.3"/>
+    <line x1="${x}" y1="${y-5}" x2="${x}" y2="${y+2}" stroke="${young?["#3A6FF0","#FF4D8D","#25B86F"][Math.floor(r()*3)]:"#8f867a"}" stroke-width="3"/>`;
+    if(!young)s+=`<line x1="${x+3}" y1="${y-3}" x2="${x+6}" y2="${y+2}" stroke="#7A5C42" stroke-width="1.7"/>`;
+    return s;
+  };
+  const car=(c,row,along,colr)=>{ // along: "v"(col6) or "h"(row6)
+    const[x0,y0]=px(c,row);
+    const x=x0+(r()-0.5)*10, y=y0+(r()-0.5)*4;
+    const dir=along==="v"?1:-1; // 進行面の向き
+    const L=16,Wd=9,Hh=7;
+    const p1=[x, y], p2=[x+dir*L*0.5, y+L*0.25], p3=[x+dir*L*0.5+ -dir*Wd*0.5, y+L*0.25 - -1*Wd*0.25*-1];
+    // 簡易:2面+天面の小箱
+    const a=[x,y],b=[x+dir*14,y+7],cc=[x+dir*14- dir*8, y+7-4],d=[x - dir*8, y-4];
+    let s=`<ellipse cx="${x+dir*7-dir*4}" cy="${y+6}" rx="12" ry="4" fill="#2B2440" opacity=".15"/>`;
+    s+=`<polygon points="${a[0]},${a[1]} ${b[0]},${b[1]} ${b[0]},${b[1]-Hh} ${a[0]},${a[1]-Hh}" fill="${colr[1]}" stroke="#2B2440" stroke-width="1.4"/>`;
+    s+=`<polygon points="${b[0]},${b[1]-Hh} ${b[0]},${b[1]} ${cc[0]},${cc[1]} ${cc[0]},${cc[1]-Hh}" fill="${colr[2]}" stroke="#2B2440" stroke-width="1.4"/>`;
+    s+=`<polygon points="${a[0]},${a[1]-Hh} ${b[0]},${b[1]-Hh} ${cc[0]},${cc[1]-Hh} ${d[0]},${d[1]-Hh}" fill="${colr[0]}" stroke="#2B2440" stroke-width="1.4"/>`;
+    s+=`<polygon points="${a[0]+dir*3},${a[1]-Hh-0.5} ${a[0]+dir*9},${a[1]-Hh+2.5} ${a[0]+dir*9},${a[1]-Hh-1.5} ${a[0]+dir*3},${a[1]-Hh-4.5}" fill="#BFE3FF" opacity=".9"/>`;
+    return s;
+  };
+
+  // ---- ゾーン定義 ----
+  const isRoad=(c,row)=>c===6||row===6;
+  const indPlots=[[1,1],[2,1],[3,1],[1,2],[2,2],[3,2],[4,1],[4,3]];
+  const comPlots=[[8,1],[9,1],[10,1],[8,2],[9,2],[10,2],[11,2],[8,3],[9,3],[10,3],[11,4]];
+  const housePlots=[[8,8],[9,8],[10,8],[11,8],[8,9],[9,9],[10,9],[11,9],[8,10],[9,10],[10,10],[11,10],[8,11],[10,11]];
+  const parkTiles=[[1,8],[2,8],[1,9],[2,9],[3,8],[3,9]];
+  const kodomoSite=[4,8], hallSite=[4,10];
+  const indCount=Math.max(0,Math.min(indPlots.length,Math.round((G.IND-15)/10)));
+  const comCount=Math.max(2,Math.min(comPlots.length,Math.round(2+(G.POP-20000)/80000*7+G.IND/30)));
+  const houseCount=Math.max(2,Math.min(housePlots.length,Math.round(2+(G.POP-20000)/80000*12)));
+  const vacantCount=G.POP<47000?Math.min(3,Math.round((47000-G.POP)/3500)):0;
+
+  const layers=[];
+  const add=(z,svg)=>layers.push({z,svg});
+
+  // ---- 地面と道路 ----
+  for(let row=0;row<N;row++)for(let c=0;c<N;c++){
+    const[x,y]=px(c,row);
+    if(isRoad(c,row)){
+      let s=`<polygon points="${x},${y-TH/2} ${x+TW/2},${y} ${x},${y+TH/2} ${x-TW/2},${y}" fill="#5F5B63" stroke="#4A4650" stroke-width="1"/>`;
+      // 歩道の縁石
+      const curb=c===6?`<line x1="${x-TW/2+4}" y1="${y-1}" x2="${x+2}" y2="${y-TH/2+3}" stroke="#B9B29B" stroke-width="2.5" opacity=".9"/>
+                       <line x1="${x-2}" y1="${y+TH/2-3}" x2="${x+TW/2-4}" y2="${y+1}" stroke="#B9B29B" stroke-width="2.5" opacity=".9"/>`
+                     :`<line x1="${x-TW/2+4}" y1="${y+1}" x2="${x+2}" y2="${y+TH/2-3}" stroke="#B9B29B" stroke-width="2.5" opacity=".9"/>
+                       <line x1="${x-2}" y1="${y-TH/2+3}" x2="${x+TW/2-4}" y2="${y-1}" stroke="#B9B29B" stroke-width="2.5" opacity=".9"/>`;
+      if(c===6&&row===6){ // 交差点:横断歩道
+        s+=`<g stroke="#EDEDED" stroke-width="3" opacity=".9">`;
+        for(let k=-2;k<=2;k++)s+=`<line x1="${x-16+k*7}" y1="${y-8+k*3.5}" x2="${x-8+k*7}" y2="${y-12+k*3.5}"/>`;
+        s+=`</g>`;
+      }else{
+        s+=curb;
+        if(G.INF>=40&&r()<0.75){
+          const rot=c===6?26.57:-26.57;
+          s+=`<line x1="${x-6}" y1="${y}" x2="${x+6}" y2="${y}" stroke="#F2E9C8" stroke-width="2.2" opacity="${0.35+G.INF*0.006}" transform="rotate(${rot} ${x} ${y})"/>`;
+        }
+        if(G.INF<55&&r()<(55-G.INF)/45)s+=`<path d="M${x-8} ${y-2} l6 3 l-3 4 l7 3" stroke="#332F38" stroke-width="1.7" fill="none"/>`;
+        if(G.INF<30&&r()<0.25)s+=`<ellipse cx="${x+4}" cy="${y+3}" rx="5.5" ry="2.6" fill="#2E2A33"/>`;
+        if(G.INF>=55&&r()<G.INF/280){
+          s+=`<line x1="${x+15}" y1="${y}" x2="${x+15}" y2="${y-24}" stroke="#4a4650" stroke-width="2.5"/>
+          <circle cx="${x+15}" cy="${y-27}" r="4" fill="#FFE9A8" stroke="#4a4650" stroke-width="1.8"/>
+          <circle cx="${x+15}" cy="${y-27}" r="7" fill="#FFE9A8" opacity=".25"/>`;
+        }
+      }
+      add(c+row,s);
+    }else{
+      const g=(c+row)%2?"#8FBE79":"#85B56F";
+      let s=`<polygon points="${x},${y-TH/2} ${x+TW/2},${y} ${x},${y+TH/2} ${x-TW/2},${y}" fill="${g}" stroke="#76A863" stroke-width="1"/>`;
+      if(r()<0.14)s+=`<circle cx="${x+(r()-0.5)*26}" cy="${y+(r()-0.5)*10}" r="2.5" fill="#79B569" stroke="#5f9a50" stroke-width=".8"/>`;
+      if(G.FAM>=55&&r()<0.08)s+=`<circle cx="${x+(r()-0.5)*24}" cy="${y+(r()-0.5)*9}" r="1.6" fill="${["#FF8FB3","#FFE28A","#fff"][Math.floor(r()*3)]}"/>`;
+      if(G.INF<45&&r()<0.1)s+=`<ellipse cx="${x+(r()-0.5)*20}" cy="${y+(r()-0.5)*8}" rx="7" ry="3" fill="#A8935F" opacity=".55"/>`;
+      add(c+row,s);
+    }
+  }
+
+  // ---- 工場 ----
+  indPlots.forEach((p,i)=>{
+    if(i>=indCount)return;
+    const[c,row]=p;const h=22+r()*10;const[x,y]=px(c,row);
+    let s=shadow(c,row)+isoBox(c,row,h,"url(#gT2)","url(#gL2)","url(#gR2)");
+    s+=`<rect x="${x+7}" y="${y-h-20}" width="6" height="20" fill="#8f867a" stroke="#2B2440" stroke-width="1.6"/>
+        <rect x="${x+7}" y="${y-h-20}" width="6" height="4" fill="#C9302C" stroke="#2B2440" stroke-width="1.2"/>`;
+    s+=darkWin(x-TW/4-3,y-h/2,"L")+litWin(x+TW/4-6,y-h/2+6,"R");
+    if(G.IND>=50)s+=`<circle cx="${x+10}" cy="${y-h-26}" r="4.5" fill="#fff" opacity=".85"/><circle cx="${x+14}" cy="${y-h-34}" r="6" fill="#fff" opacity=".55"/>`;
+    add(c+row,s);
+  });
+  if(G.built.indpark){
+    const c=1,row=4;const[x,y]=px(c,row);
+    let s=shadow(c,row)+isoBox(c,row,16,"#D5DEE8","#94A2B4","#B9C6D6")+shadow(c+1,row)+isoBox(c+1,row,14,"#D5DEE8","#94A2B4","#B9C6D6");
+    s+=`<rect x="${x-30}" y="${y-34}" width="58" height="11" fill="#fff" stroke="#2B2440" stroke-width="1.6"/><text x="${x-26}" y="${y-25.5}" font-size="8" font-weight="bold" fill="#2B2440">IND. PARK</text>`;
+    add(c+1+row,s);
+  }
+
+  // ---- 商業ビル(3タイプ) ----
+  comPlots.forEach((p,i)=>{
+    if(i>=comCount)return;
+    const[c,row]=p;const[x,y]=px(c,row);
+    const maxH=36+G.IND*0.7+(G.POP-50000)/50000*38;
+    const h=Math.max(22,maxH*(0.5+r()*0.5));
+    const pal=[["url(#gT1)","url(#gL1)","url(#gR1)"],["url(#gT3)","url(#gL3)","url(#gR3)"],["url(#gT2)","url(#gL2)","url(#gR2)"]][i%3];
+    let s=shadow(c,row)+isoBox(c,row,h,pal[0],pal[1],pal[2]);
+    const floors=Math.floor(h/12);
+    for(let f=1;f<=floors;f++){
+      const yy=y-f*12+5;
+      s+=`<line x1="${x-TW/2+3}" y1="${yy}" x2="${x-2}" y2="${yy+TH/2-4}" stroke="#2B2440" stroke-width=".7" opacity=".3"/>`;
+      s+=`<line x1="${x+2}" y1="${yy+TH/2-4}" x2="${x+TW/2-3}" y2="${yy}" stroke="#2B2440" stroke-width=".7" opacity=".3"/>`;
+      s+=(r()<G.IND/115?litWin(x-TW/4-3,yy+7,"L"):darkWin(x-TW/4-3,yy+7,"L"));
+      s+=(r()<G.IND/115?litWin(x+TW/4-3,yy+10,"R"):darkWin(x+TW/4-3,yy+10,"R"));
+    }
+    const t=i%3;
+    if(t===0){ // オフィス:屋上設備+アンテナ
+      s+=`<polygon points="${x-8},${y-TH/2-h+9} ${x+4},${y-TH/2-h+15} ${x+4},${y-TH/2-h+8} ${x-8},${y-TH/2-h+2}" fill="#8B94A3" stroke="#2B2440" stroke-width="1.3"/>`;
+      s+=`<line x1="${x+10}" y1="${y-h-4}" x2="${x+10}" y2="${y-h-20}" stroke="#2B2440" stroke-width="1.6"/><circle cx="${x+10}" cy="${y-h-21}" r="2" fill="#FF4D8D"/>`;
+    }else if(t===1){ // 店舗:看板+日よけ
+      s+=`<polygon points="${x+3},${y+TH/2-9} ${x+TW/2-2},${y-9} ${x+TW/2-2},${y-15} ${x+3},${y+TH/2-15}" fill="#FF8A3D" stroke="#2B2440" stroke-width="1.3"/>`;
+      s+=`<rect x="${x-TW/2+3}" y="${y-h+4}" width="16" height="7" fill="#FFC53D" stroke="#2B2440" stroke-width="1.2"/>`;
+    }else{ // 集合住宅:給水タンク
+      s+=`<ellipse cx="${x-6}" cy="${y-TH/2-h+8}" rx="6" ry="3" fill="#C9CDD4" stroke="#2B2440" stroke-width="1.3"/><rect x="${x-12}" y="${y-TH/2-h+8}" width="12" height="6" fill="#C9CDD4" stroke="#2B2440" stroke-width="1.3"/>`;
+    }
+    add(c+row,s);
+  });
+
+  // ---- 住宅 ----
+  housePlots.forEach((p,i)=>{
+    const[c,row]=p;const[x,y]=px(c,row);
+    if(i<houseCount){
+      const hh=12,apexY=y-hh-13;
+      const roof=[["#B84F42","#D96A5B"],["#4F6FB8","#6A8AD9"],["#4F8F5B","#6AB077"]][i%3];
+      let s=shadow(c,row,0.85)+isoBox(c,row,hh,"#F8EDD4","#D9C5A0","#F5E6C8",1.8);
+      s+=`<polygon points="${x-TW/2},${y-hh} ${x},${y+TH/2-hh} ${x},${apexY}" fill="${roof[0]}" stroke="#2B2440" stroke-width="1.8"/>`;
+      s+=`<polygon points="${x},${y+TH/2-hh} ${x+TW/2},${y-hh} ${x},${apexY}" fill="${roof[1]}" stroke="#2B2440" stroke-width="1.8"/>`;
+      s+=`<line x1="${x}" y1="${apexY}" x2="${x}" y2="${y+TH/2-hh}" stroke="#2B2440" stroke-width="1.2" opacity=".5"/>`;
+      const dxx=x+9,dyy=y+9;
+      s+=`<polygon points="${dxx},${dyy} ${dxx+7},${dyy-3.5} ${dxx+7},${dyy-12} ${dxx},${dyy-8.5}" fill="#7A5C42" stroke="#2B2440" stroke-width="1.4"/>`;
+      s+=litWin(x-TW/4-4,y-3,"L");
+      if(r()<0.5)s+=tree(c,row,-TW/3,TH/4);
+      add(c+row,s);
+    }else if(i<houseCount+vacantCount){
+      let s=shadow(c,row,0.8)+isoBox(c,row,10,"#D8D3C6","#A8A296","#C4BEB0",1.6);
+      s+=`<line x1="${x-14}" y1="${y-2}" x2="${x-2}" y2="${y+6}" stroke="#7A5C42" stroke-width="2"/><line x1="${x-2}" y1="${y-2}" x2="${x-14}" y2="${y+6}" stroke="#7A5C42" stroke-width="2"/>`;
+      s+=`<g transform="translate(${x-16} ${y-30}) rotate(-8)"><rect width="34" height="12" fill="#fff" stroke="#2B2440" stroke-width="1.6"/><text x="3" y="9" font-size="8" font-weight="bold" fill="#C9302C">空き家</text></g>`;
+      add(c+row,s);
+    }
+  });
+
+  // ---- 公園 ----
+  if(G.FAM>=30){
+    parkTiles.forEach((p,i)=>{
+      const[c,row]=p;const[x,y]=px(c,row);
+      let s=`<polygon points="${x},${y-TH/2} ${x+TW/2},${y} ${x},${y+TH/2} ${x-TW/2},${y}" fill="#6FB05C" stroke="#5f9a50" stroke-width="1"/>`;
+      if(i===0)s+=`<ellipse cx="${x}" cy="${y+2}" rx="14" ry="6" fill="#7EC9E8" stroke="#4A90B8" stroke-width="1.5"/>`; // 池
+      if(i<Math.round(G.FAM/20))s+=tree(c,row,(r()-0.5)*16,(r()-0.5)*6);
+      add(c+row,s);
+    });
+    const kids=Math.round((G.FAM-30)/16);
+    for(let i=0;i<kids;i++){
+      const[c,row]=parkTiles[(i+1)%parkTiles.length];const[x,y]=px(c,row);
+      add(c+row+0.05,person(x+(r()-0.5)*22,y+(r()-0.5)*8,true));
+    }
+  }
+  if(G.built.kodomo||G.FAM>=60){
+    const[c,row]=kodomoSite;const[x,y]=px(c,row);
+    let s=shadow(c,row)+isoBox(c,row,16,"#F7E4B4","#D9BC7E","#F3D9A4");
+    s+=`<line x1="${x-TW/2}" y1="${y-16}" x2="${x-TW/2}" y2="${y-40}" stroke="#2B2440" stroke-width="2"/><polygon points="${x-TW/2},${y-40} ${x-TW/2+15},${y-36} ${x-TW/2},${y-32}" fill="#FF4D8D" stroke="#2B2440" stroke-width="1.6"/>`;
+    s+=`<circle cx="${x}" cy="${y-TH/2-9}" r="4.5" fill="#fff" stroke="#2B2440" stroke-width="1.6"/><line x1="${x}" y1="${y-TH/2-9}" x2="${x}" y2="${y-TH/2-12}" stroke="#2B2440" stroke-width="1"/>`;
+    s+=litWin(x+TW/4-6,y-4,"R");
+    add(c+row,s);
+  }
+  if(G.built.hall){
+    const[c,row]=hallSite;const[x,y]=px(c,row);
+    let s=shadow(c,row)+isoBox(c,row,14,"#D6C8F2","#8A72C2","#C9B7E8");
+    s+=`<path d="M${x-TW/2} ${y-14} Q${x} ${y-46} ${x+TW/2} ${y-14}" fill="#8A5CF6" stroke="#2B2440" stroke-width="2"/>
+    <path d="M${x-TW/2+8} ${y-18} Q${x} ${y-42} ${x+TW/2-8} ${y-18}" fill="none" stroke="#fff" stroke-width="1.4" opacity=".5"/>`;
+    add(c+row,s);
+  }
+  if(G.built.stadium){
+    const[x,y]=px(2,11);
+    const RX=78,RY=34,WH=24; // 外周半径・スタンド壁の高さ
+    let s=`<ellipse cx="${x+7}" cy="${y+6}" rx="${RX+6}" ry="${RY+4}" fill="#2B2440" opacity=".15"/>`;
+    // 外壁:底面前半アーチ→右壁→上面前半アーチ(正しい円柱構築)
+    s+=`<path d="M ${x-RX} ${y} A ${RX} ${RY} 0 0 0 ${x+RX} ${y} L ${x+RX} ${y-WH} A ${RX} ${RY} 0 0 1 ${x-RX} ${y-WH} Z"
+        fill="#CFC5AE" stroke="#2B2440" stroke-width="2.5"/>`;
+    // 壁の柱ライン(楕円の前面カーブに沿って)
+    for(let k=-3;k<=3;k++){
+      const dx=k*RX/4, fy=RY*Math.sqrt(Math.max(0,1-(dx/RX)**2));
+      s+=`<line x1="${x+dx}" y1="${y-WH+fy}" x2="${x+dx}" y2="${y+fy}" stroke="#2B2440" stroke-width="1.2" opacity=".3"/>`;
+    }
+    // 正面ゲート
+    s+=`<rect x="${x-10}" y="${y+RY-16}" width="20" height="16" rx="3" fill="#5B5344" stroke="#2B2440" stroke-width="1.8"/>`;
+    // 上端リム(コンコース)
+    s+=`<ellipse cx="${x}" cy="${y-WH}" rx="${RX}" ry="${RY}" fill="#E9E2D2" stroke="#2B2440" stroke-width="2.5"/>`;
+    // 内側スタンド(すり鉢:座席リング→少し下がった芝生)
+    s+=`<ellipse cx="${x}" cy="${y-WH+1}" rx="${RX-12}" ry="${RY-6}" fill="#C4574E" stroke="#2B2440" stroke-width="2"/>`;
+    s+=`<ellipse cx="${x}" cy="${y-WH+3}" rx="${RX-22}" ry="${RY-11}" fill="#A8433C" stroke="#2B2440" stroke-width="1.6"/>`;
+    s+=`<ellipse cx="${x}" cy="${y-WH+6}" rx="${RX-32}" ry="${RY-16}" fill="#5E9C50" stroke="#2B2440" stroke-width="2.2"/>`;
+    s+=`<ellipse cx="${x}" cy="${y-WH+6}" rx="${(RX-32)*0.5}" ry="${(RY-16)*0.5}" fill="none" stroke="#fff" stroke-width="1.8" opacity=".9"/>`;
+    s+=`<line x1="${x}" y1="${y-WH+6-(RY-16)}" x2="${x}" y2="${y-WH+6+(RY-16)}" stroke="#fff" stroke-width="1.8" opacity=".9"/>`;
+    // 照明塔(地面から立つ・奥側2基)
+    const light=(lx,ly)=>`<line x1="${lx}" y1="${ly}" x2="${lx}" y2="${ly-52}" stroke="#2B2440" stroke-width="2.6"/>
+      <line x1="${lx-6}" y1="${ly}" x2="${lx}" y2="${ly-14}" stroke="#2B2440" stroke-width="1.6"/>
+      <rect x="${lx-12}" y="${ly-68}" width="24" height="16" rx="2" fill="#FFC53D" stroke="#2B2440" stroke-width="2"/>
+      <circle cx="${lx-5}" cy="${ly-60}" r="2.2" fill="#fff"/><circle cx="${lx+5}" cy="${ly-60}" r="2.2" fill="#fff"/>`;
+    s=light(x-RX-8,y-14)+light(x+RX+8,y-14)+s; // 塔は壁より先に描いて奥に
+    add(13.5,s);
+  }
+  if(G.built.ekimae){
+    const[x,y]=px(9,12);
+    // 線路:グリッドのすぐ外(row=13.4)をアイソメ軸に平行に走らせる
+    const[ax,ay]=px(2.5,13.4), [bx,by]=px(14.5,13.4); // 傾き=+0.5(タイル軸と一致)
+    let s="";
+    // バラスト(砕石帯)
+    s+=`<polygon points="${ax},${ay-6} ${bx},${by-6} ${bx},${by+10} ${ax},${ay+10}" fill="#B0A78F" opacity=".7"/>`;
+    // 枕木(進行方向に垂直=逆アイソメ軸)
+    const steps=14;
+    for(let k=0;k<=steps;k++){
+      const t=k/steps, tx=ax+(bx-ax)*t, ty=ay+(by-ay)*t;
+      s+=`<line x1="${tx-7}" y1="${ty+3.5}" x2="${tx+7}" y2="${ty-3.5}" stroke="#7A5C42" stroke-width="3.6"/>`;
+    }
+    // レール2本(枕木方向にオフセット)
+    s+=`<line x1="${ax-4}" y1="${ay+2}" x2="${bx-4}" y2="${by+2}" stroke="#3C3844" stroke-width="2.6"/>`;
+    s+=`<line x1="${ax+4}" y1="${ay-2}" x2="${bx+4}" y2="${by-2}" stroke="#3C3844" stroke-width="2.6"/>`;
+    s+=shadow(9,12)+isoBox(9,12,26,"url(#gT2)","url(#gL2)","url(#gR2)",2.2);
+    s+=`<rect x="${x-26}" y="${y-24}" width="52" height="13" rx="2" fill="#fff" stroke="#2B2440" stroke-width="1.8"/><text x="${x-21}" y="${y-14}" font-size="9" font-weight="bold" fill="#2B2440">STATION</text>`;
+    s+=`<circle cx="${x-30}" cy="${y-32}" r="5" fill="#FFE9A8" stroke="#2B2440" stroke-width="1.4"/>`;
+    add(22,s);
+  }
+  if(G.pendingBuilds.length){
+    const[x,y]=px(11,5);
+    let s=`<polygon points="${x},${y-TH/2} ${x+TW/2},${y} ${x},${y+TH/2} ${x-TW/2},${y}" fill="#E8E0CB" stroke="#2B2440" stroke-width="1.6" stroke-dasharray="5 3"/>
+    <ellipse cx="${x+8}" cy="${y+5}" rx="10" ry="4" fill="#C9B78A"/>
+    <g stroke="#E2574C" stroke-width="4" fill="none">
+    <line x1="${x}" y1="${y}" x2="${x}" y2="${y-90}"/><line x1="${x-24}" y1="${y-82}" x2="${x+54}" y2="${y-82}"/>
+    <line x1="${x+54}" y1="${y-82}" x2="${x+54}" y2="${y-52}"/>
+    <line x1="${x}" y1="${y-90}" x2="${x+30}" y2="${y-82}"/></g>
+    <rect x="${x+47}" y="${y-52}" width="13" height="11" fill="#FFC53D" stroke="#2B2440" stroke-width="1.8"/>`;
+    add(16.9,s);
+  }
+
+  // ---- 車(道路上・産業と人口で台数) ----
+  const cars=Math.round(1+(G.POP-20000)/80000*4+G.IND/40);
+  const carPal=[["#FF8A8E","#C94F53","#E86A6E"],["#8AB8FF","#4F7FC9","#6A9AE8"],["#FFE28A","#C9A94F","#E8C86A"],["#C6C9CF","#8A8D94","#A8ABB2"]];
+  for(let i=0;i<cars;i++){
+    const onV=r()<0.5;
+    const c=onV?6:1+Math.floor(r()*10);
+    const row=onV?1+Math.floor(r()*10):6;
+    if(c===6&&row===6)continue;
+    add(c+row+0.08,car(c,row,onV?"v":"h",carPal[i%4]));
+  }
+  // ---- 通行人 ----
+  const ppl=Math.round(3+(G.POP-20000)/80000*14);
+  for(let i=0;i<ppl;i++){
+    const onV=r()<0.5;
+    const c=onV?6:1+Math.floor(r()*11);
+    const row=onV?1+Math.floor(r()*11):6;
+    const[x,y]=px(c,row);
+    add(c+row+0.1,person(x+(r()-0.5)*20,y+(r()-0.5)*8,r()<(1-G.AGED/100)));
+  }
+
+  layers.sort((a,b)=>a.z-b.z);
+  return `<svg viewBox="0 0 ${W} ${H}" style="display:block;width:100%;height:auto;border-radius:12px;" role="img" aria-label="現在の街の様子(俯瞰)">${e.join("")}${layers.map(l=>l.svg).join("")}<rect width="${W}" height="${H}" fill="url(#vign)"/></svg>`;
+}
+
+/* ============ UI ============ */
+const app=document.getElementById("app"),hud=document.getElementById("hud");
+const fmt=n=>Math.round(n).toLocaleString();
+function renderHud(){
+  if(!G){hud.innerHTML="";return;}
+  hud.innerHTML=`
+  <div class="h-item">📅 <span class="big">${G.year}</span>/20年</div>
+  <div class="h-item pop">👥 <span class="big">${fmt(G.POP)}</span>人</div>
+  <div class="h-item">💰 基金 <span class="big">${G.FUND.toFixed(0)}</span>億</div>
+  <div class="h-item">✨ <span class="big" style="color:${G.CLEAN<55?"var(--red)":"var(--green)"}">${G.CLEAN.toFixed(0)}</span></div>`;
+}
+function statBars(){
+  const rows=[["産業活力",G.IND,"#3A6FF0"],["子育て環境",G.FAM,"#FF4D8D"],["インフラ",G.INF,"#25B86F"],["高齢者福祉",G.WEL,"#8A5CF6"],["行政DX",G.DX,"#FF8A3D"]];
+  return rows.map(([l,v,c])=>`<div class="stat-line"><label>${l}</label>
+    <div class="sbar"><div class="sfill" style="width:${v}%;background:${c}"></div></div>
+    <span class="sv">${v.toFixed(0)}</span></div>`).join("");
+}
+function supBars(){
+  return `<div class="stat-line"><label>現役層支持</label><div class="sbar"><div class="sfill" style="width:${G.SUP_W}%;background:#3A6FF0"></div></div><span class="sv">${G.SUP_W.toFixed(0)}%</span></div>
+  <div class="stat-line"><label>高齢層支持</label><div class="sbar"><div class="sfill" style="width:${G.SUP_A}%;background:#8A5CF6"></div></div><span class="sv">${G.SUP_A.toFixed(0)}%</span></div>`;
+}
+
+function screenTitle(){
+  newGame();renderHud();
+  app.innerHTML=`
+  <div class="card center">
+    <div class="disp" style="font-size:26px;margin:8px 0;">奇跡の<span style="color:var(--pink)">10万人</span>都市</div>
+    <p style="font-size:13px;font-weight:700;">あなたは人口5万人の地方都市の市長。<br>
+    予算をつくるのはあなた。だが<b>決めるのは議会</b>だ。<br>
+    4つの会派を政策の中身で説得し、20年で人口10万人を目指せ。</p>
+    <div style="text-align:left;font-size:12px;font-weight:700;background:#F0E8D8;border-radius:12px;padding:10px 14px;margin:12px 0;">
+    🏛 <b>二元代表制</b>:市長と議会はどちらも市民に選ばれた対等な代表。予算も建設も、議会の議決なしには1円も動かせません。<br>
+    📌 前市長は高齢者福祉に手厚い市政でした(福祉8億円/年)。<br>
+    📌 何もしなければ人口は毎年約800人ずつ減っていきます。</div>
+    <button class="act pink" id="start">市長に就任する</button>
+  </div>`;
+  document.getElementById("start").onclick=screenBudget;
+}
+
+let alloc={},buildSel=null;
+function autoRebalance(al,P){ // 修正で超過した分を他項目から自動減額
+  let sum=al.ind+al.fam+al.inf+al.wel+al.dx+al.promo;
+  const order=["promo","ind","fam","dx","inf","wel"];
+  let i=0;
+  while(sum>P&&i<200){
+    const k=order[i%order.length];
+    if(al[k]>0){al[k]=Math.max(0,al[k]-1);sum--;}
+    i++;
+  }
+}
+function screenBudget(){
+  renderHud();
+  const pre=preview();
+  const P=Math.floor(pre.policy);
+  if(!("ind" in alloc))alloc={ind:10,fam:10,inf:8,wel:8,dx:5,promo:5};
+  buildSel=null;
+  const mag=Math.max(1,P/56); // 予算規模に応じて配分枠が広がる
+  const items=[
+    ["ind","産業・雇用振興","若者の仕事をつくる。税収の源",Math.round(20*mag)],
+    ["fam","子育て・教育","出生率とファミリー転入(効果は2年後)",Math.round(20*mag)],
+    ["inf","インフラ維持","都市の器。ケチると崩落事故のリスク",Math.round(20*mag)],
+    ["wel","高齢者福祉","高齢層の支持に直結。ただし減額は猛反発",Math.round(20*mag)],
+    ["dx","行革・DX投資","翌年から人件費を恒久削減。高齢層は少し不満",Math.round(15*mag)],
+    ["promo","移住プロモーション","翌年の転入を増やす。受け皿がないと効果半減",Math.round(15*mag)],
+  ];
+  const kw=pre.fi.keijo,jk=pre.fi.jkh;
+  app.innerHTML=`
+  <div class="card" style="padding:8px;">${renderCity()}</div>
+  <h2 class="scr">${pre.yr}年目の<span class="em">予算編成</span></h2>
+  <div class="sub">歳入${pre.rev.REV.toFixed(0)}億円 − 義務的経費等${pre.man.TOTAL.toFixed(0)}億円 = 政策予算 <b>${P}億円</b></div>
+  <div class="fisc">
+    <span class="chip ${kw>95?"danger":(kw>90?"warn":"")}">経常収支比率 ${kw.toFixed(1)}%</span>
+    <span class="chip ${jk>18?"danger":(jk>14?"warn":"")}">実質公債費比率 ${jk.toFixed(1)}%</span>
+    <span class="chip">市債残高 ${G.DEBT.toFixed(0)}億</span>
+    <span class="chip ${G.IND-Math.min(G.IND,42+G.FAM*0.7)>=10?"warn":""}">🏭 実効産業力 ${Math.min(G.IND,42+G.FAM*0.7).toFixed(0)}/${G.IND.toFixed(0)}</span>
+    <span class="chip ${G.CLEAN<55?"danger":(G.CLEAN<65?"warn":"")}">✨ クリーン度 ${G.CLEAN.toFixed(0)}</span>
+  </div>
+  <div class="card">
+    ${items.map(([k,name,desc,max])=>`
+    <div class="b-row">
+      <div class="b-head"><span>${name}</span><span class="amt" id="amt-${k}">${alloc[k]}億円</span></div>
+      <input type="range" id="sl-${k}" min="0" max="${max}" step="1" value="${alloc[k]}">
+      <div class="b-desc">${desc}</div>
+    </div>`).join("")}
+    <div class="budget-summary">
+      <span>合計 <span id="total"></span> / ${P}億円</span>
+      <span>残り→基金へ <span class="rest ok" id="rest"></span></span>
+    </div>
+  </div>
+  <div class="card">
+    <div class="mini-h">🏗 建設議案の提出(市債発行・任意)${jk>18?" — 公債費比率18%超のため今年は起債できません":""}</div>
+    <div class="build-row">${Object.entries(BUILDINGS).map(([k,b])=>{
+      if(G.built[k])return `<span class="bd done">${b.name} ✔</span>`;
+      if(G.pendingBuilds.some(pb=>pb.k===k))return `<span class="bd done">${b.name} 🏗建設中</span>`;
+      return `<button class="bd" data-b="${k}" ${jk>18?"disabled":""}>${b.name} <span class="cost">${b.cost}億</span><br><span style="font-weight:700;font-size:10px;">${b.desc}</span></button>`;}).join("")}
+    </div>
+  </div>
+  <div class="card">${statBars()}${supBars()}</div>
+  <button class="act" id="exec">予算案を議会に提出する 🏛</button>
+  <p class="notice">数値・制度はゲーム用に簡略化した架空のものです。</p>`;
+
+  const update=()=>{
+    let sum=0;
+    items.forEach(([k])=>{alloc[k]=+document.getElementById("sl-"+k).value;
+      document.getElementById("amt-"+k).textContent=alloc[k]+"億円";sum+=alloc[k];});
+    document.getElementById("total").textContent=sum;
+    const rest=P-sum,re=document.getElementById("rest");
+    re.textContent=(rest>=0?"+":"")+rest+"億";
+    re.className="rest "+(rest>=0?"ok":"over");
+    document.getElementById("exec").disabled=rest<0;
+  };
+  items.forEach(([k])=>document.getElementById("sl-"+k).addEventListener("input",update));
+  update();
+  app.querySelectorAll(".bd[data-b]").forEach(b=>b.onclick=()=>{
+    buildSel=(buildSel===b.dataset.b)?null:b.dataset.b;
+    app.querySelectorAll(".bd").forEach(x=>x.classList.toggle("sel",x.dataset.b===buildSel));
+  });
+  document.getElementById("exec").onclick=()=>{
+    screenDeliberation({alloc:{...alloc},build:buildSel,prevWel:G.prevWelSpend,fi:pre.fi,P});
+  };
+}
+
+/* 議会審議:予算議案 → (あれば)建設議案 → 執行 */
+function factionRows(j){
+  return Object.keys(FACTIONS).map(k=>{
+    const f=FACTIONS[k],v=j[k];
+    return `<div class="faction">
+      <div class="f-seat">${f.icon}<br>${f.seats}議席</div>
+      <div class="f-body"><div class="f-name">${f.name}</div>${v.reason}</div>
+      <div class="f-vote ${v.ok?"yes":"no"}">${v.ok?"賛成":"反対"}</div>
+    </div>`;}).join("");
+}
+function screenDeliberation(ctx){
+  renderHud();
+  const j=judgeBudget(ctx);
+  const t=tallyVotes(j);
+  app.innerHTML=`
+  <h2 class="scr">3月議会 <span class="em">予算審議</span></h2>
+  <div class="sub">各会派は「あなたとの関係」ではなく、政策の中身で是々非々を判断します。</div>
+  <div class="card">
+    ${factionRows(j)}
+    <div class="vote-result ${t.pass?"pass":"fail"}">賛成 ${t.yes} / ${t.total} — ${t.pass?"可決":"否決"}</div>
+  </div>
+  ${t.pass
+    ?`<button class="act green" id="go">予算成立。執行する ▶</button>`
+    :`<div class="card">
+        <div class="mini-h">💬 修正協議 — 反対会派の要求から一つを受け入れ、予算案を修正します</div>
+        ${Object.keys(FACTIONS).filter(k=>!j[k].ok&&j[k].demand).map(k=>`
+          <div class="demand" data-d="${k}">${FACTIONS[k].icon} ${FACTIONS[k].name}:${j[k].demand.label}
+          <div class="d-note">受け入れると同会派は賛成に回る(超過分は他項目から自動減額)</div></div>`).join("")}
+      </div>`}
+  `;
+  if(t.pass){
+    document.getElementById("go").onclick=()=>{
+      if(ctx.build)screenBuildBill(ctx);
+      else execYear(ctx);
+    };
+  }else{
+    app.querySelectorAll("[data-d]").forEach(el=>el.onclick=()=>{
+      const k=el.dataset.d;
+      j[k].demand.fix(ctx.alloc);
+      autoRebalance(ctx.alloc,ctx.P);
+      G.bias[k]=Math.max(G.bias[k],1); // 誠実な協議は心証を残す
+      screenDeliberation(ctx); // 再審議
+    });
+  }
+}
+function screenBuildBill(ctx){
+  renderHud();
+  const b=BUILDINGS[ctx.build];
+  const preElection=(G.year+1)%4===0;
+  app.innerHTML=`
+  <h2 class="scr">建設議案 <span class="em">${b.name}</span>(${b.cost}億円)</h2>
+  <div class="sub">諮り方で「得るもの」と「諦めるもの」が変わります。維持費${b.mnt}億円/年は竣工後ずっと続きます。${preElection?"<b>※来年は選挙の年。竣工が間に合うかどうかは票に直結します。</b>":""}</div>
+  <div class="card">
+    <button class="act ghost" id="full" style="margin-bottom:10px;text-align:left;">📐 <b>精査型:試算公表+住民説明会を経て提案</b><br>
+    <span style="font-size:11.5px;font-weight:700;">
+    ✅ 得るもの:改革・地域会派の賛成が見込める/クリーン度+2/疑惑リスク低<br>
+    ❌ 諦めるもの:<b>竣工は来年度</b>——効果も支持率ブーストも1年待ち。経済会派は「遅い」と渋る</span></button>
+    <button class="act ghost" id="brief" style="text-align:left;">⚡ <b>スピード型:概要説明で即着工</b><br>
+    <span style="font-size:11.5px;font-weight:700;">
+    ✅ 得るもの:<b>効果は今年から</b>——経済会派は「この決断力」と全面支持。選挙前なら強力<br>
+    ❌ 諦めるもの:クリーン度−3/改革・地域会派はほぼ確実に反対/<b>談合疑惑の火種が残る(発生率↑)</b></span></button>
+  </div>`;
+  const submit=(disclosure)=>{
+    G.CLEAN=clamp(G.CLEAN+(disclosure==="full"?2:-3));
+    const j=judgeBuild(ctx.build,disclosure,ctx.fi);
+    const t=tallyVotes(j);
+    app.innerHTML=`
+    <h2 class="scr">建設議案 <span class="em">採決</span></h2>
+    <div class="card">
+      ${factionRows(j)}
+      <div class="vote-result ${t.pass?"pass":"fail"}">賛成 ${t.yes} / ${t.total} — ${t.pass?"可決":"否決"}</div>
+      ${t.pass?`<p style="font-size:12.5px;font-weight:700;">${disclosure==="full"?"丁寧な手続きが実を結んだ。竣工は来年度——待つことを選んだ。":"議会を割っての可決。スピードを得て、信頼の一部を差し出した。"}</p>`
+              :`<p style="font-size:12.5px;font-weight:700;">議案は否決されました。${b.name}の建設は見送りです。議会が問うたのは、維持費の見通しと合意形成の手順でした。</p>`}
+    </div>
+    <button class="act" id="go">予算を執行する ▶</button>`;
+    document.getElementById("go").onclick=()=>{
+      if(!t.pass)ctx.build=null;
+      ctx.buildMode=disclosure;
+      execYear(ctx);
+    };
+  };
+  document.getElementById("full").onclick=()=>submit("full");
+  document.getElementById("brief").onclick=()=>submit("brief");
+}
+function execYear(ctx){
+  const r=step(ctx.alloc,ctx.build,ctx.buildMode||"full");
+  if(!G.alive){screenEnd();return;}
+  screenEvents(r,ctx);
+}
+
+/* イベントフェーズ */
+function screenEvents(r,ctx){
+  const queue=pickEvents(ctx);
+  if(!queue.length){screenReport(r);return;}
+  let i=0;
+  const show=()=>{
+    renderHud();
+    const ev=queue[i];
+    app.innerHTML=`
+    <h2 class="scr"><span class="em">${ev.tag}</span> ${G.year}年目・第${i+1}報</h2>
+    <div class="card">
+      <div class="disp" style="font-size:17px;margin-bottom:6px;">${ev.title}</div>
+      <p style="font-size:13.5px;font-weight:700;">${ev.desc}</p>
+      <div id="choices" style="margin-top:12px;">
+        ${ev.ch.map((c,ci)=>`<button class="act ghost" style="margin:5px 0;text-align:left;font-size:13.5px;" data-c="${ci}">${c.l}</button>`).join("")}
+      </div>
+      <div id="outcome" style="display:none;">
+        <div class="ev" id="oc-note"></div>
+        <div style="font-size:12px;font-weight:900;color:var(--blue);" id="oc-fx"></div>
+        <button class="act" id="oc-next" style="margin-top:10px;"></button>
+      </div>
+    </div>`;
+    app.querySelectorAll("[data-c]").forEach(btn=>btn.onclick=()=>{
+      const c=ev.ch[+btn.dataset.c];
+      if(ev.once==="hykjo")G.hykjoDone=true;
+      let fxMsg=applyFx(c.fx);
+      if(c.run){const extra=c.run();if(extra)fxMsg=(fxMsg?fxMsg+" / ":"")+extra;}
+      r.events.push(`【${ev.tag}】${ev.title} → ${c.l}`);
+      document.getElementById("choices").style.display="none";
+      const oc=document.getElementById("outcome");oc.style.display="block";
+      document.getElementById("oc-note").textContent=c.note;
+      document.getElementById("oc-fx").textContent=fxMsg?("効果: "+fxMsg):"";
+      const nb=document.getElementById("oc-next");
+      nb.textContent=(i<queue.length-1)?"次の報告へ ▶":"決算報告へ ▶";
+      renderHud();
+      nb.onclick=()=>{i++;if(i<queue.length)show();else screenReport(r);};
+    });
+  };
+  show();
+}
+
+function sparkline(){
+  const h=G.popHist,W=560,H=60;
+  const min=Math.min(...h,45000),max=Math.max(...h,60000);
+  const pts=h.map((v,i)=>`${(i/(Math.max(h.length-1,1)))*W},${H-((v-min)/(max-min))*H}`).join(" ");
+  return `<svg class="spark" viewBox="0 0 ${W} ${H+4}">
+    <line x1="0" y1="${H-((100000-min)/(max-min))*H}" x2="${W}" y2="${H-((100000-min)/(max-min))*H}" stroke="#FF4D8D" stroke-width="2" stroke-dasharray="6 5" opacity="${max>80000?0.8:0}"/>
+    <polyline points="${pts}" fill="none" stroke="#3A6FF0" stroke-width="3"/></svg>`;
+}
+function screenReport(r){
+  renderHud();
+  const d=G.POP-G.prevPOP;
+  const arrow=(a,b)=>{const df=b-a;return df>0.5?`<span class="delta up">▲${df.toFixed(0)}</span>`:(df<-0.5?`<span class="delta down">▼${(-df).toFixed(0)}</span>`:"");};
+  app.innerHTML=`
+  <h2 class="scr">${G.year}年目の<span class="em">決算報告</span></h2>
+  <div class="card" style="padding:8px;">${renderCity()}</div>
+  <div class="card rep-pop">
+    <div class="mini-h">総人口</div>
+    <div class="rp-num">${fmt(G.POP)}<span style="font-size:16px;">人</span></div>
+    <div class="rp-delta ${d>=0?"up":"down"}">${d>=0?"▲":"▼"}${fmt(Math.abs(d))}人(自然増減 ${r.natural>=0?"+":""}${fmt(r.natural)} / 社会増減 ${r.social>=0?"+":""}${fmt(r.social)})</div>
+    ${sparkline()}
+    <div class="mini-h" style="text-align:right;">— 目標10万人ライン</div>
+  </div>
+  ${r.events.length?`<div>${r.events.map(e=>`<div class="ev">${e}</div>`).join("")}</div>`:""}
+  <div class="two">
+    <div class="card"><div class="mini-h">政策予算の執行</div><div class="mini-v">${r.spend.toFixed(0)}/${r.policy.toFixed(0)}億</div></div>
+    <div class="card"><div class="mini-h">経常収支比率</div><div class="mini-v">${r.fi.keijo.toFixed(1)}%</div></div>
+    <div class="card"><div class="mini-h">高齢化率</div><div class="mini-v">${G.AGED.toFixed(1)}%</div></div>
+  </div>
+  <div class="card">
+    ${statBars()}${supBars()}
+    <div style="font-size:11px;font-weight:700;color:#8b7f6a;margin-top:6px;">
+    産業${arrow(r.before.IND,G.IND)} 子育て${arrow(r.before.FAM,G.FAM)} インフラ${arrow(r.before.INF,G.INF)} 福祉${arrow(r.before.WEL,G.WEL)} DX${arrow(r.before.DX,G.DX)}</div>
+  </div>
+  <button class="act" id="next">${G.year%4===0?"🗳 市長選挙へ…":"次の年度へ ▶"}</button>`;
+  document.getElementById("next").onclick=()=>{
+    if(G.year%4===0){screenElection();}
+    else if(G.year>=20){screenEnd();}
+    else screenBudget();
+  };
+}
+
+function screenElection(){
+  const{vote,fair}=electionCheck();
+  renderHud();
+  const win=vote>=50;
+  app.innerHTML=`
+  <h2 class="scr">${G.year}年目 <span class="em">市長選挙</span></h2>
+  <div class="card el-vote">
+    <div class="mini-h">あなたの得票率</div>
+    <div class="v-num ${win?"win":"lose"}">${vote.toFixed(1)}%</div>
+    <div style="font-weight:900;">${win?"🎊 当選! 市政は続く":"💔 落選…"}</div>
+  </div>
+  <div class="el-detail">
+    🗳 内訳:現役層支持 ${G.SUP_W.toFixed(0)}%(投票率42%) × 高齢層支持 ${G.SUP_A.toFixed(0)}%(投票率72%)<br>
+    ✨ クリーン度補正: ${((G.CLEAN-70)*0.15)>=0?"+":""}${((G.CLEAN-70)*0.15).toFixed(1)}pt(クリーン度${G.CLEAN.toFixed(0)})<br>
+    ⏳ 多選への飽き: −${((G.electionsWon-(vote>=50?1:0))*2.2).toFixed(1)}pt ／ 🥊 対立候補の勢い: ${G.challenger>=0?"−":"+"}${Math.abs(G.challenger).toFixed(1)}pt<br>
+    💡 <b>もし全世代の投票率が同じだったら:得票率 ${fair.toFixed(1)}%</b><br>
+    <span style="font-size:11px;">人口の${G.AGED.toFixed(0)}%の高齢層が、票の${(G.AGED*0.72/(G.WORK*0.42+G.AGED*0.72)*100).toFixed(0)}%を握っています。</span>
+  </div>
+  ${win?`<button class="act pink" id="go">${G.year>=20?"結果発表へ":"新しい任期へ ▶"}</button>`
+       :`<button class="act ghost" id="go">結果を見る</button>`}`;
+  document.getElementById("go").onclick=()=>{
+    if(!G.alive||G.year>=20){screenEnd();}else screenBudget();
+  };
+}
+
+function screenEnd(){
+  renderHud();
+  let title,msg,color;
+  if(!G.alive&&G.deathCause==="election"){title="民意の壁";msg=`${G.year}年目の選挙で落選(得票率${G.lastVote.toFixed(1)}%)。数字は良くても、届かない声があった。`;color="var(--red)";}
+  else if(!G.alive&&G.deathCause==="fiscal"){title="財政破綻";msg="基金が底をつきました。「自由に使えるお金」の管理こそ市政の生命線。";color="var(--red)";}
+  else if(!G.alive){title="財政再生団体";msg="借金の返済が年収の25%を超え、国の管理下に。ハコモノの誘惑は甘く、ツケは重い。";color="var(--red)";}
+  else if(G.POP>=100000){title="奇跡の市長";msg="人口10万人達成!! 議会と正面から向き合い、政策で街を動かした。あなたは本物です。";color="var(--pink)";}
+  else if(G.POP>50000){title="中興の祖";msg=`20年完走・人口${fmt(G.POP)}人。衰退を成長に転じた手腕は本物。あと一歩、何が足りなかった?`;color="var(--blue)";}
+  else{title="守成の人";msg=`20年完走・人口${fmt(G.POP)}人。守り切ったが、街は少しずつ小さくなった。`;color="#8b7f6a";}
+  app.innerHTML=`
+  <div class="card center">
+    <div class="mini-h">あなたの称号</div>
+    <div class="disp" style="font-size:30px;color:${color};margin:6px 0;">${title}</div>
+    <p style="font-size:13px;font-weight:700;">${msg}</p>
+    <div class="card" style="box-shadow:none;border-width:2.5px;padding:8px;">
+      <div class="mini-h" style="text-align:left;padding:4px 6px;">20年後、あなたの街</div>${renderCity()}
+    </div>
+    <div class="card" style="box-shadow:none;border-width:2.5px;">
+      <div class="mini-h">20年の軌跡</div>${sparkline()}
+      <div style="font-size:12px;font-weight:900;">最終人口 ${fmt(G.POP)}人 ／ 当選 ${G.electionsWon}回 ／ 基金 ${G.FUND.toFixed(0)}億円 ／ クリーン度 ${G.CLEAN.toFixed(0)} ／ 高齢化率 ${G.AGED.toFixed(1)}%</div>
+    </div>
+    <button class="act pink" id="retry">もう一度挑戦する</button>
+  </div>
+  <p class="notice">このゲームの数値・制度は学習用に簡略化した架空のものです。</p>`;
+  document.getElementById("retry").onclick=screenTitle;
+}
+
+screenTitle();
+</script>
+</body>
+</html>

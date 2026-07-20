@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>財政クエスト — まちのお金がわかると、まちが見えてくる</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;600;800&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F3F0E7;
+  --paper-deep:#E8E4D6;
+  --card:#FBF9F2;
+  --ink:#28251F;
+  --ai:#1E3A55;
+  --ai-light:#3D5C7A;
+  --ai-wash:#DDE4EA;
+  --shu:#B5352F;
+  --shu-soft:#C9605B;
+  --kin:#A8842C;      /* 金 rank accent */
+  --line:#CBC5B3;
+  --ok:#3D6B4F;
+  --ok-wash:#E3EDE6;
+  --bad-wash:#F4E3E2;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{-webkit-text-size-adjust:100%;}
+body{
+  background:var(--paper);
+  color:var(--ink);
+  font-family:'Zen Kaku Gothic New',sans-serif;
+  font-size:16px;line-height:1.85;min-height:100vh;
+}
+.wrap{max-width:760px;margin:0 auto;padding:0 20px 90px;}
+
+/* ===== header / status bar ===== */
+header.top{
+  border-bottom:3px double var(--ink);
+  padding:22px 0 14px;margin-bottom:6px;
+}
+.top-row{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+header.top h1{
+  font-family:'Shippori Mincho',serif;font-weight:800;font-size:24px;letter-spacing:.12em;cursor:pointer;
+}
+header.top h1 span{color:var(--shu);}
+header.top .tag{font-size:11px;letter-spacing:.18em;color:var(--ai-light);}
+.status{
+  display:flex;align-items:center;gap:14px;margin-top:12px;flex-wrap:wrap;
+}
+.rank-badge{
+  display:inline-flex;align-items:center;gap:8px;
+  border:1.5px solid var(--ink);background:var(--card);
+  padding:5px 14px 5px 10px;font-size:13px;font-weight:700;letter-spacing:.08em;
+}
+.rank-badge .rk-mark{
+  width:20px;height:20px;border-radius:50%;
+  border:2px solid var(--shu);color:var(--shu);
+  font-size:10px;display:flex;align-items:center;justify-content:center;
+  font-family:'Shippori Mincho',serif;font-weight:800;transform:rotate(-8deg);
+}
+.rank-badge.master{border-color:var(--kin);color:var(--kin);}
+.rank-badge.master .rk-mark{border-color:var(--kin);color:var(--kin);}
+.xp-wrap{flex:1;min-width:180px;}
+.xp-label{font-size:11px;letter-spacing:.1em;color:#7d7867;display:flex;justify-content:space-between;}
+.xp-bar{height:9px;background:var(--paper-deep);border:1px solid var(--line);margin-top:3px;}
+.xp-fill{height:100%;background:linear-gradient(90deg,var(--ai),var(--ai-light));transition:width .6s cubic-bezier(.3,1,.4,1);}
+
+/* ===== level-up toast ===== */
+#toast{
+  position:fixed;left:50%;top:18%;transform:translateX(-50%) scale(.8);
+  background:var(--ink);color:#fff;padding:18px 30px;
+  font-family:'Shippori Mincho',serif;letter-spacing:.1em;text-align:center;
+  opacity:0;pointer-events:none;z-index:50;
+  border:1px solid var(--kin);
+  transition:opacity .3s, transform .3s;
+}
+#toast.on{opacity:1;transform:translateX(-50%) scale(1);}
+#toast .t-small{font-size:11px;color:var(--kin);letter-spacing:.3em;}
+#toast .t-big{font-size:21px;font-weight:800;margin-top:4px;}
+@media (prefers-reduced-motion:reduce){#toast{transition:none;}}
+
+/* ===== home ===== */
+.intro{padding:20px 0 4px;font-size:14.5px;color:#4d4a40;}
+.intro strong{color:var(--ink);}
+.rank-ladder{
+  display:flex;gap:0;margin:18px 0 8px;border:1px solid var(--line);background:var(--card);
+  overflow:hidden;
+}
+.rung{
+  flex:1;text-align:center;padding:10px 2px 8px;font-size:10.5px;letter-spacing:.03em;
+  color:#9a947f;border-right:1px dashed var(--line);position:relative;line-height:1.5;
+}
+.rung:last-child{border-right:none;}
+.rung .r-name{font-weight:700;font-size:11.5px;display:block;}
+.rung.reached{color:var(--ink);background:var(--ai-wash);}
+.rung.current{background:var(--ai);color:#fff;}
+.rung.current .r-name{color:#fff;}
+.rung.master-r.reached{background:var(--kin);color:#fff;}
+.ladder-note{font-size:11.5px;color:#8b8571;margin-bottom:20px;}
+
+.stampbook{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:8px;
+  background:var(--paper-deep);border:1px solid var(--line);
+  padding:12px;margin:14px 0 24px;
+}
+.stamp-slot{
+  aspect-ratio:1;border:1px dashed var(--line);
+  display:flex;align-items:center;justify-content:center;
+  position:relative;background:var(--paper);
+}
+.stamp-slot .num{font-size:9px;color:#9a947f;position:absolute;top:3px;left:5px;letter-spacing:.08em;}
+.seal{
+  width:72%;aspect-ratio:1;border-radius:50%;
+  border:2.5px solid var(--shu);color:var(--shu);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Shippori Mincho',serif;font-weight:800;font-size:13px;
+  transform:rotate(-8deg);letter-spacing:.03em;
+  box-shadow:inset 0 0 0 1.5px rgba(181,53,47,.25);
+  animation:stampin .45s cubic-bezier(.2,1.6,.4,1) both;
+  writing-mode:vertical-rl;line-height:1.05;padding:2px;text-align:center;
+}
+.seal.gold{border-color:var(--kin);color:var(--kin);box-shadow:inset 0 0 0 1.5px rgba(168,132,44,.3);}
+@keyframes stampin{
+  0%{transform:rotate(-8deg) scale(2.2);opacity:0;}
+  60%{transform:rotate(-8deg) scale(.92);opacity:1;}
+  100%{transform:rotate(-8deg) scale(1);}
+}
+@media (prefers-reduced-motion:reduce){.seal{animation:none;}}
+
+.chapter-list{list-style:none;display:flex;flex-direction:column;gap:10px;}
+.chapter-card{
+  border:1px solid var(--line);background:var(--card);
+  padding:15px 18px;cursor:pointer;
+  display:flex;gap:14px;align-items:center;
+  transition:border-color .15s;
+}
+.chapter-card:hover,.chapter-card:focus-visible{border-color:var(--ai);}
+.chapter-card:focus-visible{outline:2px solid var(--ai);outline-offset:2px;}
+.chapter-card.locked{opacity:.5;cursor:default;}
+.chapter-card.locked:hover{border-color:var(--line);}
+.chapter-card.final{border:1.5px solid var(--kin);}
+.ch-no{
+  font-family:'Shippori Mincho',serif;font-weight:800;color:var(--ai);
+  font-size:12px;letter-spacing:.08em;border-right:1px solid var(--line);
+  padding-right:13px;writing-mode:vertical-rl;min-height:54px;flex-shrink:0;
+}
+.chapter-card.final .ch-no{color:var(--kin);}
+.ch-body h3{font-family:'Shippori Mincho',serif;font-size:16.5px;font-weight:600;}
+.ch-body p{font-size:12.5px;color:#6f6a5d;line-height:1.6;}
+.ch-state{margin-left:auto;font-size:11px;letter-spacing:.08em;color:#9a947f;white-space:nowrap;text-align:right;flex-shrink:0;}
+.ch-state.done{color:var(--shu);font-weight:700;}
+.ch-state .xp-got{display:block;font-size:10px;color:var(--ai-light);}
+
+/* ===== chapter view ===== */
+.crumb{font-size:12px;color:var(--ai-light);padding:14px 0 2px;letter-spacing:.06em;}
+.crumb a{color:var(--ai-light);cursor:pointer;text-decoration:underline;text-underline-offset:3px;}
+h2.ch-title{font-family:'Shippori Mincho',serif;font-size:23px;font-weight:800;letter-spacing:.05em;padding:18px 0 0;}
+h2.ch-title .lead{display:block;font-size:11.5px;color:var(--ai-light);letter-spacing:.22em;font-weight:500;margin-bottom:2px;}
+.stage-tabs{display:flex;border-bottom:1px solid var(--ink);margin:10px 0 0;}
+.stage-tab{
+  flex:1;text-align:center;padding:10px 4px 8px;
+  font-family:'Shippori Mincho',serif;font-size:13.5px;letter-spacing:.12em;
+  color:#8b8571;border:none;background:none;cursor:pointer;
+  border-bottom:3px solid transparent;margin-bottom:-1px;
+}
+.stage-tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--shu);font-weight:600;}
+.stage-tab:focus-visible{outline:2px solid var(--ai);outline-offset:-2px;}
+.stage{padding:24px 0 0;}
+
+.lesson h4{
+  font-family:'Shippori Mincho',serif;font-size:16.5px;font-weight:600;
+  margin:28px 0 8px;padding-left:12px;border-left:4px solid var(--ai);
+}
+.lesson h4:first-child{margin-top:4px;}
+.lesson p{margin:0 0 13px;font-size:14.5px;}
+.lesson .kp{background:var(--ai-wash);border-left:4px solid var(--ai);padding:11px 15px;margin:14px 0;font-size:13.5px;}
+.lesson .kp strong{color:var(--ai);}
+.lesson .fun{background:#F0EAD8;border-left:4px solid var(--kin);padding:11px 15px;margin:14px 0;font-size:13.5px;}
+.lesson .fun strong{color:var(--kin);}
+.term{border-bottom:2px dotted var(--shu-soft);font-weight:700;}
+table.zaisei{width:100%;border-collapse:collapse;margin:13px 0;font-size:13px;}
+table.zaisei th,table.zaisei td{border:1px solid var(--line);padding:7px 10px;text-align:left;vertical-align:top;}
+table.zaisei th{background:var(--paper-deep);font-weight:700;white-space:nowrap;}
+table.zaisei td.num{text-align:right;font-family:'IBM Plex Mono',monospace;}
+
+.ex-box{border:1px solid var(--ink);background:var(--card);padding:20px;margin:14px 0;}
+.ex-box h5{font-family:'Shippori Mincho',serif;font-size:15px;margin-bottom:10px;letter-spacing:.05em;}
+.ex-q{font-size:14px;margin-bottom:12px;}
+.ex-input-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:10px 0;}
+input[type="number"]{
+  font-family:'IBM Plex Mono',monospace;font-size:16px;
+  padding:8px 10px;border:1px solid var(--ink);background:#fff;width:130px;color:var(--ink);
+}
+input[type="number"]:focus-visible{outline:2px solid var(--ai);}
+.unit{font-size:14px;color:#6f6a5d;}
+button.act{
+  font-family:'Zen Kaku Gothic New',sans-serif;font-size:14px;font-weight:700;letter-spacing:.08em;
+  background:var(--ai);color:#fff;border:none;padding:10px 26px;cursor:pointer;
+}
+button.act:hover{background:var(--ai-light);}
+button.act:focus-visible{outline:2px solid var(--shu);outline-offset:2px;}
+button.act.ghost{background:none;color:var(--ai);border:1px solid var(--ai);}
+button.act.gold{background:var(--kin);}
+.fb{margin-top:12px;padding:12px 14px;font-size:13.5px;display:none;}
+.fb.on{display:block;}
+.fb.good{background:var(--ok-wash);border-left:4px solid var(--ok);}
+.fb.bad{background:var(--bad-wash);border-left:4px solid var(--shu);}
+
+.q-block{border-bottom:1px solid var(--line);padding:18px 0;}
+.q-block .qt{font-size:14.5px;font-weight:700;margin-bottom:11px;}
+.q-block .qt .qno{color:var(--ai);font-family:'Shippori Mincho',serif;margin-right:8px;}
+.opts{display:flex;flex-direction:column;gap:8px;}
+.opt{
+  display:flex;gap:10px;align-items:flex-start;
+  border:1px solid var(--line);background:var(--card);
+  padding:10px 14px;cursor:pointer;font-size:13.5px;line-height:1.6;
+}
+.opt:hover{border-color:var(--ai);}
+.opt input{margin-top:5px;accent-color:var(--ai);}
+.opt.correct{border-color:var(--ok);background:var(--ok-wash);}
+.opt.wrong{border-color:var(--shu);background:var(--bad-wash);}
+.expl{display:none;margin-top:10px;font-size:12.5px;color:#4d4a40;background:var(--paper-deep);padding:10px 14px;}
+.expl.on{display:block;}
+.quiz-result{text-align:center;padding:28px 0 8px;display:none;}
+.quiz-result.on{display:block;}
+.quiz-result .score{font-family:'Shippori Mincho',serif;font-size:34px;font-weight:800;}
+.quiz-result .msg{font-size:14px;margin:8px 0 6px;}
+.quiz-result .xp-msg{font-size:13px;color:var(--ai);font-weight:700;margin-bottom:16px;}
+.quiz-result .btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;}
+.center{text-align:center;margin:24px 0 8px;}
+.next-hint{font-size:12.5px;color:#8b8571;margin-top:10px;}
+.notice{font-size:11.5px;color:#8b8571;margin-top:22px;border-top:1px solid var(--line);padding-top:12px;line-height:1.7;}
+
+/* ===== certificate ===== */
+.cert{
+  border:3px double var(--kin);background:var(--card);
+  padding:36px 26px;text-align:center;margin:20px 0;
+}
+.cert .c-eyebrow{font-size:11px;letter-spacing:.4em;color:var(--kin);}
+.cert .c-title{font-family:'Shippori Mincho',serif;font-size:30px;font-weight:800;letter-spacing:.15em;margin:8px 0 14px;}
+.cert p{font-size:13.5px;}
+.cert .c-seal{margin:18px auto 0;width:76px;height:76px;border-radius:50%;
+  border:3px solid var(--kin);color:var(--kin);display:flex;align-items:center;justify-content:center;
+  font-family:'Shippori Mincho',serif;font-weight:800;font-size:15px;transform:rotate(-8deg);
+  writing-mode:vertical-rl;line-height:1.1;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="top-row">
+      <h1 id="home-link" tabindex="0" role="button" aria-label="ホームへ戻る">財政<span>クエスト</span></h1>
+      <div class="tag">まちのお金がわかると、まちが見えてくる</div>
+    </div>
+    <div class="status">
+      <div class="rank-badge" id="rank-badge"><span class="rk-mark">位</span><span id="rank-name">一般市民</span></div>
+      <div class="xp-wrap">
+        <div class="xp-label"><span>経験値</span><span id="xp-text" class="mono">0 XP</span></div>
+        <div class="xp-bar"><div class="xp-fill" id="xp-fill" style="width:0%"></div></div>
+      </div>
+    </div>
+  </header>
+  <main id="app"></main>
+</div>
+<div id="toast" role="status"><div class="t-small">RANK UP</div><div class="t-big" id="toast-rank"></div></div>
+
+<script>
+/* ================= ranks & xp ================= */
+const RANKS = [
+  {name:"一般市民", xp:0,   note:"ここから出発"},
+  {name:"財政見習い", xp:90, note:""},
+  {name:"予算ウォッチャー", xp:220, note:""},
+  {name:"新米議員級", xp:380, note:""},
+  {name:"ベテラン議員級", xp:560, note:""},
+  {name:"財政マスター", xp:null, note:"最終試験合格で認定"}
+];
+const XP_LESSON=10, XP_EX=20, XP_Q=10, XP_PERFECT=10;
+const PASS_LINE=4;
+
+/* ================= chapters ================= */
+const CHAPTERS = [
+{
+  id:"c1", stampLabel:"歳入",
+  title:"まちの家計簿・収入編", lead:"第一章",
+  desc:"まちのお金はどこから来る? 4つの財布と「自立度」の測り方。",
+  lesson:`
+  <h4>まちにも家計簿がある</h4>
+  <p>あなたのまちは、毎年数百億円のお金を集めて使っています。その出どころは大きく4つ。家計にたとえると、こうなります。</p>
+  <table class="zaisei">
+    <tr><th>① 地方税</th><td><span class="term">自分の給料</span>。住民税・固定資産税など。使い道は自由。</td></tr>
+    <tr><th>② 地方交付税</th><td><span class="term">実家からの仕送り</span>(国から)。使い道は自由だが、額を決めるのは実家。</td></tr>
+    <tr><th>③ 国庫支出金など</th><td><span class="term">用途指定のお祝い金</span>。「学費に使ってね」と使い道が決められた補助金。</td></tr>
+    <tr><th>④ 地方債(市債など)</th><td><span class="term">ローン</span>。将来の自分(=将来世代)が返す借金。</td></tr>
+  </table>
+  <h4>「自立度」を測るものさし</h4>
+  <p>①に手数料などを足したものを<span class="term">自主財源</span>、②③④を<span class="term">依存財源</span>と呼びます。収入全体に占める自主財源の割合が<span class="term">自主財源比率</span>——まちの経済的な自立度です。</p>
+  <div class="kp"><strong>ここが本質:</strong>自主財源比率が低いまちは、国の方針ひとつで事業が左右されます。「自分のまちのことを自分で決められる度合い」は、実はこの数字で決まっています。</div>
+  <div class="fun"><strong>豆知識:</strong>全国にはごくわずかに、交付税(仕送り)ゼロでやっていける「不交付団体」があります。多くは大企業の工場や発電所を抱えるまち。全国1,700超の市町村のうち、ほんの数十だけです。</div>
+  `,
+  exercise:{
+    intro:"架空の「あおぞら市」の収入(サンプル)。自立度を計算してみましょう。",
+    table:[["地方税","96億円"],["手数料・使用料など","4億円"],["地方交付税","70億円"],["国庫支出金など","60億円"],["地方債","20億円"],["収入合計","250億円"]],
+    question:"自主財源比率は何%?(整数で。自主財源=地方税+手数料等)",
+    answer:40, tolerance:0, unit:"%",
+    good:"正解! (96+4)÷250=40%。全国の市の平均はおおむね50%前後。あおぞら市はやや仕送り頼みの体質です。",
+    bad:"自主財源=96+4=100億円。÷250億円で40%です。交付税や補助金は「依存財源」なので分子に入れません。"
+  },
+  quiz:[
+    {q:"使い道が指定されている「ひも付き」のお金は?",opts:["地方税","地方交付税","国庫支出金","手数料収入"],a:2,e:"国庫支出金は特定事業のための補助金。他の用途には使えません。交付税は使い道自由です。"},
+    {q:"地方交付税を家計にたとえると?",opts:["自分の給料","使い道自由な仕送り(額は送る側が決める)","住宅ローン","宝くじの当せん金"],a:1,e:"使途は自由ですが、いくら来るかは国の算定次第。ここが「依存」と言われる理由です。"},
+    {q:"自主財源比率が低いまちで起こりやすいのは?",opts:["借金が自動で消える","国の制度変更にまちの計画が振り回される","住民税が必ず上がる","選挙がなくなる"],a:1,e:"依存財源が主だと、国の予算方針の変化がそのまま、まちの事業の存続に直結します。"},
+    {q:"地方債(借金)の返済を実質的に負担するのは?",opts:["国だけ","借りた年の住民だけ","将来の住民(将来世代)","銀行"],a:2,e:"borrowは今、返済は未来。道路や施設の借金は、将来の税金から返されます。"},
+    {q:"「不交付団体」とは?",opts:["税金を集めないまち","交付税なしで標準的な行政を賄えるまち","借金が禁止されたまち","人口ゼロのまち"],a:1,e:"自前の税収が十分あるため仕送り(普通交付税)が来ないまち。全国でも少数派です。"}
+  ]
+},
+{
+  id:"c2", stampLabel:"歳出",
+  title:"まちの家計簿・支出編", lead:"第二章",
+  desc:"お金はどこへ消える? 削れない「固定費」の正体。",
+  lesson:`
+  <h4>支出は二つのメガネで見る</h4>
+  <p><span class="term">目的別</span>(福祉・道路・教育…何のために)と<span class="term">性質別</span>(人件費・給付・借金返済…どんな性質か)。ニュースで見るのは目的別ですが、まちの体質を診るのは性質別です。</p>
+  <h4>削れない三兄弟「義務的経費」</h4>
+  <table class="zaisei">
+    <tr><th>人件費</th><td>職員の給与など。家計でいう「生活の基本コスト」。</td></tr>
+    <tr><th>扶助費</th><td>生活保護・子育て・障害福祉などの給付。国の制度で決まり、まちの判断では減らせない。全国的に増加中。</td></tr>
+    <tr><th>公債費</th><td>過去の借金の返済。<span class="term">過去の決断の請求書</span>。</td></tr>
+  </table>
+  <p>この3つは法律や契約で支払いが決まっていて、簡単には削れません。支出の半分を超えてくると、まちの身動きが重くなります。</p>
+  <h4>ハコモノの本当の値段</h4>
+  <p>施設を建てる費用(建設事業費)は一回きりに見えます。でも完成した瞬間から、光熱費・修繕費・そして数十年後の建て替え費が<span class="term">毎年の固定費</span>に変わります。</p>
+  <div class="kp"><strong>ここが本質:</strong>「無料の施設」は存在しません。建設費の2〜3倍の維持・更新費が、30〜50年かけて後からやってきます。これを<span class="term">ライフサイクルコスト</span>と呼びます。</div>
+  <div class="fun"><strong>豆知識:</strong>日本の公共施設の多くは高度成長期〜バブル期の建設。全国いっせいに「建て替えの波」が来ているのが今です。あなたのまちの体育館や公民館の築年数、調べたことありますか?</div>
+  `,
+  exercise:{
+    intro:"「あおぞら市」の性質別支出(サンプル)。固定費の重さを測ります。",
+    table:[["人件費","45億円"],["扶助費","55億円"],["公債費","25億円"],["物件費(光熱費・委託料等)","35億円"],["建設事業費","40億円"],["その他","50億円"],["支出合計","250億円"]],
+    question:"義務的経費(人件費+扶助費+公債費)は支出全体の何%?(整数で)",
+    answer:50, tolerance:0, unit:"%",
+    good:"正解! (45+55+25)÷250=50%。ちょうど警戒ライン。扶助費はこの先も増えるので、どこで吸収するかが課題です。",
+    bad:"45+55+25=125億円。÷250億円=50%です。物件費と建設事業費は義務的経費には含めません。"
+  },
+  quiz:[
+    {q:"義務的経費の三兄弟は?",opts:["人件費・物件費・修繕費","人件費・扶助費・公債費","扶助費・建設費・広報費","公債費・積立金・旅費"],a:1,e:"人件費・扶助費・公債費。法令や契約で支払いが義務づけられた、削りにくい支出です。"},
+    {q:"扶助費が「まちの判断で減らせない」理由は?",opts:["金額が小さいから","国の制度に基づく給付だから","現金でしか払えないから","議会が禁止しているから"],a:1,e:"生活保護や児童手当などは国の制度で給付内容が決まっています。増加を前提に他を設計するしかありません。"},
+    {q:"公債費とは?",opts:["公務員の交際費","過去の借金の元本と利息の返済","公園の維持費","広報誌の印刷費"],a:1,e:"過去に借りたお金の返済。今年の公債費の重さは、過去の投資判断の結果です。"},
+    {q:"ライフサイクルコストの考え方として正しいのは?",opts:["建設費だけ見ればよい","建設費+数十年の維持費・更新費まで含めて総額で判断する","土地代は無視してよい","施設は永遠に使える前提で考える"],a:1,e:"維持・更新費は建設費の2〜3倍になることも。ハコモノの議論は「その後の30年」までがセットです。"},
+    {q:"「目的別」と「性質別」の説明として正しいのは?",opts:["同じものの言い換え","目的別=何のため、性質別=どんな性質。体質診断は性質別で行う","性質別は国しか使わない","目的別は非公開情報"],a:1,e:"福祉に使った(目的別)お金が、給付なのか人件費なのか(性質別)は別の情報。診断には性質別が効きます。"}
+  ]
+},
+{
+  id:"c3", stampLabel:"指標",
+  title:"三つの数字で健康診断", lead:"第三章",
+  desc:"財政力指数・経常収支比率・実質公債費比率。この3つでまちの体力がわかる。",
+  lesson:`
+  <h4>① 財政力指数 — 稼ぐ力</h4>
+  <p>標準的な行政サービスに必要な額に対して、自前の税収がどれだけあるかの比率(3年平均)。<span class="term">1.0以上</span>なら仕送り不要の優等生。多くの地方のまちは0.3〜0.6です。</p>
+  <h4>② 経常収支比率 — 身動きの軽さ</h4>
+  <p>毎年必ず出ていく固定費が、毎年入ってくる自由なお金の何%を食っているか。<span class="term">高いほど悪い</span>のがポイント。</p>
+  <div class="kp"><strong>読み方の目安:</strong>80%台=まずまず健全 / 90%超=硬直ぎみ / 95%超=新しいことに使えるお金がほぼない危険水域。家計でいえば「手取りのうち固定費が95%」の状態です。</div>
+  <h4>③ 実質公債費比率 — 借金返済の重さ</h4>
+  <p>年収(標準財政規模)に対する借金返済の割合(3年平均)。<span class="term">18%</span>を超えると新たな借金に国・県の許可が必要になります。</p>
+  <h4>おまけ:基金 — まちの貯金箱</h4>
+  <p>何にでも使える<span class="term">財政調整基金</span>と、使い道を決めた特定目的基金。災害や不況への備えです。</p>
+  <div class="fun"><strong>豆知識:</strong>この3指標+基金残高は、どのまちも「財政状況資料集」という公開資料で誰でも見られます。健康診断書は、実は全部ネットに公開されているのです。</div>
+  `,
+  exercise:{
+    intro:"「あおぞら市」の健康診断結果(サンプル)。",
+    table:[["財政力指数(3年平均)","0.52"],["経常収支比率","93.4%"],["実質公債費比率","9.8%"],["財政調整基金残高","18億円"],["標準財政規模(年収に相当)","150億円"]],
+    question:"財政調整基金(貯金)は年収の何%分?(整数で)",
+    answer:12, tolerance:0, unit:"%",
+    good:"正解! 18÷150=12%。貯金はまずまず。むしろ経常収支比率93.4%=固定費の重さが、このまちの本当の課題です。",
+    bad:"18億÷150億=12%です。指標は必ず「何に対する割合か」という分母とセットで覚えるのがコツ。"
+  },
+  quiz:[
+    {q:"財政力指数1.0以上のまちは?",opts:["普通交付税が来ない(不要)","借金ができない","税率を自由に決められる","議会が不要になる"],a:0,e:"標準的な仕事を自前の税収で賄える=仕送り不要の不交付団体になります。"},
+    {q:"経常収支比率95%の家計的な意味は?",opts:["貯金が収入の95%","手取りの95%が固定費で消え、自由になるのは5%","収入の95%が給料","ローンが収入の95%"],a:1,e:"自由なお金100のうち95が固定費に消える状態。新しい挑戦の余地がほぼありません。"},
+    {q:"実質公債費比率が18%を超えると?",opts:["市長が交代する","新たな借金に許可が必要になる","税金が半額になる","貯金が没収される"],a:1,e:"18%=起債許可団体のライン。借金の自由度が制限され始める黄信号です。"},
+    {q:"3つの指標のうち「高いほど良い」のは?",opts:["財政力指数","経常収支比率","実質公債費比率","どれも低いほど良い"],a:0,e:"財政力指数だけは高いほど良い。あとの2つは高いほど苦しい。向きの違いに注意!"},
+    {q:"指標を見るとき最も大切な視点は?",opts:["1年分の数字だけ見る","数年の変化の傾きと、その原因まで見る","小数点は無視する","隣のまちに勝てばよい"],a:1,e:"健康診断と同じで、去年からの変化と原因(固定費のどれが増えた?)まで見て初めて意味を持ちます。"}
+  ]
+},
+{
+  id:"c4", stampLabel:"借金",
+  title:"借金は悪者なのか", lead:"第四章",
+  desc:"地方債のしくみ。「良い借金」と「危ない借金」の見分け方。",
+  lesson:`
+  <h4>なぜまちは借金するのか</h4>
+  <p>学校や道路は50年使います。建設費を今年の住民だけが払うのは不公平——<span class="term">使う世代みんなで分担する</span>ために借金(地方債)を使う。これが原則です。借金=悪、ではありません。</p>
+  <h4>地方債のルール</h4>
+  <p>地方債は原則として<span class="term">建設事業などにしか使えません</span>(建設地方債の原則)。「今月の生活費が足りないからローンで」は禁止。ここが家計や国債と大きく違う点です。</p>
+  <h4>交付税措置という魔法(と、その注意点)</h4>
+  <p>借金の種類によっては、返済額の一部を国が後から交付税に上乗せしてくれる<span class="term">交付税措置</span>があります。「実質負担3割」のような有利な借金も存在します。</p>
+  <div class="kp"><strong>ここが本質:</strong>「有利だから」と借りすぎれば返済は確実に膨らみます。また交付税措置は交付税総額の中でのやりくりなので、満額の恩恵が保証されているわけではありません。「実質負担」という言葉には少しだけ疑いの目を。</div>
+  <h4>臨時財政対策債という例外</h4>
+  <p>国の交付税の財源が足りないとき、「仕送りの代わりに、まちが自分で借りておいて。返済は面倒みるから」という特殊な借金がありました(臨時財政対策債)。建設のためでない借金の代表例で、地方財政の構造問題の象徴とされてきました。</p>
+  <div class="fun"><strong>豆知識:</strong>まちの借金残高は「住民一人あたり◯万円」に換算すると実感が湧きます。全国の市町村平均はおおむね一人あたり数十万円規模。あなたのまちは?</div>
+  `,
+  exercise:{
+    intro:"「あおぞら市」の借金(サンプル)。一人あたりに換算してみましょう。",
+    table:[["地方債残高","270億円"],["人口","60,000人"]],
+    question:"住民一人あたりの借金残高は何万円?(整数で)",
+    answer:45, tolerance:0, unit:"万円",
+    good:"正解! 270億円÷6万人=45万円。4人家族なら180万円分。この感覚を持って残高の増減を見ると、ニュースの見え方が変わります。",
+    bad:"270億円÷60,000人=45万円です。億と万の換算に注意:270億円=2,700万万円…と混乱したら「270億÷6万=45万」と単位を揃えて。"
+  },
+  quiz:[
+    {q:"地方債で世代間の公平が保たれる理由は?",opts:["利息がつかないから","長く使う施設の費用を、使う世代みんなで分担できるから","国が全額返すから","住民が返さなくてよいから"],a:1,e:"50年使う施設なら50年かけて返す。将来の利用者にも応分の負担をしてもらう仕組みです。"},
+    {q:"地方債の原則として正しいのは?",opts:["何にでも使える","原則、建設事業などに限られる","給食費に使うのが主流","人件費の支払いが主目的"],a:1,e:"経常的な経費(生活費)を借金で賄うことは原則禁止。ここが健全性の生命線です。"},
+    {q:"「交付税措置あり」の借金への正しい態度は?",opts:["無限に借りてよい","有利だが借りすぎれば返済は膨らむし、満額保証でもないと心得る","措置がある借金は返済不要","市民に隠すべき情報"],a:1,e:"有利な制度は活用しつつ、「実質負担」の言葉を鵜呑みにしない。残高と返済額の実額を必ず見ます。"},
+    {q:"臨時財政対策債の性格は?",opts:["学校建設専用の借金","交付税の不足を穴埋めするために、まちが代わりに借りる特殊な借金","民間銀行が勝手に貸す借金","戦前からある最古の地方債"],a:1,e:"建設目的でない借金の代表例。地方財政の構造問題の象徴として長く議論されてきました。"},
+    {q:"借金残高を実感に変える良い方法は?",opts:["ドルに換算する","住民一人あたりの金額に換算する","無視する","職員数で割る"],a:1,e:"「一人あたり◯万円」は住民と共有できる最強の翻訳。財政の話を自分ごとにする第一歩です。"}
+  ]
+},
+{
+  id:"c5", stampLabel:"警報",
+  title:"破綻を防ぐ警報装置", lead:"第五章",
+  desc:"夕張ショックが生んだ4つの警報。イエローカードとレッドカード。",
+  lesson:`
+  <h4>2007年、夕張ショック</h4>
+  <p>北海道夕張市が事実上の財政破綻。一般会計の<span class="term">外側</span>(特別会計や第三セクター)に赤字が隠れ、見えたときには手遅れでした。市民サービスは大幅カット、負担は増加——この教訓から<span class="term">財政健全化法</span>が生まれ、まちの「全身」を診る警報装置が義務づけられました。</p>
+  <h4>4つの警報(健全化判断比率)</h4>
+  <table class="zaisei">
+    <tr><th>実質赤字比率</th><td>メインの財布(一般会計等)の赤字。</td></tr>
+    <tr><th>連結実質赤字比率</th><td>水道・病院など全部の財布を合算した赤字。</td></tr>
+    <tr><th>実質公債費比率</th><td>借金返済の重さ(第三章の指標がここにも登場)。</td></tr>
+    <tr><th>将来負担比率</th><td>借金残高+将来払う退職金+第三セクターの負債…<span class="term">将来世代に送ったツケの総量</span>。</td></tr>
+  </table>
+  <p>それぞれに<span class="term">早期健全化基準</span>(イエローカード:改善計画の策定義務)と<span class="term">財政再生基準</span>(レッドカード:国の管理下で再建)の2本の線が引かれています。</p>
+  <div class="kp"><strong>ここが本質:</strong>警報が鳴っていない=健康、ではありません。警報は「重症」を検知する装置。生活習慣病レベルの悪化(固定費のじわじわ増)は、第三章の指標で自分で見つけるしかありません。</div>
+  <div class="fun"><strong>豆知識:</strong>4つの警報の結果は毎年、監査を経て議会に報告され、公表されます。「うちのまち 健全化判断比率」で検索すると、誰でも今すぐ見られます。</div>
+  `,
+  exercise:{
+    intro:"「あおぞら市」の将来へのツケ(サンプル)。将来負担比率を計算します。",
+    table:[["将来負担額(借金残高・退職手当負担等)","330億円"],["充当可能財源(貯金・国の措置見込み等)","120億円"],["標準財政規模(年収に相当)","150億円"]],
+    question:"将来負担比率=(将来負担額−充当可能財源)÷標準財政規模。何%?(整数で)",
+    answer:140, tolerance:0, unit:"%",
+    good:"正解! (330−120)÷150=140%。市のイエローカードは350%なので余裕はありますが、「年収の1.4倍のツケが未来に乗っている」という感覚が大切です。",
+    bad:"(330−120)=210億円 ÷150億円=140%。将来負担額から貯金等を引き忘れないように。"
+  },
+  quiz:[
+    {q:"財政健全化法が生まれたきっかけは?",opts:["東京五輪","夕張市の財政破綻","消費税の導入","平成の大合併"],a:1,e:"会計の外に隠れた赤字が破綻まで見えなかった夕張の教訓が、全身を診る仕組みを生みました。"},
+    {q:"将来負担比率が測るのは?",opts:["今年の赤字","将来世代に送ったツケ(借金+退職手当負担等)の総量","職員の残業時間","貯金の利回り"],a:1,e:"借金だけでなく、退職手当の将来負担や第三セクターの債務まで含めた「未来への請求書」の合計です。"},
+    {q:"イエローカード(早期健全化基準)を超えると?",opts:["まちが消滅する","財政健全化計画の策定が義務になる","市長が逮捕される","税金がゼロになる"],a:1,e:"自主的な再建計画が義務化される段階。レッド(財政再生基準)まで行くと国の関与下での再建になります。"},
+    {q:"「警報が鳴っていない=健康」と言えない理由は?",opts:["警報は飾りだから","警報は重症検知用で、固定費のじわじわ増のような生活習慣病は検知しないから","数字が全部ウソだから","警報は10年に1回しか鳴らないから"],a:1,e:"4指標は破綻防止の最終ライン。日常の健康管理は経常収支比率などで自分で行う必要があります。"},
+    {q:"健全化判断比率を知りたいとき、正しい行動は?",opts:["役所に忍び込む","「(まちの名前) 健全化判断比率」で検索する(公表されている)","議員にしか見せてもらえない","国に情報公開請求が必須"],a:1,e:"毎年、監査を経て議会報告・公表が義務。誰でも今すぐ見られる公開情報です。"}
+  ]
+},
+{
+  id:"c6", stampLabel:"隠れ",
+  title:"見えない財布を探せ", lead:"第六章",
+  desc:"特別会計・公営企業・第三セクター。「本体」の外にあるお金の流れ。",
+  lesson:`
+  <h4>まちの財布は一つじゃない</h4>
+  <p>ニュースで見る「予算◯◯億円」は<span class="term">一般会計</span>、いわばメインの財布。その外に、目的別の<span class="term">特別会計</span>(国民健康保険、介護保険など)と、料金収入で回す<span class="term">公営企業会計</span>(水道・下水道・病院など)があります。夕張の赤字が隠れていたのは、この「外側」でした。</p>
+  <h4>水道は静かなる主役</h4>
+  <p>公営企業は<span class="term">独立採算</span>(料金で賄う)が原則。ところが人口減少で料金収入は減り、老朽化した水道管の更新費は増える。足りない分はメインの財布から<span class="term">繰出金</span>として補填されます。</p>
+  <div class="kp"><strong>ここが本質:</strong>繰出金が年々増えているまちは、見えないところで一般会計が痩せていきます。「水道料金の値上げ」のニュースは、実はまちの財政全体の話なのです。</div>
+  <h4>第三セクターという遺産</h4>
+  <p>まちと民間が共同出資した会社(観光施設、開発公社など)。経営が傾くと、損失補償や貸付を通じてまちの負担に跳ね返ります。将来負担比率(第五章)にはこの負債も含まれています。</p>
+  <div class="fun"><strong>豆知識:</strong>日本の水道管の総延長は地球18周分以上。その多くが高度成長期に埋設され、法定耐用年数40年を超え始めています。あなたが今日ひねった蛇口の水は、何歳の管を通ってきたでしょう?</div>
+  `,
+  exercise:{
+    intro:"「あおぞら市」の下水道会計(サンプル)。独立採算の達成度を見ます。",
+    table:[["下水道の年間費用","20億円"],["料金収入","13億円"],["一般会計からの繰出金","7億円"]],
+    question:"費用のうち料金収入で賄えている割合は何%?(整数で)",
+    answer:65, tolerance:0, unit:"%",
+    good:"正解! 13÷20=65%。残り35%はメインの財布からの補填。この繰出金が5年前より増えていたら、それは警戒サインです。",
+    bad:"13億÷20億=65%です。独立採算の原則からは35%の不足。繰出金の推移こそ見るべきポイントです。"
+  },
+  quiz:[
+    {q:"公営企業会計の原則は?",opts:["税金で全額運営","料金収入で賄う独立採算","国が直接運営","ボランティア運営"],a:1,e:"水道・下水道・病院などは、サービスの対価(料金)で経営するのが原則です。"},
+    {q:"「繰出金」とは?",opts:["貯金の利息","一般会計から特別会計・公営企業への補填","国からの罰金","職員のボーナス"],a:1,e:"メインの財布からの仕送り。増加傾向なら、外側の会計の苦しさが本体に及び始めた印です。"},
+    {q:"人口減少が水道経営を直撃する理由は?",opts:["水が濁るから","料金収入が減る一方、管の維持・更新費は減らないから","職員が増えるから","雨が減るから"],a:1,e:"利用者が減っても管の長さは変わらない。収入減×費用増のはさみ撃ちが全国の水道の課題です。"},
+    {q:"第三セクターの経営悪化がまちに及ぶ経路は?",opts:["影響は一切ない","損失補償や貸付を通じて、まちの負担になり得る","国が必ず肩代わりする","住民が個人で返済する"],a:1,e:"まちが出資・保証している以上、傾けばツケは回ってきます。将来負担比率に含まれるのはそのためです。"},
+    {q:"夕張の教訓が教える「見るべき場所」は?",opts:["一般会計だけ見れば十分","一般会計の外(特別会計・公営企業・三セク)まで連結で見る","広報誌だけ読む","隣のまちの会計を見る"],a:1,e:"赤字は外側に隠れる。連結で全身を診る——健全化法の思想そのものです。"}
+  ]
+},
+{
+  id:"c7", stampLabel:"予算",
+  title:"予算はこうして生まれる", lead:"第七章",
+  desc:"秋に始まる編成、3月の審議、そして決算という答え合わせ。一年のドラマ。",
+  lesson:`
+  <h4>予算の一年カレンダー</h4>
+  <table class="zaisei">
+    <tr><th>秋(10〜11月)</th><td>役所内で<span class="term">予算編成方針</span>が出て、各部署が要求を提出。実はここが勝負どころ。</td></tr>
+    <tr><th>冬(12〜2月)</th><td>財政課の査定 → 首長の査定。要求は削られ、形が決まる。</td></tr>
+    <tr><th>3月議会</th><td><span class="term">議会が審議・議決</span>。予算は議決がないと1円も使えない。</td></tr>
+    <tr><th>年度中</th><td>足りない・状況が変わった分は<span class="term">補正予算</span>で追加修正。</td></tr>
+    <tr><th>翌年9月議会</th><td><span class="term">決算</span>=答え合わせ。使い切れたか、効果はあったか。</td></tr>
+  </table>
+  <h4>決算は「終わった話」ではない</h4>
+  <p>決算で見るべきは①<span class="term">執行率</span>(予算をどれだけ使えたか)、②使い残しの理由、③「◯人が利用する見込み」と言っていた事業の<span class="term">実績</span>。この答え合わせが次の予算の質を決めます。</p>
+  <div class="kp"><strong>ここが本質:</strong>予算は議決の瞬間ではなく、前年の秋に大枠が決まります。住民の声を政策に届けたいなら、届ける時期は「秋」。3月に騒いでも列車はもう出発しています。</div>
+  <div class="fun"><strong>豆知識:</strong>予算書は数百ページの大作ですが、最初の数ページの「総括表」と「◯◯年度予算の概要」(多くのまちが作る解説版)だけで全体像の8割はつかめます。完読は職員でもしません。</div>
+  `,
+  exercise:{
+    intro:"「あおぞら市」のある事業の決算(サンプル)。答え合わせをしてみましょう。",
+    table:[["移住支援事業 予算額","5,000万円"],["実際に使った額","2,750万円"],["当初の見込み","支援100件"],["実績","支援41件"]],
+    question:"この事業の執行率は何%?(整数で)",
+    answer:55, tolerance:0, unit:"%",
+    good:"正解! 2,750÷5,000=55%。件数も見込みの4割。「なぜ使われなかった? 次年度はどう直す?」——この問いが決算を未来につなげます。",
+    bad:"2,750万÷5,000万=55%です。執行率の低さ自体より「原因と、次への反映」を問うのが決算の使い方です。"
+  },
+  quiz:[
+    {q:"新年度予算の大枠が実質的に決まり始めるのは?",opts:["3月議会の当日","前年の秋(予算編成方針〜要求)","新年度が始まってから","選挙の直後だけ"],a:1,e:"秋の編成段階で大勢は決まります。声を届けるベストシーズンも秋です。"},
+    {q:"予算が使えるようになる条件は?",opts:["市長が決めれば使える","議会の議決","国の許可","住民投票"],a:1,e:"予算の議決は議会の最も強い権限。議決なしには1円も執行できません。"},
+    {q:"補正予算とは?",opts:["予算の誤字修正","年度途中の追加・変更の予算","10年に1度の特別予算","国の予算のこと"],a:1,e:"災害対応や国の交付金への対応など、年度途中の変化に対応する仕組みです。"},
+    {q:"決算審査の核心は?",opts:["書類の厚さを測る","計画と結果のズレの原因を特定し、次の予算に反映させる","過去を責めて終わる","黒字なら何も見ない"],a:1,e:"決算は過去の総括であると同時に、次の予算の設計図。答え合わせ→改善のループが財政を良くします。"},
+    {q:"予算書を効率よくつかむコツは?",opts:["全ページ暗記する","総括表と概要版でまず全体像をつかむ","最後のページから読む","読まずに想像する"],a:1,e:"総括表+概要版で8割。細部は関心のある事業だけ深掘りすれば十分です。"}
+  ]
+},
+{
+  id:"c8", stampLabel:"実践",
+  title:"自分のまちを調べてみる", lead:"第八章",
+  desc:"学びを現実へ。公開データの探し方と、数字を「自分の言葉」にする技術。",
+  lesson:`
+  <h4>三種の神器(すべて無料・公開)</h4>
+  <table class="zaisei">
+    <tr><th>決算カード</th><td>まちの主要数値が<span class="term">1枚に凝縮</span>。「(まちの名前) 決算カード」で検索。まずはこれ。</td></tr>
+    <tr><th>財政状況資料集</th><td>指標の経年変化+<span class="term">よく似たまち(類似団体)との比較</span>+まち自身の分析コメント付き。宝の山。</td></tr>
+    <tr><th>財政ダッシュボード</th><td>総務省・デジタル庁が公開する比較サイト。グラフで直感的に見られる。</td></tr>
+  </table>
+  <h4>最初にやる3つのチェック</h4>
+  <p>① 経常収支比率は5年前と比べて上がった? 下がった?<br>
+  ② 借金残高を人口で割ると一人あたり何万円?<br>
+  ③ 貯金(財政調整基金)は年収(標準財政規模)の何%分ある?</p>
+  <p>この3問に答えられたら、あなたはもう「まちの財政を語れる住民」です。</p>
+  <h4>数字を「自分の言葉」に翻訳する</h4>
+  <div class="kp"><strong>ここが本質:</strong>「経常収支比率93%」より「手取り100万円のうち自由になるのは7万円」の方が伝わる。翻訳できる人が一人増えるごとに、まちの財政は少しずつ、みんなのものになります。</div>
+  <div class="fun"><strong>最後の豆知識:</strong>財政は「役所の専門家のもの」と思われがちですが、原資は全部、私たちの税金です。見る人が増えるほど、お金の使われ方は良くなる——これは全国どこのまちでも同じです。</div>
+  `,
+  exercise:{
+    intro:"総仕上げ。「あおぞら市」の5年間の変化(サンプル)を読み取ります。",
+    table:[["経常収支比率(5年前)","90.2%"],["経常収支比率(今年)","93.4%"],["主因:扶助費充当一般財源の増加","+3.5億円"],["経常一般財源の総額","160億円"]],
+    question:"経常収支比率は5年間で何ポイント上昇した?(小数第1位まで。例: 2.5)",
+    answer:3.2, tolerance:0.05, unit:"ポイント",
+    good:"正解! 93.4−90.2=3.2ポイント上昇。主因は扶助費。「固定費がじわじわ効いてきている」——ここまで言えれば、数字読みは卒業です。",
+    bad:"93.4−90.2=3.2ポイントです。比率の変化は「ポイント」で表します(「%上昇」とは意味が違うので注意)。"
+  },
+  quiz:[
+    {q:"まちの主要財政データが1枚にまとまった公開資料は?",opts:["決算カード","住民票","都市計画図","給与明細"],a:0,e:"決算カードは全市町村分が毎年公開。財政ウォッチングの入口に最適です。"},
+    {q:"「類似団体比較」が役に立つ理由は?",opts:["大都市と比べられるから","人口や産業構造が似たまち同士で比べるから、違いが課題として浮かび上がる","比較は意味がない","国と比べられるから"],a:1,e:"規模の違うまちとの比較は不公平。似た条件のまちと比べて初めて「うちだけ高い/低い」が意味を持ちます。"},
+    {q:"比率の変化を表す正しい単位は?",opts:["90%から93%は「3%上昇」","90%から93%は「3ポイント上昇」","単位は不要","「3倍」と言う"],a:1,e:"%同士の差は「ポイント」。「3%上昇」だと90→92.7の意味になってしまいます。細かいけれど信頼に関わる作法です。"},
+    {q:"財政の数字を人に伝えるとき最も効果的なのは?",opts:["専門用語を増やす","家計や一人あたり額など、身近な言葉に翻訳する","数字を隠す","英語で言う"],a:1,e:"「一人あたり45万円」「手取りの93%が固定費」。翻訳こそが、財政を自分ごとにする技術です。"},
+    {q:"この講座全体を貫くメッセージは?",opts:["財政は専門家だけのもの","公開データを読める住民が増えるほど、まちのお金の使われ方は良くなる","借金は常に悪","貯金だけしていればよい"],a:1,e:"原資は私たちの税金。見る人・語れる人が増えることが、財政民主主義のいちばんの土台です。"}
+  ]
+}
+];
+
+/* ================= master exam ================= */
+const MASTER_EXAM = {
+  passLine: 8,
+  questions: [
+    {q:"収入250億円のうち地方税90億円・手数料等10億円のまちの自主財源比率は?",opts:["36%","40%","50%","64%"],a:1,e:"(90+10)÷250=40%。"},
+    {q:"「使い道は自由だが、額は国が決める」収入は?",opts:["地方税","地方交付税","国庫支出金","地方債"],a:1,e:"交付税は一般財源(使途自由)だが額の決定権は国。依存財源の代表です。"},
+    {q:"経常収支比率が5年で88%→94%に。最初に確認すべきは?",opts:["庁舎の色","人件費・扶助費・公債費のどれが増えたかの分解","隣のまちの人口","職員の平均身長"],a:1,e:"固定費三兄弟のどれが効いたかを分解するのが診断の第一歩です。"},
+    {q:"建設費10億円の施設。ライフサイクルコストの考え方で見込むべき総額の目安は?",opts:["10億円で完結","維持・更新を含め20〜30億円規模","1億円","国が全額負担"],a:1,e:"維持・更新費は建設費の2〜3倍に達することも。30〜50年の総額で判断します。"},
+    {q:"実質公債費比率が19%になったまちに起こることは?",opts:["何も起こらない","市債発行に許可が必要になる","即座に財政再生団体","交付税が停止"],a:1,e:"18%以上で起債許可団体。借金の自由度が制限され始めます。"},
+    {q:"将来負担額400億・充当可能財源130億・標準財政規模180億のまちの将来負担比率は?",opts:["100%","150%","222%","310%"],a:1,e:"(400−130)÷180=150%。市の早期健全化基準350%とは距離があるが、傾向の監視が大切。"},
+    {q:"一般会計からの繰出金が毎年増え続けている。最も疑うべき場所は?",opts:["広報費","水道・下水道・病院など公営企業や特別会計の収支悪化","議会の茶菓子代","街路樹の本数"],a:1,e:"繰出金の増加は外側の会計の悲鳴。人口減少下の公営企業は全国共通の課題です。"},
+    {q:"住民の声を新年度予算に反映させたい。動くべき時期は?",opts:["3月議会の当日","前年の秋(編成が始まる前後)","新年度開始後","いつでも同じ"],a:1,e:"大枠は秋に決まります。3月は最終確認の場に近い。"},
+    {q:"決算で執行率55%・利用実績が見込みの4割の事業。建設的な問いは?",opts:["「担当者を処分せよ」","「需要予測の方法と、次年度予算への反映を示してほしい」","「予算を倍にせよ」","「なかったことにしよう」"],a:1,e:"原因の特定と次への反映を求めるのが、決算を未来につなげる問い方です。"},
+    {q:"財政力指数0.45・経常収支比率96%・一人あたり地方債残高52万円のまち。総合診断として最も適切なのは?",opts:["完全に健全","自立度が低く固定費も重い。新規の政策余地が小さく、固定費の構造分析が急務","明日破綻する","数字からは何もわからない"],a:1,e:"破綻ラインではないが、身動きの重い体質。原因分解と中期的な設計が必要な状態と読めます。"}
+  ]
+};
+
+/* ================= state & storage ================= */
+let progress = {};   // {c1:{stamped,best,xpGot:{lesson,ex,quiz}}, master:{passed,best}}
+let xp = 0;
+let persistMode = "none";
+
+const store = {
+  async get(k){
+    try{ const v = localStorage.getItem(k); if(v!==null){persistMode="local";return v;} }catch(e){}
+    try{ const r = await window.storage.get(k); if(r&&r.value!=null){persistMode="claude";return r.value;} }catch(e){}
+    return null;
+  },
+  async set(k,v){
+    try{ localStorage.setItem(k,v); persistMode="local"; return; }catch(e){}
+    try{ await window.storage.set(k,v); persistMode="claude"; return; }catch(e){}
+    persistMode="none";
+  }
+};
+
+async function loadState(){
+  const v = await store.get("zaisei-quest");
+  if(v){ try{ const o=JSON.parse(v); progress=o.progress||{}; xp=o.xp||0; }catch(e){} }
+}
+async function saveState(){
+  await store.set("zaisei-quest", JSON.stringify({progress,xp}));
+}
+
+/* ================= rank logic ================= */
+function currentRank(){
+  if(progress.master && progress.master.passed) return 5;
+  let r=0;
+  for(let i=0;i<RANKS.length-1;i++){ if(RANKS[i].xp!==null && xp>=RANKS[i].xp) r=i; }
+  return r;
+}
+function nextThreshold(){
+  const r=currentRank();
+  if(r>=4) return null;
+  return RANKS[r+1].xp;
+}
+let lastRank = 0;
+
+function updateStatus(animate){
+  const r = currentRank();
+  const badge=document.getElementById("rank-badge");
+  document.getElementById("rank-name").textContent = RANKS[r].name;
+  badge.classList.toggle("master", r===5);
+  badge.querySelector(".rk-mark").textContent = r===5?"極":"位";
+  const nt = nextThreshold();
+  const base = RANKS[r].xp ?? 560;
+  let pct;
+  if(r===5) pct=100;
+  else if(nt===null) pct = progress.master&&progress.master.passed?100:96;
+  else pct = Math.min(100, Math.round((xp-base)/(nt-base)*100));
+  document.getElementById("xp-fill").style.width = pct+"%";
+  document.getElementById("xp-text").textContent = xp+" XP" + (nt?` ／ 次の位まで ${Math.max(0,nt-xp)}`:"");
+  if(animate && r>lastRank){
+    const t=document.getElementById("toast");
+    document.getElementById("toast-rank").textContent = RANKS[r].name+" に昇格";
+    t.classList.add("on");
+    setTimeout(()=>t.classList.remove("on"), 2600);
+  }
+  lastRank=r;
+}
+async function addXp(n){
+  xp+=n;
+  await saveState();
+  updateStatus(true);
+}
+
+/* ================= rendering ================= */
+const app=document.getElementById("app");
+function esc(s){return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+const KANJI=["一","二","三","四","五","六","七","八"];
+
+function renderHome(){
+  const r=currentRank();
+  const rungs = RANKS.map((rk,i)=>{
+    const cls = ["rung"];
+    if(i<=r) cls.push("reached");
+    if(i===r) cls.push("current");
+    if(i===5) cls.push("master-r");
+    return `<div class="${cls.join(" ")}"><span class="r-name">${rk.name}</span>${rk.xp!==null?rk.xp+"XP〜":"最終試験"}</div>`;
+  }).join("");
+
+  const slots = CHAPTERS.map((c,i)=>{
+    const done = progress[c.id]&&progress[c.id].stamped;
+    return `<div class="stamp-slot"><span class="num">其の${KANJI[i]}</span>${done?`<div class="seal">${c.stampLabel}<br>済</div>`:""}</div>`;
+  }).join("");
+
+  const masterDone = progress.master&&progress.master.passed;
+  const allStamped = CHAPTERS.every(c=>progress[c.id]&&progress[c.id].stamped);
+
+  const cards = CHAPTERS.map((c,i)=>{
+    const st=progress[c.id];
+    const done=st&&st.stamped;
+    return `<li class="chapter-card" tabindex="0" role="button" data-ch="${i}">
+      <div class="ch-no">第${KANJI[i]}章</div>
+      <div class="ch-body"><h3>${c.title}</h3><p>${c.desc}</p></div>
+      <div class="ch-state ${done?"done":""}">${done?`合格（${st.best}/5）`:(st&&st.best!=null?`挑戦中（最高${st.best}/5）`:"未読")}</div>
+    </li>`;
+  }).join("");
+
+  app.innerHTML = `
+    <p class="intro">全八章+最終試験。読む(<strong>+${XP_LESSON}XP</strong>)、数字を解く(<strong>+${XP_EX}XP</strong>)、試験に挑む(正解ごとに<strong>+${XP_Q}XP</strong>、全問正解ボーナスあり)。経験値で位が上がり、最終試験に合格すると<strong>財政マスター</strong>認定です。</p>
+    <div class="rank-ladder">${rungs}</div>
+    <p class="ladder-note">位は経験値で自動昇格。財政マスターのみ、最終試験(${MASTER_EXAM.passLine}/10で合格)が必要です。</p>
+    <div class="stampbook" aria-label="合格印の記録">${slots}</div>
+    <ul class="chapter-list">
+      ${cards}
+      <li class="chapter-card final ${allStamped?"":"locked"}" tabindex="${allStamped?0:-1}" role="button" data-master="1" aria-disabled="${!allStamped}">
+        <div class="ch-no">最終</div>
+        <div class="ch-body"><h3>財政マスター試験</h3><p>${allStamped?"全章の知識を総動員する10問。8問正解で「財政マスター」認定。":"全八章の合格印を集めると挑戦できます。"}</p></div>
+        <div class="ch-state ${masterDone?"done":""}">${masterDone?"マスター認定済":(allStamped?"挑戦可能":"未開放")}</div>
+      </li>
+    </ul>
+    <p class="notice">本講座の数値例はすべて学習用の架空サンプルです。実在のまちの財政は「決算カード」「財政状況資料集」(いずれも無料公開)で確認できます。${persistMode==="none"?"<br>※この環境では進捗保存が利用できないため、記録はこの画面を開いている間のみ有効です。":""}</p>
+  `;
+  app.querySelectorAll(".chapter-card[data-ch]").forEach(el=>{
+    const go=()=>renderChapter(+el.dataset.ch,"lesson");
+    el.addEventListener("click",go);
+    el.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();go();}});
+  });
+  const mc=app.querySelector("[data-master]");
+  if(allStamped){
+    const go=()=>renderMaster();
+    mc.addEventListener("click",go);
+    mc.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();go();}});
+  }
+  window.scrollTo(0,0);
+}
+
+function renderChapter(idx,stage){
+  const c=CHAPTERS[idx];
+  app.innerHTML=`
+    <div class="crumb"><a id="back">← 目次へ戻る</a></div>
+    <h2 class="ch-title"><span class="lead">第${KANJI[idx]}章</span>${c.title}</h2>
+    <div class="stage-tabs" role="tablist">
+      <button class="stage-tab" role="tab" data-s="lesson" aria-selected="${stage==="lesson"}">座学</button>
+      <button class="stage-tab" role="tab" data-s="exercise" aria-selected="${stage==="exercise"}">数字読み</button>
+      <button class="stage-tab" role="tab" data-s="quiz" aria-selected="${stage==="quiz"}">章末試験</button>
+    </div>
+    <div class="stage" id="stage"></div>`;
+  document.getElementById("back").addEventListener("click",renderHome);
+  app.querySelectorAll(".stage-tab").forEach(b=>b.addEventListener("click",()=>renderChapter(idx,b.dataset.s)));
+  const el=document.getElementById("stage");
+  if(stage==="lesson") renderLesson(el,idx);
+  else if(stage==="exercise") renderExercise(el,idx);
+  else renderQuiz(el,idx);
+  window.scrollTo(0,0);
+}
+
+function ensureXpFlags(cid){
+  if(!progress[cid]) progress[cid]={stamped:false,best:null,got:{}};
+  if(!progress[cid].got) progress[cid].got={};
+  return progress[cid];
+}
+
+function renderLesson(el,idx){
+  const c=CHAPTERS[idx];
+  const st=ensureXpFlags(c.id);
+  el.innerHTML=`<div class="lesson">${c.lesson}</div>
+    <div class="center"><button class="act" id="to-ex">${st.got.lesson?"数字読みへ進む":"読了して数字読みへ (+"+XP_LESSON+"XP)"}</button></div>`;
+  el.querySelector("#to-ex").addEventListener("click",async()=>{
+    if(!st.got.lesson){ st.got.lesson=true; await addXp(XP_LESSON); }
+    renderChapter(idx,"exercise");
+  });
+}
+
+function renderExercise(el,idx){
+  const c=CHAPTERS[idx];
+  const st=ensureXpFlags(c.id);
+  const rows=c.exercise.table.map(r=>`<tr><th>${r[0]}</th><td class="num">${r[1]}</td></tr>`).join("");
+  el.innerHTML=`
+    <div class="ex-box">
+      <h5>数字読み演習 ${st.got.ex?"（クリア済）":"（正解で +"+XP_EX+"XP）"}</h5>
+      <p class="ex-q">${c.exercise.intro}</p>
+      <table class="zaisei">${rows}</table>
+      <p class="ex-q">${c.exercise.question}</p>
+      <div class="ex-input-row">
+        <input type="number" id="ex-ans" inputmode="decimal" step="any" aria-label="解答を入力">
+        <span class="unit">${c.exercise.unit}</span>
+        <button class="act" id="ex-check">答え合わせ</button>
+      </div>
+      <div class="fb" id="ex-fb"></div>
+    </div>
+    <div class="center"><button class="act ghost" id="to-quiz">章末試験へ進む</button></div>`;
+  const fb=el.querySelector("#ex-fb");
+  el.querySelector("#ex-check").addEventListener("click",async()=>{
+    const v=parseFloat(el.querySelector("#ex-ans").value);
+    if(isNaN(v)){fb.className="fb bad on";fb.textContent="数値を入力してください。";return;}
+    if(Math.abs(v-c.exercise.answer)<=c.exercise.tolerance){
+      fb.className="fb good on";
+      fb.textContent=c.exercise.good + (st.got.ex?"":" [+"+XP_EX+"XP]");
+      if(!st.got.ex){ st.got.ex=true; await addXp(XP_EX); }
+    }else{
+      fb.className="fb bad on";fb.textContent=c.exercise.bad;
+    }
+  });
+  el.querySelector("#ex-ans").addEventListener("keydown",e=>{if(e.key==="Enter")el.querySelector("#ex-check").click();});
+  el.querySelector("#to-quiz").addEventListener("click",()=>renderChapter(idx,"quiz"));
+}
+
+function buildQuizHtml(questions){
+  return questions.map((q,qi)=>{
+    const opts=q.opts.map((o,oi)=>`
+      <label class="opt" data-q="${qi}" data-o="${oi}">
+        <input type="radio" name="q${qi}" value="${oi}"><span>${esc(o)}</span>
+      </label>`).join("");
+    return `<div class="q-block"><div class="qt"><span class="qno">問${qi+1}</span>${esc(q.q)}</div>
+      <div class="opts">${opts}</div><div class="expl" id="expl-${qi}">${esc(q.e)}</div></div>`;
+  }).join("");
+}
+
+function gradeQuiz(el,questions){
+  let unanswered=false;
+  questions.forEach((q,qi)=>{ if(!el.querySelector(`input[name="q${qi}"]:checked`)) unanswered=true; });
+  if(unanswered){ alert("未回答の問題があります。すべて選んでから採点してください。"); return null; }
+  let score=0;
+  questions.forEach((q,qi)=>{
+    const chosen=+el.querySelector(`input[name="q${qi}"]:checked`).value;
+    el.querySelectorAll(`.opt[data-q="${qi}"]`).forEach(op=>{
+      const oi=+op.dataset.o;
+      if(oi===q.a) op.classList.add("correct");
+      else if(oi===chosen) op.classList.add("wrong");
+      op.querySelector("input").disabled=true;
+    });
+    el.querySelector(`#expl-${qi}`).classList.add("on");
+    if(chosen===q.a) score++;
+  });
+  return score;
+}
+
+function renderQuiz(el,idx){
+  const c=CHAPTERS[idx];
+  const st=ensureXpFlags(c.id);
+  el.innerHTML=`
+    <p class="ex-q">全${c.quiz.length}問。${PASS_LINE}問正解で合格印。正解ごとに+${XP_Q}XP(過去の最高得点を超えた分だけ加算)、全問正解で+${XP_PERFECT}XPボーナス。</p>
+    ${buildQuizHtml(c.quiz)}
+    <div class="center"><button class="act" id="grade">採点する</button></div>
+    <div class="quiz-result" id="result">
+      <div class="score" id="score"></div>
+      <div class="msg" id="rmsg"></div>
+      <div class="xp-msg" id="xpmsg"></div>
+      <div class="btns">
+        <button class="act ghost" id="retry">もう一度</button>
+        <button class="act" id="home2">目次へ</button>
+      </div>
+      <p class="next-hint" id="hint"></p>
+    </div>`;
+  el.querySelector("#grade").addEventListener("click",async()=>{
+    const score=gradeQuiz(el,c.quiz);
+    if(score===null)return;
+    el.querySelector("#grade").style.display="none";
+    const res=el.querySelector("#result");res.classList.add("on");
+    el.querySelector("#score").textContent=`${score} / ${c.quiz.length}`;
+    const passed=score>=PASS_LINE;
+    const prevBest=st.best??0;
+    let gained=0;
+    if(score>prevBest){ gained=(score-prevBest)*XP_Q; }
+    if(score===c.quiz.length && !st.got.perfect){ gained+=XP_PERFECT; st.got.perfect=true; }
+    st.best=Math.max(prevBest,score);
+    st.stamped=st.stamped||passed;
+    if(gained>0) await addXp(gained); else await saveState();
+    el.querySelector("#rmsg").textContent = passed?"合格。合格印が押されました。":"合格まであと一歩。解説を読んで再挑戦を。";
+    el.querySelector("#xpmsg").textContent = gained>0?`+${gained} XP 獲得`: "";
+    const allStamped=CHAPTERS.every(ch=>progress[ch.id]&&progress[ch.id].stamped);
+    el.querySelector("#hint").textContent = passed
+      ? (idx<CHAPTERS.length-1?`次は第${KANJI[idx+1]}章「${CHAPTERS[idx+1].title}」へ。`:(allStamped?"全章制覇! 最終試験「財政マスター試験」が開放されました。":""))
+      : "";
+    res.scrollIntoView({behavior:"smooth",block:"center"});
+  });
+  el.querySelector("#retry").addEventListener("click",()=>renderChapter(idx,"quiz"));
+  el.querySelector("#home2").addEventListener("click",renderHome);
+}
+
+function renderMaster(){
+  const done=progress.master&&progress.master.passed;
+  app.innerHTML=`
+    <div class="crumb"><a id="back">← 目次へ戻る</a></div>
+    <h2 class="ch-title"><span class="lead">最終試験</span>財政マスター試験</h2>
+    <div class="stage">
+      ${done?renderCertHtml():""}
+      <p class="ex-q" style="margin-top:14px;">全10問・${MASTER_EXAM.passLine}問正解で「財政マスター」認定。${done?"(すでに認定済みですが、何度でも腕試しできます)":"全八章の総合力が試されます。"}</p>
+      ${buildQuizHtml(MASTER_EXAM.questions)}
+      <div class="center"><button class="act gold" id="grade">採点する</button></div>
+      <div class="quiz-result" id="result">
+        <div class="score" id="score"></div>
+        <div class="msg" id="rmsg"></div>
+        <div class="xp-msg" id="xpmsg"></div>
+        <div class="btns">
+          <button class="act ghost" id="retry">もう一度</button>
+          <button class="act" id="home2">目次へ</button>
+        </div>
+      </div>
+      <div id="cert-slot"></div>
+    </div>`;
+  document.getElementById("back").addEventListener("click",renderHome);
+  const el=app;
+  el.querySelector("#grade").addEventListener("click",async()=>{
+    const score=gradeQuiz(el,MASTER_EXAM.questions);
+    if(score===null)return;
+    el.querySelector("#grade").style.display="none";
+    const res=el.querySelector("#result");res.classList.add("on");
+    el.querySelector("#score").textContent=`${score} / 10`;
+    const passed=score>=MASTER_EXAM.passLine;
+    const prev=progress.master||{passed:false,best:0};
+    let gained=0;
+    if(score>(prev.best||0)) gained=(score-(prev.best||0))*XP_Q;
+    const firstPass=passed&&!prev.passed;
+    if(firstPass) gained+=50;
+    progress.master={passed:prev.passed||passed,best:Math.max(prev.best||0,score)};
+    if(gained>0) await addXp(gained); else await saveState();
+    updateStatus(true);
+    el.querySelector("#rmsg").textContent=passed?"合格。あなたは財政マスターです。":"あと一歩。各章を読み直して再挑戦を。";
+    el.querySelector("#xpmsg").textContent=gained>0?`+${gained} XP 獲得${firstPass?"(認定ボーナス込み)":""}`:"";
+    if(firstPass){ document.getElementById("cert-slot").innerHTML=renderCertHtml(); }
+    res.scrollIntoView({behavior:"smooth",block:"center"});
+  });
+  el.querySelector("#retry").addEventListener("click",renderMaster);
+  el.querySelector("#home2").addEventListener("click",renderHome);
+  window.scrollTo(0,0);
+}
+
+function renderCertHtml(){
+  return `<div class="cert">
+    <div class="c-eyebrow">CERTIFICATE</div>
+    <div class="c-title">財政マスター認定</div>
+    <p>全八章の学びと最終試験を修めたことをここに認めます。<br>
+    次の一歩は、あなたのまちの「決算カード」を開くこと。<br>
+    数字を読める住民が一人増えるたび、まちのお金は少しずつ、みんなのものになります。</p>
+    <div class="c-seal">財政<br>マスター</div>
+  </div>`;
+}
+
+/* ================= boot ================= */
+const homeLink=document.getElementById("home-link");
+homeLink.addEventListener("click",renderHome);
+homeLink.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();renderHome();}});
+
+(async()=>{
+  await loadState();
+  lastRank=currentRank();
+  updateStatus(false);
+  renderHome();
+})();
+</script>
+</body>
+</html>
