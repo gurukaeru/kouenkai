@@ -266,6 +266,7 @@
       <a href="#houtoku" class="navlink hover:text-tetsu transition-colors">報徳思想</a>
       <a href="#apps" class="navlink hover:text-tetsu transition-colors">学びのアプリ</a>
       <a href="#message" class="navlink hover:text-tetsu transition-colors">政治姿勢</a>
+      <a href="#meyasubako" class="navlink hover:text-tetsu transition-colors">目安箱</a>
       <a href="#join" class="navlink hover:text-tetsu transition-colors">入会のご案内</a>
     </nav>
 
@@ -531,7 +532,70 @@
 </section>
 
 <!-- ============================================================
-     6. 後援会入会フォーム
+     6. 目安箱 — 匿名で声を投函できるフォーム（Googleフォーム連携）
+     ============================================================ -->
+<section id="meyasubako" class="relative py-24 px-5 sm:px-8 rule-t">
+  <div class="max-w-2xl mx-auto">
+    <div class="mb-12 text-center">
+      <p class="reveal text-[11px] tracking-[0.4em] text-gray1 mb-4">あなたの声を、聴かせてください</p>
+      <h2 class="reveal font-mincho font-semibold text-2xl sm:text-3xl tracking-widest">目安箱</h2>
+      <div class="reveal w-10 h-px bg-ink/30 mx-auto my-6"></div>
+      <p class="reveal text-gray1 text-sm leading-loose" data-delay="1">
+        暮らしの困りごと、市政への疑問、まちへの想い。<br class="hidden sm:block">
+        お名前を書かずに、そのまま投函いただけます。すべての声に目を通します。
+      </p>
+    </div>
+
+    <form id="meyasu-form" class="reveal bg-white border border-ink/10 p-6 sm:p-10 space-y-5" novalidate>
+
+      <!-- スパム対策ハニーポット（人間には見えない。入力があれば送信しない） -->
+      <input type="text" name="website" id="meyasu-hp" tabindex="-1" autocomplete="off" aria-hidden="true"
+        style="position:absolute; left:-9999px; width:1px; height:1px; opacity:0;">
+
+      <div class="field">
+        <textarea id="meyasu-voice" name="voice" rows="6" placeholder=" "
+          class="w-full border border-ink/15 px-4 py-3.5 text-ink placeholder-transparent focus:outline-none focus:border-tetsu transition-colors resize-none bg-white"></textarea>
+        <label for="meyasu-voice">声・ご意見 <span class="text-shu">*</span></label>
+        <p class="error-msg hidden text-xs text-shu mt-1.5">お声の内容をご入力ください。</p>
+      </div>
+
+      <!-- 地区プルダウン（floating label非対応のため先頭optionをラベル代わりに） -->
+      <div class="field">
+        <select id="meyasu-area" name="area"
+          class="w-full border border-ink/15 px-4 py-3.5 text-ink focus:outline-none focus:border-tetsu transition-colors bg-white">
+          <option value="">お住まいの地区（任意）</option>
+          <option value="小高区">小高区</option>
+          <option value="原町区">原町区</option>
+          <option value="鹿島区">鹿島区</option>
+          <option value="市外">市外</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <input type="text" id="meyasu-name" name="name" placeholder=" " autocomplete="name"
+          class="w-full border border-ink/15 px-4 py-3.5 text-ink placeholder-transparent focus:outline-none focus:border-tetsu transition-colors bg-white">
+        <label for="meyasu-name">お名前（任意）</label>
+      </div>
+
+      <div class="field">
+        <input type="text" id="meyasu-contact" name="contact" placeholder=" "
+          class="w-full border border-ink/15 px-4 py-3.5 text-ink placeholder-transparent focus:outline-none focus:border-tetsu transition-colors bg-white">
+        <label for="meyasu-contact">ご連絡先（任意・返信をご希望の場合）</label>
+      </div>
+
+      <button type="submit" class="magnetic w-full bg-tetsu text-paper font-mincho tracking-[0.3em] py-3.5 hover:bg-tetsu2 transition-colors">
+        投函する
+      </button>
+
+      <p id="meyasu-success" class="hidden text-sm text-tetsu text-center pt-2 tracking-wider">
+        たしかに、投函されました。ありがとうございます。
+      </p>
+    </form>
+  </div>
+</section>
+
+<!-- ============================================================
+     7. 後援会入会フォーム
      ============================================================ -->
 <section id="join" class="relative py-24 px-5 sm:px-8 bg-paper2/70">
   <div class="max-w-2xl mx-auto">
@@ -630,7 +694,7 @@
 </main>
 
 <!-- ============================================================
-     7. フッター
+     8. フッター
      ============================================================ -->
 <footer class="rule-t py-12 px-5 sm:px-8">
   <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6 text-sm text-gray1">
@@ -822,6 +886,65 @@
         })
         .catch(() => {
           alert('送信に失敗しました。お手数ですが、時間をおいて再度お試しください。');
+        })
+        .finally(() => {
+          btn.disabled = false;
+          btn.textContent = btnOrig;
+        });
+    });
+  }
+
+  // --- 7. 目安箱フォーム（Googleフォーム連携） ---
+  // フォームの質問を変更した場合は entry 番号の取り直しが必要（CLAUDE.md参照）
+  const MEYASU_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSf68vWTkoG2bOt0BgQUggiF4U-CfGU5Z3JiuIMrhDOyXQPo_g/formResponse';
+  const MEYASU_ENTRY = {
+    'meyasu-voice': 'entry.585938599',      // 声・ご意見
+    'meyasu-area': 'entry.1443640426',      // お住まいの地区（プルダウン）
+    'meyasu-name': 'entry.1128542867',      // お名前
+    'meyasu-contact': 'entry.212098713',    // ご連絡先
+  };
+
+  const meyasuForm = document.getElementById('meyasu-form');
+  if (meyasuForm) {
+    meyasuForm.addEventListener('submit', function (e) {
+      e.preventDefault();
+
+      // 必須は「声・ご意見」のみ
+      const voice = document.getElementById('meyasu-voice');
+      const voiceErr = voice.closest('.field').querySelector('.error-msg');
+      if (!voice.value.trim()) {
+        voiceErr.classList.remove('hidden');
+        voice.classList.add('border-shu');
+        return;
+      }
+      voiceErr.classList.add('hidden');
+      voice.classList.remove('border-shu');
+
+      // ハニーポットに入力があればスパムとみなし送信しない（見た目は成功にする）
+      if (document.getElementById('meyasu-hp').value) {
+        document.getElementById('meyasu-success').classList.remove('hidden');
+        meyasuForm.reset();
+        return;
+      }
+
+      const btn = meyasuForm.querySelector('button[type="submit"]');
+      const btnOrig = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = '投函中…';
+
+      const fd = new FormData();
+      Object.keys(MEYASU_ENTRY).forEach((id) => {
+        const el = document.getElementById(id);
+        if (el && el.value.trim()) fd.append(MEYASU_ENTRY[id], el.value.trim());
+      });
+
+      fetch(MEYASU_URL, { method: 'POST', mode: 'no-cors', body: fd })
+        .then(() => {
+          document.getElementById('meyasu-success').classList.remove('hidden');
+          meyasuForm.reset();
+        })
+        .catch(() => {
+          alert('投函に失敗しました。お手数ですが、時間をおいて再度お試しください。');
         })
         .finally(() => {
           btn.disabled = false;
