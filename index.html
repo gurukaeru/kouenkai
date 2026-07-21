@@ -583,6 +583,8 @@
         <label for="meyasu-contact">ご連絡先（任意・返信をご希望の場合）</label>
       </div>
 
+      <p class="text-xs text-gray1 leading-relaxed">投函いただいた内容は、<a href="privacy.html" target="_blank" rel="noopener" class="text-tetsu underline underline-offset-2 hover:text-tetsu2">プライバシーポリシー</a>に基づいて取り扱います。</p>
+
       <button type="submit" class="magnetic w-full bg-tetsu text-paper font-mincho tracking-[0.3em] py-3.5 hover:bg-tetsu2 transition-colors">
         投函する
       </button>
@@ -665,8 +667,7 @@
 
       <label class="flex items-start gap-3 text-sm text-gray1 cursor-pointer pt-1">
         <input type="checkbox" id="privacy" required class="mt-1 w-4 h-4 accent-tetsu">
-        <!-- ▼プライバシーポリシーのリンク先を差し替えてください -->
-        <span><a href="#" class="text-tetsu underline underline-offset-2 hover:text-tetsu2">プライバシーポリシー</a>に同意します。</span>
+        <span><a href="privacy.html" target="_blank" rel="noopener" class="text-tetsu underline underline-offset-2 hover:text-tetsu2">プライバシーポリシー</a>に同意します。</span>
       </label>
       <p id="privacy-error" class="error-msg hidden text-xs text-shu">プライバシーポリシーへの同意が必要です。</p>
 
@@ -711,7 +712,10 @@
       <a href="#" aria-label="note" class="hover:text-tetsu transition-colors"><i class="fa-solid fa-pen-nib"></i></a>
       <a href="#" aria-label="LINE" class="hover:text-tetsu transition-colors"><i class="fa-solid fa-comment-dots"></i></a>
     </div>
-    <p class="text-xs tracking-wider text-gray1/70">© 2026 栗原尚希後援会</p>
+    <div class="flex items-center gap-5 text-xs tracking-wider text-gray1/70">
+      <a href="privacy.html" class="hover:text-tetsu transition-colors">プライバシーポリシー</a>
+      <p>© 2026 栗原尚希後援会</p>
+    </div>
   </div>
 </footer>
 

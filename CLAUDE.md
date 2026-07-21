@@ -113,7 +113,7 @@ Claude Code でこのプロジェクトを編集する際は、必ず本ファ�
 - [x] 本人写真の差し替え（背景透過WebP `assets/img/candidate-main.webp` を**左右反転でヒーロー右上に大きく配置**。裾は `.hero-photo` のmaskで紙色にフェード。原本は `assets/img/original/20260619_11.jpg` に保管。差し替え時はVision切り抜き→高さ1000px WebP化の手順を踏襲）
 - [ ] SNS各リンクの実URL設定（現在すべて `href="#"`）: X / Instagram / note / LINE
 - [ ] LINE公式アカウントの友だち追加URL設定（ヘッダー・ヒーロー・フォーム下・フッターの4箇所）
-- [ ] プライバシーポリシーページの作成とリンク設定（フォーム同意チェックのリンク先が現在 `href="#"`）
+- [x] プライバシーポリシーページの作成とリンク設定（2026-07-21・`privacy.html`。入会フォーム同意チェック・目安箱・フッターの3箇所からリンク。noindex設定。Cookie解析は「未導入」と記載しているため、**GA4等を導入したら本文の改定が必要**）
 - [x] フォーム送信処理の実装（2026-07-21完了・**Googleフォーム連携**）
   - 送信先フォーム編集画面：https://docs.google.com/forms/d/1katsq0ZUmAzeDv4kLmiqNpgv1tkwPiHdFJgvXmukTxQ/edit（回答はスプレッドシート記録・メール通知設定済み）
   - サイト側UIから `formResponse` へ fetch(no-cors) でPOST。entry番号は index.html の `GFORM_ENTRY` に記載
