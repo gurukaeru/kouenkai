@@ -111,7 +111,9 @@ Claude Code でこのプロジェクトを編集する際は、必ず本ファ�
 ## 未対応・今後のタスク（TODO）
 
 - [x] 本人写真の差し替え（背景透過WebP `assets/img/candidate-main.webp` を**左右反転でヒーロー右上に大きく配置**。裾は `.hero-photo` のmaskで紙色にフェード。原本は `assets/img/original/20260619_11.jpg` に保管。差し替え時はVision切り抜き→高さ1000px WebP化の手順を踏襲）
-- [ ] SNS各リンクの実URL設定（現在すべて `href="#"`）: X / Instagram / note / LINE
+- [x] SNS各リンクの実URL設定（2026-07-21・**栗人事業と共通アカウント `kuryudo_hotoku`**。X=twitter.com/kuryudo_hotoku / Instagram=instagram.com/kuryudo_hotoku / note=note.com/kuryudo_hotoku。ヘッダー・フッター両方に設定）
+- [ ] LINE公式アカウントのURLのみ未設定（ヘッダー登録ボタン・ヒーロー・フォーム下・フッターの計4箇所が `href="#"` のまま）
+- [x] ヘッダー／フッターロゴを画像化（2026-07-21・`assets/img/logo-mark.png`＝栗×循環（∞）×新芽のシンボルマーク。白背景を透過処理済み。原本は `~/Downloads/生成画像1 (4).png`。privacy.htmlも同ロゴに統一）
 - [ ] LINE公式アカウントの友だち追加URL設定（ヘッダー・ヒーロー・フォーム下・フッターの4箇所）
 - [x] プライバシーポリシーページの作成とリンク設定（2026-07-21・`privacy.html`。入会フォーム同意チェック・目安箱・フッターの3箇所からリンク。noindex設定。Cookie解析は「未導入」と記載しているため、**GA4等を導入したら本文の改定が必要**）
 - [x] フォーム送信処理の実装（2026-07-21完了・**Googleフォーム連携**）
