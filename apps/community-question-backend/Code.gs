@@ -112,8 +112,7 @@ function doGet(event) {
         choices: choices,
         correct_index: Number(row[9]),
         explanation: String(row[10]),
-        source_title: String(row[11]),
-        source_url: String(row[12])
+        contributor: String(row[13])
       });
     }
 
@@ -161,8 +160,8 @@ function doPost(event) {
         questionData.choices[2] || '',
         questionData.correctIndex,
         questionData.explanation,
-        questionData.sourceTitle,
-        questionData.sourceUrl,
+        '',
+        '',
         questionData.contributor,
         questionData.contact,
         '',
@@ -265,8 +264,6 @@ function validateSubmission_(input) {
   var type = cleanText_(input.type, 10);
   var question = cleanText_(input.question, 180);
   var explanation = cleanText_(input.explanation, 600);
-  var sourceTitle = cleanText_(input.source_title, 100);
-  var sourceUrl = cleanText_(input.source_url, 500);
   var contributor = cleanText_(input.contributor, 40);
   var contact = cleanText_(input.contact, 150);
   var correctIndex = Number(input.correct_index);
@@ -292,14 +289,6 @@ function validateSubmission_(input) {
 
   if (explanation.length < 10) {
     throw new Error('解説は10文字以上で入力してください。');
-  }
-
-  if (!sourceTitle) {
-    throw new Error('出典名を入力してください。');
-  }
-
-  if (!/^https:\/\//i.test(sourceUrl)) {
-    throw new Error('出典URLは https:// で始めてください。');
   }
 
   if (contact && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact)) {
@@ -343,8 +332,6 @@ function validateSubmission_(input) {
     ],
     correctIndex: correctIndex,
     explanation: safeCellText_(explanation),
-    sourceTitle: safeCellText_(sourceTitle),
-    sourceUrl: sourceUrl,
     contributor: safeCellText_(contributor),
     contact: safeCellText_(contact)
   };
