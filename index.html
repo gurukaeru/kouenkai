@@ -264,10 +264,10 @@
     </a>
 
     <nav class="hidden md:flex items-center gap-9 text-[13px] tracking-wider text-gray1">
+      <a href="#message" class="navlink hover:text-tetsu transition-colors">ご挨拶</a>
       <a href="#houtoku" class="navlink hover:text-tetsu transition-colors">報徳思想</a>
-      <a href="#apps" class="navlink hover:text-tetsu transition-colors">学びのアプリ</a>
-      <a href="#message" class="navlink hover:text-tetsu transition-colors">私の想い</a>
       <a href="#policy" class="navlink hover:text-tetsu transition-colors">政策</a>
+      <a href="#apps" class="navlink hover:text-tetsu transition-colors">学びのアプリ</a>
       <a href="#meyasubako" class="navlink hover:text-tetsu transition-colors">目安箱</a>
       <a href="#join" class="navlink hover:text-tetsu transition-colors">入会のご案内</a>
     </nav>
@@ -279,6 +279,9 @@
         <a href="https://www.instagram.com/kuryudo_hotoku/" target="_blank" rel="noopener" aria-label="Instagram" class="hover:text-tetsu transition-colors"><i class="fa-brands fa-instagram"></i></a>
         <a href="https://note.com/kuryudo_hotoku" target="_blank" rel="noopener" aria-label="note" class="hover:text-tetsu transition-colors"><i class="fa-solid fa-pen-nib"></i></a>
       </div>
+      <a href="#apps" class="magnetic hidden sm:inline-flex items-center text-xs sm:text-[13px] font-medium border border-shu text-shu px-5 py-2 rounded-sm tracking-wider hover:bg-shu hover:text-paper transition-colors whitespace-nowrap">
+        楽しく学ぶ
+      </a>
       <a href="#meyasubako" class="magnetic text-xs sm:text-[13px] font-medium bg-shu text-paper px-5 py-2 rounded-sm tracking-wider hover:bg-shu2 transition-colors whitespace-nowrap">
         声を届ける
       </a>
@@ -298,7 +301,7 @@
       <!-- 縦書きキャッチコピー：一文字ずつ墨が滲むように出現 ※差し替え可能 -->
       <div class="col-span-4 lg:col-span-5 flex gap-5 sm:gap-10">
         <h1 class="tategaki split font-mincho font-semibold text-3xl sm:text-4xl lg:text-[2.6rem] leading-loose h-[420px] sm:h-[500px]">徳がめぐれば、</h1>
-        <p class="tategaki split font-mincho font-semibold text-3xl sm:text-4xl lg:text-[2.6rem] leading-loose h-[420px] sm:h-[500px] mt-8" data-split-delay="700">まちが活きづく。</p>
+        <p class="tategaki split font-mincho font-semibold text-3xl sm:text-4xl lg:text-[2.6rem] leading-loose h-[420px] sm:h-[500px] mt-8" data-split-delay="700" data-hl-from="3" data-hl-to="6">まちが活きづく。</p>
       </div>
 
       <!-- ▼本人写真：全デバイスで「右上に大きく」の同構図（背景透過・左右反転・裾は紙色にフェード。原本は assets/img/original/ に保管） -->
@@ -318,19 +321,53 @@
             <p class="font-mincho font-bold text-3xl tracking-[0.2em]">栗原 尚希</p>
             <p class="text-gray1 text-xs tracking-[0.25em] mt-2">くりはら なおき ／ 南相馬市在住</p>
           </div>
-          <!-- スローガン（名刺のメインコピー・報徳四綱領の実践） -->
+          <!-- 座右の銘（名刺のキャッチ） -->
           <p class="font-mincho font-semibold text-base sm:text-lg text-tetsu tracking-wider leading-relaxed">
-            耳を傾け、現場で働き、<br class="hidden sm:block">足るを知り、未来へ譲る。
+            質実剛健。<br>至誠を尽くして、市政と向き合う。
           </p>
         </div>
-
-        <!-- CTA：後援会入会（マグネティックホバー） -->
-        <div class="reveal mt-8" data-delay="2">
-          <a href="#join" class="magnetic w-full inline-flex items-center justify-center gap-2 bg-shu text-paper font-mincho tracking-[0.2em] text-base px-8 py-4 hover:bg-shu2 transition-colors">
-            後援会に入会する
-          </a>
-        </div>
       </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     5. メッセージ（政治姿勢）— 書簡のような一段組
+     ============================================================ -->
+<section id="message" class="relative py-24 px-5 sm:px-8">
+  <div class="max-w-3xl mx-auto">
+    <h2 class="reveal font-mincho font-semibold text-2xl sm:text-3xl tracking-widest text-center leading-relaxed mb-4">
+      ご挨拶
+    </h2>
+    <div class="reveal w-10 h-px bg-ink/30 mx-auto mb-12"></div>
+
+    <!-- ▼ご挨拶本文 ※差し替え・追記可能 -->
+    <div class="space-y-7 text-[15px] leading-[2.1] text-ink/85">
+      <p class="reveal">
+        父が創業した会社で、私は地域の道路工事に携わってきました。
+      </p>
+      <p class="reveal" data-delay="1">
+        一本の道が整うことで、暮らしが便利になる。人と人が行き交い、物が動き、新しい交流が生まれる。その先で、地域全体が少しずつ豊かになっていく。私はこの仕事に誇りを持ち、精を尽くしてきました。
+      </p>
+      <p class="reveal" data-delay="1">
+        そして地域活動に関わる中で、このまちを良くしたいという想いを持って行動している人が、本当にたくさんいることを知りました。素晴らしい人がいる。素晴らしい活動がある。けれど、それぞれをつなぐ「道」が、まだ足りないのではないか。そう考えるようになりました。
+      </p>
+      <p class="reveal" data-delay="2">
+        人と人がつながる。仕事と暮らしがつながる。学校と社会がつながる。そして、今を生きる私たちの営みが、次の世代へつながっていく。
+      </p>
+      <p class="reveal" data-delay="2">
+        道路をつくることで地域を支えてきたように、これからは人と人、想いと想いをつなぎ、地域の力がめぐる道をつくってまいります。
+      </p>
+    </div>
+
+    <!-- 署名 -->
+    <p class="reveal mt-12 text-right font-mincho tracking-[0.3em] text-lg" data-delay="2">栗原 尚希</p>
+
+    <!-- CTA：後援会入会（ご挨拶の下・マグネティックホバー） -->
+    <div class="reveal mt-12" data-delay="2">
+      <a href="#join" class="magnetic w-full inline-flex items-center justify-center gap-2 bg-shu text-paper font-mincho tracking-[0.2em] text-base px-8 py-4 hover:bg-shu2 transition-colors">
+        後援会に入会する
+      </a>
     </div>
   </div>
 </section>
@@ -424,9 +461,87 @@
 
     <!-- 結び：四徳と循環 -->
     <p class="reveal mt-12 text-center font-mincho tracking-[0.3em] text-sm text-tetsu" data-delay="1">四つの徳は、一つの循環である。</p>
+    <p class="reveal mt-4 text-center font-mincho text-sm text-shu tracking-wider" data-delay="1">耳を傾け、現場で働き、足るを知り、未来へ譲る。</p>
     <!-- 循環図（控えめに中央配置） -->
     <div class="reveal mt-8 flex justify-center" data-delay="2">
       <img src="assets/img/houtoku-cycle.webp" alt="報徳の四つの実践がめぐる循環の図" width="900" height="932" class="w-full max-w-[260px] sm:max-w-[320px] h-auto opacity-90">
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     6. 政策（リーフレット準拠・教育／仕事／暮らし／協働の循環）
+     ============================================================ -->
+<section id="policy" class="relative py-24 px-5 sm:px-8 bg-paper2/70">
+  <div class="max-w-5xl mx-auto">
+    <p class="reveal text-[11px] tracking-[0.4em] text-gray1 mb-4 text-center">徳がめぐれば、まちが活きづく</p>
+    <h2 class="reveal font-mincho font-semibold text-2xl sm:text-3xl tracking-widest text-center leading-relaxed mb-4">
+      豊かさが循環する、南相馬へ。
+    </h2>
+    <div class="reveal w-10 h-px bg-ink/30 mx-auto mb-8"></div>
+    <p class="reveal text-gray1 text-sm sm:text-[15px] leading-loose text-center max-w-2xl mx-auto mb-16" data-delay="1">
+      報徳の精神を礎に、人が育ち、仕事が生まれ、暮らしが豊かになり、人がつながる。その豊かさが、また次の世代へとつながっていくまちへ。
+    </p>
+
+    <div class="grid md:grid-cols-2 gap-5">
+
+      <!-- 教育 -->
+      <div class="reveal quiet-card p-8 sm:p-9">
+        <div class="flex items-baseline gap-3 mb-4">
+          <h3 class="font-mincho font-semibold text-2xl tracking-[0.2em]">教育</h3>
+          <p class="font-mincho text-shu text-base tracking-wider">可能性をひらく。</p>
+        </div>
+        <p class="text-sm text-gray1 leading-loose mb-5">学校だけでなく、地域全体を学びの場に。自然や歴史、さまざまな出会いが、学びを広げます。一人ひとりが可能性を見つけ、社会で生きる力を育てます。</p>
+        <ul class="space-y-2.5 text-sm text-ink/85">
+          <li class="flex gap-2.5"><span class="text-shu shrink-0">—</span>地域をフィールドにした学びの充実</li>
+          <li class="flex gap-2.5"><span class="text-shu shrink-0">—</span>一人ひとりに寄り添う学びの場づくり</li>
+          <li class="flex gap-2.5"><span class="text-shu shrink-0">—</span>挑戦を応援する大人や環境を増やす</li>
+        </ul>
+      </div>
+
+      <!-- 仕事 -->
+      <div class="reveal quiet-card p-8 sm:p-9" data-delay="1">
+        <div class="flex items-baseline gap-3 mb-4">
+          <h3 class="font-mincho font-semibold text-2xl tracking-[0.2em]">仕事</h3>
+          <p class="font-mincho text-shu text-base tracking-wider">価値を生み出す。</p>
+        </div>
+        <p class="text-sm text-gray1 leading-loose mb-5">今ある仕事を強くし、新しい挑戦が生まれる地域へ。人の力を活かし、知恵や技術を掛け合わせ、地域から新しい価値を生み出します。</p>
+        <ul class="space-y-2.5 text-sm text-ink/85">
+          <li class="flex gap-2.5"><span class="text-shu shrink-0">—</span>地域企業の力を高める支援</li>
+          <li class="flex gap-2.5"><span class="text-shu shrink-0">—</span>新しい挑戦や創業を後押し</li>
+          <li class="flex gap-2.5"><span class="text-shu shrink-0">—</span>次の世代につなぐ事業承継</li>
+        </ul>
+      </div>
+
+      <!-- 暮らし -->
+      <div class="reveal quiet-card p-8 sm:p-9" data-delay="1">
+        <div class="flex items-baseline gap-3 mb-4">
+          <h3 class="font-mincho font-semibold text-2xl tracking-[0.2em]">暮らし</h3>
+          <p class="font-mincho text-shu text-base tracking-wider">豊かさを実感する。</p>
+        </div>
+        <p class="text-sm text-gray1 leading-loose mb-5">安心して快適に暮らせることはもちろん、「ここで暮らしたい」と思える日常を育て、一人ひとりが豊かさを実感できるまちをつくります。</p>
+        <ul class="space-y-2.5 text-sm text-ink/85">
+          <li class="flex gap-2.5"><span class="text-shu shrink-0">—</span>安心して子育てできる環境づくり</li>
+          <li class="flex gap-2.5"><span class="text-shu shrink-0">—</span>移動しやすく、暮らしやすいまちづくり</li>
+          <li class="flex gap-2.5"><span class="text-shu shrink-0">—</span>住まい・医療・福祉の充実と持続可能性の確保</li>
+          <li class="flex gap-2.5"><span class="text-shu shrink-0">—</span>自然や文化、スポーツを楽しめる環境を育てる</li>
+        </ul>
+      </div>
+
+      <!-- 協働 -->
+      <div class="reveal quiet-card p-8 sm:p-9" data-delay="2">
+        <div class="flex items-baseline gap-3 mb-4">
+          <h3 class="font-mincho font-semibold text-2xl tracking-[0.2em]">協働</h3>
+          <p class="font-mincho text-shu text-base tracking-wider">力を持ち寄る。</p>
+        </div>
+        <p class="text-sm text-gray1 leading-loose mb-5">市民・企業・地域・学校・行政。それぞれができることを持ち寄り、支え合いながら、地域の力を次の世代につなぎます。</p>
+        <ul class="space-y-2.5 text-sm text-ink/85">
+          <li class="flex gap-2.5"><span class="text-shu shrink-0">—</span>多様な主体がつながる仕組みづくり</li>
+          <li class="flex gap-2.5"><span class="text-shu shrink-0">—</span>小さな挑戦や活動を応援</li>
+          <li class="flex gap-2.5"><span class="text-shu shrink-0">—</span>世代や立場をこえたつながりを育てる</li>
+        </ul>
+      </div>
+
     </div>
   </div>
 </section>
@@ -515,119 +630,6 @@
     </div>
   </div>
 </section>
-
-<!-- ============================================================
-     5. メッセージ（政治姿勢）— 書簡のような一段組
-     ============================================================ -->
-<section id="message" class="relative py-24 px-5 sm:px-8">
-  <div class="max-w-3xl mx-auto">
-    <h2 class="reveal font-mincho font-semibold text-2xl sm:text-3xl tracking-widest text-center leading-relaxed mb-4">
-      まちを、めぐらせる。
-    </h2>
-    <div class="reveal w-10 h-px bg-ink/30 mx-auto mb-12"></div>
-
-    <!-- ▼ご挨拶本文 ※差し替え・追記可能 -->
-    <div class="space-y-7 text-[15px] leading-[2.1] text-ink/85">
-      <p class="reveal">
-        父が創業した会社で、私は地域の道路工事に携わってきました。
-      </p>
-      <p class="reveal" data-delay="1">
-        一本の道が整うことで、暮らしが便利になる。人と人が行き交い、物が動き、新しい交流が生まれる。その先で、地域全体が少しずつ豊かになっていく。私はこの仕事に誇りを持ち、精を尽くしてきました。
-      </p>
-      <p class="reveal" data-delay="1">
-        そして地域活動に関わる中で、このまちを良くしたいという想いを持って行動している人が、本当にたくさんいることを知りました。素晴らしい人がいる。素晴らしい活動がある。けれど、それぞれをつなぐ「道」が、まだ足りないのではないか。そう考えるようになりました。
-      </p>
-      <p class="reveal" data-delay="2">
-        人と人がつながる。仕事と暮らしがつながる。学校と社会がつながる。そして、今を生きる私たちの営みが、次の世代へつながっていく。
-      </p>
-      <p class="reveal" data-delay="2">
-        道路をつくることで地域を支えてきたように、これからは人と人、想いと想いをつなぎ、地域の力がめぐる道をつくってまいります。
-      </p>
-    </div>
-
-    <!-- 署名 -->
-    <p class="reveal mt-12 text-right font-mincho tracking-[0.3em] text-lg" data-delay="2">栗原 尚希</p>
-
-  </div>
-</section>
-
-<!-- ============================================================
-     6. 政策（リーフレット準拠・教育／仕事／暮らし／協働の循環）
-     ============================================================ -->
-<section id="policy" class="relative py-24 px-5 sm:px-8 bg-paper2/70">
-  <div class="max-w-5xl mx-auto">
-    <p class="reveal text-[11px] tracking-[0.4em] text-gray1 mb-4 text-center">政策｜徳がめぐれば、まちが活きづく</p>
-    <h2 class="reveal font-mincho font-semibold text-2xl sm:text-3xl tracking-widest text-center leading-relaxed mb-4">
-      豊かさが循環する、南相馬へ。
-    </h2>
-    <div class="reveal w-10 h-px bg-ink/30 mx-auto mb-8"></div>
-    <p class="reveal text-gray1 text-sm sm:text-[15px] leading-loose text-center max-w-2xl mx-auto mb-16" data-delay="1">
-      報徳の精神を礎に、人が育ち、仕事が生まれ、暮らしが豊かになり、人がつながる。その豊かさが、また次の世代へとつながっていくまちへ。
-    </p>
-
-    <div class="grid md:grid-cols-2 gap-5">
-
-      <!-- 教育 -->
-      <div class="reveal quiet-card p-8 sm:p-9">
-        <div class="flex items-baseline gap-3 mb-4">
-          <h3 class="font-mincho font-semibold text-2xl tracking-[0.2em]">教育</h3>
-          <p class="font-mincho text-shu text-base tracking-wider">可能性をひらく。</p>
-        </div>
-        <p class="text-sm text-gray1 leading-loose mb-5">学校だけでなく、地域全体を学びの場に。自然や歴史、さまざまな出会いが、学びを広げます。一人ひとりが可能性を見つけ、社会で生きる力を育てます。</p>
-        <ul class="space-y-2.5 text-sm text-ink/85">
-          <li class="flex gap-2.5"><span class="text-shu shrink-0">—</span>地域をフィールドにした学びの充実</li>
-          <li class="flex gap-2.5"><span class="text-shu shrink-0">—</span>一人ひとりに寄り添う学びの場づくり</li>
-          <li class="flex gap-2.5"><span class="text-shu shrink-0">—</span>挑戦を応援する大人や環境を増やす</li>
-        </ul>
-      </div>
-
-      <!-- 仕事 -->
-      <div class="reveal quiet-card p-8 sm:p-9" data-delay="1">
-        <div class="flex items-baseline gap-3 mb-4">
-          <h3 class="font-mincho font-semibold text-2xl tracking-[0.2em]">仕事</h3>
-          <p class="font-mincho text-shu text-base tracking-wider">価値を生み出す。</p>
-        </div>
-        <p class="text-sm text-gray1 leading-loose mb-5">今ある仕事を強くし、新しい挑戦が生まれる地域へ。人の力を活かし、知恵や技術を掛け合わせ、地域から新しい価値を生み出します。</p>
-        <ul class="space-y-2.5 text-sm text-ink/85">
-          <li class="flex gap-2.5"><span class="text-shu shrink-0">—</span>地域企業の力を高める支援</li>
-          <li class="flex gap-2.5"><span class="text-shu shrink-0">—</span>新しい挑戦や創業を後押し</li>
-          <li class="flex gap-2.5"><span class="text-shu shrink-0">—</span>次の世代につなぐ事業承継</li>
-        </ul>
-      </div>
-
-      <!-- 暮らし -->
-      <div class="reveal quiet-card p-8 sm:p-9" data-delay="1">
-        <div class="flex items-baseline gap-3 mb-4">
-          <h3 class="font-mincho font-semibold text-2xl tracking-[0.2em]">暮らし</h3>
-          <p class="font-mincho text-shu text-base tracking-wider">豊かさを実感する。</p>
-        </div>
-        <p class="text-sm text-gray1 leading-loose mb-5">安心して快適に暮らせることはもちろん、「ここで暮らしたい」と思える日常を育て、一人ひとりが豊かさを実感できるまちをつくります。</p>
-        <ul class="space-y-2.5 text-sm text-ink/85">
-          <li class="flex gap-2.5"><span class="text-shu shrink-0">—</span>安心して子育てできる環境づくり</li>
-          <li class="flex gap-2.5"><span class="text-shu shrink-0">—</span>移動しやすく、暮らしやすいまちづくり</li>
-          <li class="flex gap-2.5"><span class="text-shu shrink-0">—</span>住まい・医療・福祉の充実と持続可能性の確保</li>
-          <li class="flex gap-2.5"><span class="text-shu shrink-0">—</span>自然や文化、スポーツを楽しめる環境を育てる</li>
-        </ul>
-      </div>
-
-      <!-- 協働 -->
-      <div class="reveal quiet-card p-8 sm:p-9" data-delay="2">
-        <div class="flex items-baseline gap-3 mb-4">
-          <h3 class="font-mincho font-semibold text-2xl tracking-[0.2em]">協働</h3>
-          <p class="font-mincho text-shu text-base tracking-wider">力を持ち寄る。</p>
-        </div>
-        <p class="text-sm text-gray1 leading-loose mb-5">市民・企業・地域・学校・行政。それぞれができることを持ち寄り、支え合いながら、地域の力を次の世代につなぎます。</p>
-        <ul class="space-y-2.5 text-sm text-ink/85">
-          <li class="flex gap-2.5"><span class="text-shu shrink-0">—</span>多様な主体がつながる仕組みづくり</li>
-          <li class="flex gap-2.5"><span class="text-shu shrink-0">—</span>小さな挑戦や活動を応援</li>
-          <li class="flex gap-2.5"><span class="text-shu shrink-0">—</span>世代や立場をこえたつながりを育てる</li>
-        </ul>
-      </div>
-
-    </div>
-  </div>
-</section>
-
 <!-- ============================================================
      6. 目安箱 — 匿名で声を投函できるフォーム（Googleフォーム連携）
      ============================================================ -->
@@ -820,10 +822,13 @@
   document.querySelectorAll('.split').forEach((el) => {
     const text = el.textContent;
     const baseDelay = parseInt(el.dataset.splitDelay || '0', 10);
+    const hlFrom = el.dataset.hlFrom !== undefined ? parseInt(el.dataset.hlFrom, 10) : -1;
+    const hlTo = el.dataset.hlTo !== undefined ? parseInt(el.dataset.hlTo, 10) : -1;
     el.textContent = '';
     [...text].forEach((ch, i) => {
       const span = document.createElement('span');
       span.className = 'char';
+      if (hlFrom >= 0 && i >= hlFrom && i <= hlTo) span.classList.add('text-shu');
       span.textContent = ch;
       el.appendChild(span);
       setTimeout(() => span.classList.add('in'), baseDelay + 250 + i * 110);
