@@ -270,6 +270,7 @@
       <a href="#apps" class="navlink hover:text-tetsu transition-colors">学びのアプリ</a>
       <a href="#meyasubako" class="navlink hover:text-tetsu transition-colors">目安箱</a>
       <a href="#join" class="navlink hover:text-tetsu transition-colors">入会のご案内</a>
+      <a href="#media" class="navlink hover:text-tetsu transition-colors">発信</a>
     </nav>
 
     <div class="flex items-center gap-2.5 sm:gap-4">
@@ -786,10 +787,35 @@
   </div>
 </section>
 
+<!-- ============================================================
+     8. 発信（note記事一覧・kuryudo_hotoku RSS。入会の後・フッターの上）
+     ============================================================ -->
+<section id="media" class="relative py-24 px-5 sm:px-8 bg-paper2/70">
+  <div class="max-w-3xl mx-auto">
+    <p class="reveal text-[11px] tracking-[0.4em] text-gray1 mb-4 text-center">活動の発信</p>
+    <h2 class="reveal font-mincho font-semibold text-2xl sm:text-3xl tracking-widest text-center leading-relaxed mb-4">言葉を、綴る。</h2>
+    <div class="reveal w-10 h-px bg-ink/30 mx-auto mb-4"></div>
+    <p class="reveal text-gray1 text-sm leading-loose text-center mb-10" data-delay="1">
+      日々の政治活動や、まちへの想いを note に綴っています。
+    </p>
+    <div id="note-feed" class="reveal" data-delay="1">
+      <p class="text-sm text-gray1 text-center py-6">読み込み中…</p>
+    </div>
+    <div class="reveal text-center mt-8" data-delay="2">
+      <button type="button" id="note-more" class="font-mincho text-sm text-shu tracking-[0.15em] hover:opacity-70 transition-opacity mb-8" hidden>過去の記事を見る ＋</button>
+      <div>
+        <a href="https://note.com/kuryudo_hotoku" target="_blank" rel="noopener" class="inline-flex items-center gap-2 border border-ink/25 font-mincho tracking-[0.2em] text-sm px-8 py-3.5 hover:bg-paper2 transition-colors">
+          noteですべて読む
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
 </main>
 
 <!-- ============================================================
-     8. フッター
+     9. フッター
      ============================================================ -->
 <footer class="rule-t py-12 px-5 sm:px-8">
   <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6 text-sm text-gray1">
@@ -1052,6 +1078,58 @@
         });
     });
   }
+
+  // --- 8. note記事一覧（kuryudo_hotoku RSS・最新3件＋過去展開） ---
+  (function () {
+    const feed = document.getElementById('note-feed');
+    if (!feed) return;
+    const moreBtn = document.getElementById('note-more');
+    const INITIAL = 3;
+    const RSS = 'https://note.com/kuryudo_hotoku/rss';
+    const esc = s => String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    const safeUrl = v => { try { const u = new URL(String(v)); return u.protocol === 'https:' ? u.href : '#'; } catch { return '#'; } };
+
+    function render(items) {
+      if (!items.length) { feed.innerHTML = '<p class="text-sm text-gray1 text-center py-6">記事を読み込めませんでした。</p>'; if (moreBtn) moreBtn.hidden = true; return; }
+      feed.innerHTML = items.map((it, idx) => {
+        const title = esc((it.title || '').trim());
+        const url = safeUrl(it.link || it.url || '#');
+        const date = it.pubDate ? new Date(it.pubDate).toLocaleDateString('ja-JP', { year:'numeric', month:'long', day:'numeric' }) : '';
+        const hide = idx >= INITIAL ? ' hidden' : '';
+        return `<a href="${url}" target="_blank" rel="noopener" class="note-item block py-4 rule-b hover:bg-paper2/60 transition-colors${hide}"><span class="block text-[11px] tracking-[0.15em] text-gray1">${esc(date)}</span><span class="block font-mincho text-ink leading-relaxed mt-1">${title}</span></a>`;
+      }).join('');
+      if (moreBtn) {
+        if (items.length > INITIAL) {
+          moreBtn.hidden = false;
+          moreBtn.onclick = () => { feed.querySelectorAll('.note-item.hidden').forEach(el => el.classList.remove('hidden')); moreBtn.hidden = true; };
+        } else { moreBtn.hidden = true; }
+      }
+    }
+
+    function viaRss2json() {
+      const u = 'https://api.rss2json.com/v1/api.json?rss_url=' + encodeURIComponent(RSS);
+      const c = new AbortController(); setTimeout(() => c.abort(), 7000);
+      return fetch(u, { signal: c.signal }).then(r => r.json()).then(d => { if (d.status !== 'ok' || !d.items || !d.items.length) throw new Error('empty'); render(d.items); });
+    }
+    function viaAllorigins() {
+      const u = 'https://api.allorigins.win/get?url=' + encodeURIComponent(RSS);
+      const c = new AbortController(); setTimeout(() => c.abort(), 7000);
+      return fetch(u, { signal: c.signal }).then(r => r.json()).then(d => {
+        const xml = new DOMParser().parseFromString(d.contents, 'application/xml');
+        const items = Array.from(xml.querySelectorAll('item')).map(it => ({
+          title: it.querySelector('title')?.textContent?.trim() || '',
+          link: it.querySelector('link')?.textContent || '#',
+          pubDate: it.querySelector('pubDate')?.textContent || ''
+        }));
+        if (!items.length) throw new Error('empty');
+        render(items);
+      });
+    }
+    viaRss2json().catch(() => viaAllorigins().catch(() => {
+      feed.innerHTML = '<p class="text-sm text-gray1 text-center leading-loose py-6">現在、記事を表示できません。<br>下の「noteですべて読む」からご覧ください。</p>';
+      if (moreBtn) moreBtn.hidden = true;
+    }));
+  })();
 </script>
 
 </body>
