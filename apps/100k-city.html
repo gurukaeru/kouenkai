@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>奇跡の10万人都市 v2 — 二元代表制で街を動かせ</title>
+<title>奇跡の10万人都市 v3 — 暮らしと仕事の循環をつくれ</title>
 <link href="https://fonts.googleapis.com/css2?family=Mochiy+Pop+One&family=Zen+Maru+Gothic:wght@500;700;900&display=swap" rel="stylesheet">
 <style>
 :root{--ink:#2B2440;--bg:#FDF3E3;--blue:#3A6FF0;--pink:#FF4D8D;--yellow:#FFC53D;--green:#25B86F;--red:#FF5A5F;--purple:#8A5CF6;--orange:#FF8A3D;}
@@ -76,6 +76,15 @@ svg.spark{display:block;width:100%;height:64px;margin-top:6px;}
 .el-detail{font-size:12.5px;font-weight:700;background:#F0E8D8;border-radius:12px;padding:10px 14px;margin:10px 0;}
 .notice{font-size:11px;font-weight:700;color:#9a8f7a;margin-top:18px;border-top:2px dashed #D8CDB6;padding-top:10px;}
 .center{text-align:center;}
+.player-profile{margin:20px 0 12px;padding:16px;text-align:left;border:3px solid var(--blue);border-radius:16px;background:#edf3ff;}
+.player-profile legend{padding:0 8px;font-size:17px;font-weight:900;color:var(--ink);}
+.player-profile__optional{display:inline-block;margin-left:6px;padding:2px 8px;border-radius:6px;background:var(--blue);color:white;font-size:11px;vertical-align:middle;}
+.player-profile__fields{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.player-profile label{display:block;min-width:0;font-size:17px;font-weight:900;}
+.player-profile select{display:block;width:100%;min-height:50px;margin-top:8px;padding:10px 8px;border:2px solid var(--ink);border-radius:10px;background:white;color:var(--ink);font:700 16px 'Zen Maru Gothic',sans-serif;cursor:pointer;}
+.player-profile select:focus-visible{outline:3px solid var(--blue);outline-offset:3px;}
+@media(max-width:380px){.player-profile{padding:12px;}.player-profile__fields{gap:10px;}.player-profile legend{font-size:15px;}}
+.stats-section{margin:24px 0;padding-top:18px;border-top:2px solid #ddd6ca;}.stats-section h4{margin-bottom:10px;font-size:17px}.stats-note{font-size:12px;color:#625b70;margin:6px 0 14px}.stats-row{margin:14px 0}.stats-row strong{display:block;font-size:14px;margin-bottom:5px}.stats-bar{display:grid;grid-template-columns:44px minmax(0,1fr) 52px;gap:8px;align-items:center;font-size:12px;margin:5px 0}.stats-track{height:16px;border-radius:4px;background:#eee9e0;overflow:hidden}.stats-fill{height:100%;background:var(--blue);border-radius:4px}.stats-bar.mine .stats-fill{background:var(--pink)}.stats-bar b{text-align:right;font-variant-numeric:tabular-nums}.stats-controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center}.stats-controls select{padding:8px;font:inherit;max-width:100%}.stats-event{margin:12px 0;padding:12px;background:#f8f5ef;border-radius:10px}.stats-event summary{cursor:pointer;font-weight:900;font-size:14px}.stats-event .stats-bar{grid-template-columns:minmax(0,1fr) 52px}.stats-diff{font-size:11px;font-weight:700;color:#625b70}.stats-years{display:flex;gap:12px;flex-wrap:wrap}.stats-years label{font-size:13px}.stats-years select{margin-left:6px;padding:6px;font:inherit;}
 </style>
 </head>
 <body>
@@ -95,6 +104,94 @@ const BUILDINGS={
 };
 const clamp=(v,lo=0,hi=100)=>Math.max(lo,Math.min(hi,v));
 let G;
+const MODEL_VERSION='city-3.1';
+// A dedicated deployment is required; never reuse another app's collection endpoint.
+const CITY_STATS_URL='https://script.google.com/macros/s/AKfycbwwE4LVo0Nly7jRCl3WmCgN_SYAseM-oD6vQY06sVi8d5a2dBkdzgFdxZ0kQZiaYtX-6g/exec';
+function populationModel(s,famLag){
+  const n=x=>clamp(x)/100;
+  const jobs=n(effIND(s)),family=n(famLag),access=n(s.INF),care=n(s.WEL);
+  const service=n(s.serviceLag??s.DX),trust=n(s.CLEAN);
+  const capacity=clamp((s.INF+35)*900/s.POP,0.35,1);
+  const workers=.45*jobs+.25*access+.15*service+.15*trust;
+  const families=.30*jobs+.35*family+.20*access+.15*care;
+  const seniors=.50*care+.30*access+.20*service;
+  const weakest=Math.min(access,care,family);
+  const settlement=(.45+.55*weakest)*capacity;
+  const demand=clamp(1+.09*Math.sin(s.year*.65+s.cyclePhase),.91,1.09);
+  const attraction=.45*workers*workers+.40*families*families+.15*seniors*seniors;
+  const IN=s.POP*.095*attraction*settlement*demand*(1+s.promo*.35);
+  const pressures={雇用不足:.32*(1-jobs),子育て不足:.23*(1-family),生活基盤不足:.23*(1-access),ケア不足:.14*(1-care),行政への不信:.08*(1-trust)};
+  const OUT=s.POP*(.004+.032*Object.values(pressures).reduce((a,b)=>a+b,0)+.012*(1-capacity))+(s.neighborDrain?180:0);
+  const BIRTH=s.POP*s.WORK/100*.014*(.55+.9*family)*(.85+.15*access);
+  const DEATH=s.POP*s.AGED/100*.052*(1.12-.24*care);
+  return {IN,OUT,BIRTH,DEATH,natural:BIRTH-DEATH,social:IN-OUT,capacity,settlement,
+    bottleneck:Object.entries(pressures).sort((a,b)=>b[1]-a[1])[0][0],demand};
+}
+function recordDecision(type,data){
+  if(!G.research)return;
+  G.decisions.push({year:G.year,type,...data});
+}
+const RESEARCH_KEY='city-research-v3';
+// Local retention is enforced whenever the app is opened (offline browsers cannot run deletion timers).
+try{const stored=localStorage.getItem(RESEARCH_KEY);if(stored)localStorage.setItem(RESEARCH_KEY,JSON.stringify(JSON.parse(stored).filter(x=>x.savedAt>Date.now()-365*86400000).slice(-10)));}catch{}
+function researchPayload(){return {version:MODEL_VERSION,noticeVersion:'2026-09-v2',id:G.sessionId,playedAt:G.playedAt,
+ demographics:G.demographics,decisions:G.decisions,result:{year:G.year,population:G.POP,ended:G.deathCause||'completed'}};}
+function keepResearch(){
+ if(!G.research)return;
+ try{const all=JSON.parse(localStorage.getItem(RESEARCH_KEY)||'[]').filter(x=>x.id!==G.sessionId&&x.savedAt>Date.now()-365*86400000);all.push({...researchPayload(),savedAt:Date.now()});localStorage.setItem(RESEARCH_KEY,JSON.stringify(all.slice(-10)));}
+ catch{document.getElementById('research-status')?.replaceChildren(document.createTextNode('端末への保存ができませんでした。'));}
+}
+async function shareResearch(){
+ const status=document.getElementById('research-status');
+ if(!G.research){status.textContent='集計に参加せずプレイしました。';return;}
+ keepResearch();
+ if(!CITY_STATS_URL){status.textContent='この端末に記録しました。全体集計は接続準備中のため、外部送信していません。';return;}
+ status.textContent='集計用の記録を送信しています…';
+ try{
+   await fetch(CITY_STATS_URL,{method:'POST',mode:'no-cors',body:JSON.stringify(researchPayload()),signal:AbortSignal.timeout(12000)});
+   const check=await fetch(CITY_STATS_URL+'?receipt='+encodeURIComponent(G.sessionId),{signal:AbortSignal.timeout(12000)}).then(r=>r.json());
+   if(!check.saved)throw Error('not confirmed');G.submitted=true;status.textContent='集計への保存を確認しました。';
+ }catch{status.textContent='送信を確認できませんでした。端末の記録は残っています。下の再送ボタンで再試行できます。';}
+}
+async function showResearchStats(){
+ const out=document.getElementById('research-stats');out.replaceChildren();
+ if(!CITY_STATS_URL){out.textContent='全体集計は接続準備中です。';return;}
+ try{
+ const age=document.getElementById('stats-age').value,gender=document.getElementById('stats-gender').value;
+ const yearSelect=document.getElementById('stats-year'),year=yearSelect.value;
+ const data=await fetch(CITY_STATS_URL+'?age='+encodeURIComponent(age)+'&gender='+encodeURIComponent(gender)+'&year='+encodeURIComponent(year),{signal:AbortSignal.timeout(12000)}).then(r=>r.json());
+ yearSelect.replaceChildren(new Option('全年度','all'),...(data.years||[]).map(y=>new Option(`${y}年度`,String(y))));yearSelect.value=year;
+ if(data.hidden){out.textContent='この条件に該当する記録はまだありません。';return;}
+ if(!data.shares)throw Error();
+ renderResearchCharts(out,data);
+ }catch{out.textContent='集計を取得できませんでした。時間を置いてお試しください。';}
+}
+function renderResearchCharts(out,data){
+ const keys=['ind','fam','inf','wel','dx','promo'],num=x=>Math.max(0,Math.min(100,Number(x)||0));
+ const bar=(label,value,mine=false)=>`<div class="stats-bar ${mine?'mine':''}"><span>${label}</span><div class="stats-track" aria-hidden="true"><div class="stats-fill" style="width:${num(value)}%"></div></div><b>${num(value).toFixed(1)}%</b></div>`;
+ const actions=G.decisions.filter(d=>d.type==='execution'),totals=Object.fromEntries(keys.map(k=>[k,actions.reduce((n,d)=>n+d.allocation[k],0)])),sum=Object.values(totals).reduce((a,b)=>a+b,0);
+ const rows=(a,b,left,right)=>keys.map(k=>{const diff=num(a[k])-num(b[k]);return `<div class="stats-row"><strong>${BUDGET_LABELS[k]} <span class="stats-diff">${left}は${right}より ${diff>0?'+':''}${diff.toFixed(1)}pt</span></strong>${bar(left,a[k],true)}${bar(right,b[k])}</div>`;}).join('');
+ const mine=Object.fromEntries(keys.map(k=>[k,sum?totals[k]/sum*100:0]));
+ out.innerHTML=`<div class="stats-section"><h4>あなたとみんなの予算配分</h4><p class="stats-note">選択条件に合う${Number(data.count)}ゲームの平均。人数ではありません。棒の長さはすべて0〜100%。</p>${sum?rows(mine,data.shares,'あなた','集計'):keys.map(k=>`<div class="stats-row"><strong>${BUDGET_LABELS[k]}</strong>${bar('集計',data.shares[k])}</div>`).join('')}<p class="stats-note">実行した6分野の予算内訳です。基金・建設費・イベント費は含みません。</p></div>`;
+ const annual=(data.annual||[]).filter(v=>!v.hidden).sort((a,b)=>a.year-b.year);
+ const history=document.createElement('section');history.className='stats-section';history.innerHTML='<h4>年度で比べる</h4><p class="stats-note">4月〜翌3月・日本時間。同じゲームバージョンで比較します。</p>';
+ if(annual.length<2){const p=document.createElement('p');p.className='stats-note';p.textContent='2年度分の記録が集まると比較できます。';history.append(p);}else{
+ const controls=document.createElement('div');controls.className='stats-years';const selections=[];
+ for(const caption of ['比較元','比較先']){const label=document.createElement('label');label.textContent=caption;const select=document.createElement('select');annual.forEach(v=>select.add(new Option(`${v.year}年度（${v.count}ゲーム）`,String(v.year))));label.append(select);controls.append(label);selections.push(select);}
+ selections[0].value=String(annual[annual.length-2].year);selections[1].value=String(annual[annual.length-1].year);
+ const chart=document.createElement('div');const draw=()=>{const a=annual.find(v=>String(v.year)===selections[0].value),b=annual.find(v=>String(v.year)===selections[1].value);chart.innerHTML=rows(b.shares,a.shares,String(b.year),String(a.year));};selections.forEach(s=>s.onchange=draw);draw();history.append(controls,chart);}
+ out.append(history);
+ const events=document.createElement('section');events.className='stats-section';events.innerHTML='<h4>みんなが選んだ判断</h4><p class="stats-note">項目を開くと選択率を比較できます。</p>';
+ for(const item of data.events||[]){const ev=YEAR_EVENTS[item.id];if(!ev)continue;const details=document.createElement('details');details.className='stats-event';const heading=document.createElement('summary');heading.textContent=`${ev.title} · ${Number(item.count)}ゲーム`;details.append(heading);
+ const own=G.decisions.find(d=>d.type==='event'&&d.eventId===item.id);
+ ev.ch.forEach((c,i)=>{const row=document.createElement('div');row.className='stats-row';const label=document.createElement('strong');label.textContent=c.l+(own?.choice===i?' ← あなた':'');const graphic=document.createElement('div');graphic.innerHTML=`<div class="stats-bar ${own?.choice===i?'mine':''}"><div class="stats-track" aria-hidden="true"><div class="stats-fill" style="width:${num(item.shares[i])}%"></div></div><b>${num(item.shares[i]).toFixed(1)}%</b></div>`;row.append(label,graphic);details.append(row);});events.append(details);}
+ if(!data.events?.length)events.append(document.createTextNode('イベントの記録はまだありません。'));out.append(events);
+}
+function payEvent(cost){
+  // Emergency spending is not free when reserves run out: the shortfall becomes debt.
+  const gap=Math.max(0,cost-G.FUND);G.FUND=Math.max(0,G.FUND-cost);G.DEBT+=gap;
+  return gap;
+}
 function newGame(){
   G={year:0,POP:50000,AGED:34,WORK:55,CHILD:11,IND:45,FAM:40,INF:55,WEL:50,DX:20,
   SUP_W:50,SUP_A:50,CLEAN:70,FUND:20,DEBT:200,STAFF:480,
@@ -103,7 +200,9 @@ function newGame(){
   popHist:[50000],alive:true,deathCause:null,electionsWon:0,lastVote:null,
   bias:{fukushi:0,keizai:0,chiiki:0,kaikaku:0},   // 会派の心証(政策判断の補助線、毎年半減)
   builtLastYear:null, hykjoDone:false, evSeen:{}, pendingBuilds:[], rushedLast:false, renew:{},
-  rand:rngf(Date.now()%100000)};
+  rand:rngf(Date.now()%100000),cyclePhase:Math.random()*Math.PI*2,serviceLag:20,
+  commitments:[],decisions:[],research:false,demographics:{age:'na',gender:'na'},
+  sessionId:crypto.randomUUID(),playedAt:new Date().toISOString(),submitted:false};
 }
 function effIND(s){return Math.min(s.IND, 42+s.FAM*0.7);} // 労働力(人材の供給源=子育て環境)が産業の天井
 function revenues(s){
@@ -136,6 +235,10 @@ function step(alloc,build,buildMode){
   s.year=pre.yr;
   const{rev,man}=pre,fi=fiscal(s,rev,man);
   const events=[];
+  s.commitments=s.commitments.filter(item=>{
+    if(item.cost){const gap=payEvent(item.cost);events.push(`📋 ${item.label}: 継続費${item.cost}億円${gap?'（不足分は市債）':''}`);}
+    if(--item.years<=0){if(item.fx)applyFx(item.fx);events.push(`🌱 ${item.label}: 計画期間を終え、効果を確認`);return false;}return true;
+  });
   const before={IND:s.IND,FAM:s.FAM,INF:s.INF,WEL:s.WEL,DX:s.DX};
   s.builtLastYear=null;
 
@@ -220,12 +323,10 @@ function step(alloc,build,buildMode){
     events.push("🎉 大手企業の工場誘致に成功! (誘致費10億円・以後税収+4億/年)");}
 
   const famLag2=s.famHist.shift();s.famHist.push(s.FAM);
-  const BIRTH=s.POP*(s.WORK/100)*0.0140*(0.55+0.9*famLag2/100);
-  const DEATH=s.POP*(s.AGED/100)*0.052;
-  const eI=effIND(s);
-  const OUT=s.POP*0.022*(1.6-eI/100*0.85)*(1.1-s.INF/200)+(s.neighborDrain?300:0);
-  const IN=s.POP*0.0223*(0.40+eI/130+s.FAM/150)*(1+s.promo)*(0.55+s.INF/110);
-  const natural=BIRTH-DEATH,social=IN-OUT;
+  const population=populationModel(s,famLag2);
+  const {BIRTH,natural,social}=population;
+  s.serviceLag=s.serviceLag*.65+s.DX*.35;
+  events.push(`👥 転入${Math.round(population.IN)}人／転出${Math.round(population.OUT)}人。定着の課題は「${population.bottleneck}」。生活基盤の受入余力${Math.round(population.capacity*100)}%。`);
   s.prevPOP=s.POP;
   s.POP=Math.round(s.POP+natural+social);
   s.popHist.push(s.POP);
@@ -242,7 +343,7 @@ function step(alloc,build,buildMode){
   Object.keys(s.bias).forEach(k=>s.bias[k]*=0.5);
 
   if(fi.jkh>25){s.alive=false;s.deathCause="saisei";return{events};}
-  return{events,natural,social,before,fi,rev,man,policy:pre.policy,spend};
+  return{events,natural,social,population,before,fi,rev,man,policy:pre.policy,spend};
 }
 function electionCheck(){
   const s=G;
@@ -268,40 +369,43 @@ const FACTIONS={
 };
 // 予算議案への各会派の判断(政策整合性ルール)
 function judgeBudget(ctx){
-  const a=ctx.alloc, fi=ctx.fi;
-  const j={};
-  // 要求水準は市の状況とともに上がる(高齢化→福祉、都市成長→インフラ、硬直→行革)
-  const welNeed=Math.ceil(Math.max(ctx.prevWel, 5+(G.AGED-34)*0.35));
-  const indNeed=G.IND<50?8:6;
-  const infNeed=Math.ceil(6+Math.max(0,G.POP/50000-1)*7);
-  const dxNeed=G.DX<70?4:0;
-  j.fukushi=(a.wel>=welNeed-0.5)
-    ?{ok:true,reason:`高齢化率${G.AGED.toFixed(0)}%の現実に見合う福祉水準だ`}
-    :{ok:false,reason:`高齢化率${G.AGED.toFixed(0)}%。この街に必要なのは${welNeed}億円だ`,
-      demand:{label:`福祉予算を${welNeed}億円に(高齢化の実態対応)`,fix:al=>{al.wel=Math.min(20,welNeed);}}};
-  j.keizai=(a.ind>=indNeed)
-    ?{ok:true,reason:"産業政策への投資姿勢を評価する"}
-    :{ok:false,reason:G.IND<50?"地域経済は待ったなし。この額では話にならない":"稼ぐ力への投資が細っている",
-      demand:{label:`産業・雇用に${indNeed}億円を確保`,fix:al=>{al.ind=Math.max(al.ind,indNeed);}}};
-  j.chiiki=(a.inf>=infNeed)
-    ?{ok:true,reason:"都市の規模に見合ったインフラ予算だ"}
-    :{ok:false,reason:`人口${(G.POP/10000).toFixed(1)}万人の街を支えるには${infNeed}億円が要る`,
-      demand:{label:`インフラ維持に${infNeed}億円を確保(都市規模対応)`,fix:al=>{al.inf=Math.max(al.inf,infNeed);}}};
-  j.kaikaku=((dxNeed===0||a.dx>=dxNeed)&&fi.keijo<96&&G.FUND>=3)
-    ?{ok:true,reason:"行革・財政規律・備え、いずれも及第点だ"}
-    :{ok:false,reason:fi.keijo>=96?"経常収支比率"+fi.keijo.toFixed(0)+"%。硬直を放置した予算は認められない":(G.FUND<3?"基金がほぼ空だ。備えなき予算に賛成はできない":"行政改革への意思が見えない"),
-      demand:{label:dxNeed>0?`行革・DXに${dxNeed}億円+基金積立を確保`:"基金への積立を確保(3億円以上残す)",
-        fix:al=>{if(dxNeed>0)al.dx=Math.max(al.dx,dxNeed);const sum=al.ind+al.fam+al.inf+al.wel+al.dx+al.promo;if(ctx.P-sum<3){al.promo=Math.max(0,al.promo-3);}}}};
-  // 心証は判断を一度だけ傾け、消費される
-  Object.keys(j).forEach(k=>{
-    if(!j[k].ok&&G.bias[k]>=1){G.bias[k]-=1;j[k]={ok:true,reason:j[k].reason+"…だが、これまでの誠実な対応に免じて今回は賛成する"};}
-    else if(j[k].ok&&G.bias[k]<=-1){G.bias[k]+=1;j[k]={ok:false,reason:"内容以前に、市長の姿勢への不信が拭えない",demand:{label:"信頼回復:全会派への丁寧な事前説明(効果:心証回復)",fix:al=>{Object.keys(G.bias).forEach(b=>G.bias[b]=Math.max(G.bias[b],0));}}};}
-  });
+  const a=ctx.alloc,P=ctx.P, j={},need=(share,extra=0)=>Math.ceil(P*share+extra);
+  // Each caucus asks for a package, not a single low fixed threshold.
+  // Read-only: previews and repeated votes must never consume trust or change the result.
+  const requests={
+    fukushi:{wel:need(.23,Math.max(0,G.AGED-34)*.3),fam:need(.13,Math.max(0,45-G.FAM)*.1)},
+    keizai:{ind:need(.27,Math.max(0,55-G.IND)*.15),dx:need(.09)},
+    chiiki:{inf:need(.25,Math.max(0,60-G.INF)*.2+Math.max(0,G.POP/50000-1)*3),fam:need(.17)},
+    kaikaku:{dx:need(G.DX<60?.15:.09),reserve:need(ctx.fi.keijo>94?.12:.07)}
+  };
+  const explanations={fukushi:'ケアと子育ての両方を守る配分を要求',keizai:'雇用と生産性を一緒に育てる配分を要求',chiiki:'既存の生活基盤と地域の子育てを優先',kaikaku:'行政改善と将来負担への備えを要求'};
+  const reserve=P-Object.values(a).reduce((x,y)=>x+y,0);
+  for(const k of Object.keys(FACTIONS)){
+    const req={...requests[k]};
+    // Trust only changes the primary demand by at most one billion; no automatic yes.
+    const primary=Object.keys(req)[0];req[primary]=Math.max(0,req[primary]-Math.sign(G.bias[k]));
+    const missing=Object.entries(req).filter(([key,n])=>(key==='reserve'?reserve:a[key])<n);
+    const label=Object.entries(req).map(([key,n])=>`${BUDGET_LABELS[key]}${n}億円以上`).join('・');
+    j[k]={ok:!missing.length,reason:`${explanations[k]}。${label}${missing.length?'。不足：'+missing.map(([key,n])=>`${BUDGET_LABELS[key]}あと${Math.ceil(n-(key==='reserve'?reserve:a[key]))}億円`).join('／'):'。条件を満たしています'}`,demand:{label,requirements:req}};
+  }
   return j;
+}
+const BUDGET_LABELS={ind:'産業',fam:'子育て',inf:'生活基盤',wel:'福祉',dx:'行政改善',promo:'広報',reserve:'基金積立'};
+function amendmentPlan(ctx,faction,source){
+  const req=judgeBudget(ctx)[faction].demand.requirements,a={...ctx.alloc};
+  Object.entries(req).forEach(([k,n])=>{if(k!=='reserve')a[k]=Math.max(a[k],n);});
+  let short=Math.max(0,Object.values(a).reduce((x,y)=>x+y,0)+(req.reserve||0)-ctx.P);
+  const donors=source==='spread'?Object.keys(a).filter(k=>!(k in req)):[source].filter(k=>k in a&&!(k in req));
+  while(short>0&&donors.some(k=>a[k]>0)){
+    for(const k of donors){const cut=Math.min(1,a[k],short);a[k]-=cut;short-=cut;if(short<=0)break;}
+  }
+  return short>0?null:a;
 }
 // 建設議案への判断(disclosure: full=精査型(竣工は来年) / brief=スピード型(即竣工))
 function judgeBuild(build,disclosure,fi){
   const j={};
+  const projected={...G,DEBT:G.DEBT+BUILDINGS[build].cost,built:{...G.built,[build]:G.year+1}};
+  const future=fiscal(projected,revenues(projected),mandatory(projected,G.year+2));
   const likes={fukushi:["kodomo","hall"],keizai:["indpark","stadium","ekimae"],chiiki:["ekimae","hall","kodomo"],kaikaku:[]};
   j.fukushi=likes.fukushi.includes(build)||G.WEL>=55
     ?{ok:true,reason:"市民の暮らしに資する施設だ"}:{ok:false,reason:"福祉が細る中でのハコモノには賛成できない"};
@@ -318,6 +422,9 @@ function judgeBuild(build,disclosure,fi){
   j.kaikaku=(disclosure==="full"&&fi.jkh<=15)
     ?{ok:true,reason:"財政規律の範囲内であり、情報公開も十分"}
     :{ok:false,reason:disclosure!=="full"?"ライフサイクルコストの試算なき議案は審議に値しない":"公債費比率からみて起債は慎重であるべきだ"};
+  if(future.jkh>16||future.keijo>98)j.kaikaku={ok:false,reason:`建設後の試算：公債費比率${future.jkh.toFixed(1)}%、経常収支比率${future.keijo.toFixed(1)}%。説明の丁寧さだけでは将来負担を認められない`};
+  if(G.WEL<45&&!['kodomo','hall'].includes(build))j.fukushi={ok:false,reason:'福祉の不足が深刻。新施設より既存サービスの立て直しを先に求める'};
+  if(G.INF<40&&build!=='ekimae')j.chiiki={ok:false,reason:'生活基盤の不足が深刻。新施設より既存インフラの修繕が先だ'};
   return j;
 }
 function tallyVotes(j){
@@ -333,7 +440,7 @@ function applyFx(fx){
   map.forEach(([k,gk,label])=>{
     if(fx[k]){G[gk]=clamp(G[gk]+fx[k]);msgs.push(`${label}${fx[k]>0?"+":""}${fx[k]}`);}
   });
-  if(fx.fund){G.FUND=Math.max(0,G.FUND+fx.fund);msgs.push(`基金${fx.fund>0?"+":""}${fx.fund}億`);}
+  if(fx.fund){const gap=fx.fund<0?payEvent(-fx.fund):0;if(fx.fund>0)G.FUND+=fx.fund;msgs.push(`基金${fx.fund>0?"+":""}${fx.fund}億${gap?`／不足${gap}億は市債`:''}`);}
   ["fukushi","keizai","chiiki","kaikaku"].forEach(k=>{
     if(fx["bias_"+k]){G.bias[k]+=fx["bias_"+k];
       msgs.push(`${FACTIONS[k].name}の心証${fx["bias_"+k]>0?"↑":"↓"}`);}
@@ -493,7 +600,7 @@ const YEAR_EVENTS=[
   desc:"維持費が膨張した施設をどうするか。改修すれば大金が飛び、放置すれば毎年ジワジワと財政を蝕む。「建てた日の拍手」の請求書が届いた。",
   ch:[{l:"大規模改修を実施(建設費の4割を基金から)",fx:{},note:"改修費を投じ、維持費は正常化した。あの日「30年後」を想像していた者が、何人いただろう。",
        run:()=>{const k=Object.keys(G.renew).find(k=>G.renew[k]==="degraded");const cost=Math.ceil(BUILDINGS[k].cost*0.4);
-         G.FUND=Math.max(0,G.FUND-cost);G.renew[k]="renewed";return `${BUILDINGS[k].name}を改修(−${cost}億円)/維持費が正常化`;}},
+         const gap=payEvent(cost);G.renew[k]="renewed";return `${BUILDINGS[k].name}を改修(−${cost}億円)${gap?`／不足${gap}億円は市債`:''}/維持費が正常化`;}},
       {l:"改修を先送りする",fx:{clean:-2},note:"今年の財布は守られた。施設の廊下の雨漏りバケツが、ひとつ増えた。",
        run:()=>{return "維持費2.2倍が継続中…";}}]},
  {p:0.3,cond:c=>G.year>=10&&G.taxBonus>=4,tag:"衝撃",title:"誘致企業が撤退を検討——本社の構造改革",
@@ -530,6 +637,60 @@ function pickEvents(ctx){
   out.forEach(e=>G.evSeen[e.id]=G.year);
   return out;
 }
+
+/* v3: staged effects and trade-offs, rather than rewarding a particular ideology. */
+function reviseEvent(title,changes){const ev=YEAR_EVENTS.find(e=>e.title===title);if(ev)Object.assign(ev,changes);}
+reviseEvent('市職員が酒気帯び運転で検挙された',{
+ desc:'職員の不祥事が発覚。処分は事実確認と基準に沿って判断する。そのうえで、限られた人手を再発防止のどこへ振り向けるか。',
+ ch:[{l:'監査と管理職研修を強化（1億円）',fx:{fund:-1,clean:3,dx:-1},note:'チェックは増えた。現場の事務負担も増える。'},
+ {l:'相談・勤務体制の改善を先行（2億円）',fx:{fund:-2,wel:2,clean:1},note:'相談の入口を増やした。監査体制の強化は次の課題として残る。'}]});
+reviseEvent('赤字バス路線の廃止判断',{
+ desc:'定時路線と予約制交通。どちらにも利用できる人と困る人がいる。3年間の実証を選び、効果と費用を見届ける。',
+ ch:[{l:'定時路線を3年間維持（毎年2億円）',fx:{inf:3,wel:2},commit:{label:'定時バス実証',years:3,cost:2},note:'予約せず使える足を維持。利用の少ない便にも費用はかかる。'},
+ {l:'電話受付付き予約制へ（初期2億円、毎年1億円×3年）',fx:{fund:-2,dx:2,inf:-1},commit:{label:'予約交通実証',years:3,cost:1,fx:{inf:4,wel:2}},note:'乗り換えと予約に慣れる期間が必要。実証終了時に移動環境へ効果が出る。'}]});
+reviseEvent('大学サテライトキャンパス誘致の打診',{
+ desc:'大学から3年間の実証提案。負担金は毎年1.5億円。学びの場は増えるが、卒業後の雇用がなければ定住には結びつきにくい。',
+ ch:[{l:'3年間の実証を受け入れる',fx:{supW:1},commit:{label:'大学連携実証',years:3,cost:1.5,fx:{fam:5,dx:3}},note:'効果は3年後。地元の雇用との接続は別途必要になる。'},
+ {l:'既存校と企業の短期研修を選ぶ（2億円）',fx:{fund:-2,ind:2,dx:2},note:'今の働き手を支える。進学の選択肢そのものは増えない。'}]});
+reviseEvent('限られた2億円——保育士の処遇か、学校のエアコンか',{
+ ch:[{l:'保育士の処遇改善（年2億円×3年）',fx:{fam:4},commit:{label:'保育人材支援',years:3,cost:2},note:'人材の定着を支える継続費が生じる。教室の暑さ対策は残る。'},
+ {l:'エアコン整備（初期2億円、維持費年0.5億円×3年）',fx:{fund:-2,fam:2,inf:2},commit:{label:'教室空調維持',years:3,cost:.5},note:'学習環境が改善。保育の人材不足は解決していない。'}]});
+reviseEvent('介護需要の急増——特養の待機者が3倍に',{
+ desc:'施設の待機者が急増。建物だけでなく担い手も足りない。施設支援か、訪問支援と広域連携か、3年間の体制を選ぶ。',
+ ch:[{l:'施設と人材を支援（毎年4億円×3年）',fx:{wel:6,supA:3},commit:{label:'介護施設・人材支援',years:3,cost:4},note:'待機者の受け皿を増やした。継続負担が他の政策の余地を狭める。'},
+ {l:'訪問支援と広域連携（初期2億円、毎年1億円×3年）',fx:{fund:-2,dx:2,wel:2},commit:{label:'地域介護連携',years:3,cost:1,fx:{wel:3}},note:'体制づくりには時間がかかる。在宅が難しい人への施設確保は残る。'}]});
+reviseEvent('市立病院、産科か救急か',{
+ ch:[{l:'産科を維持し救急は広域連携（2億円）',fx:{fund:-2,fam:4,wel:-2,supA:-2},note:'出産の受け皿を維持。救急の移動時間が課題として残る。'},
+ {l:'救急を維持し周産期搬送を支援（2億円）',fx:{fund:-2,wel:4,fam:-2,supW:-2},note:'救急を維持。妊婦健診や出産の移動負担が残る。'},
+ {l:'共同採用・派遣で両部門を縮小維持（毎年3億円×3年）',fx:{wel:1,fam:1},commit:{label:'医療人材共同確保',years:3,cost:3},note:'両方を残す代わりに、診療日数と財政の余裕は限られる。'}]});
+reviseEvent('豪雪の朝——除雪車を先にどこへ',{
+ ch:[{l:'通勤幹線・通学路を優先',fx:{ind:2,supW:2,supA:-2},note:'幹線は開いた。生活道路の除雪は午後へ持ち越した。'},
+ {l:'高齢世帯の生活道路を優先',fx:{wel:2,supA:2,ind:-1},note:'生活道路は開いた。幹線の渋滞で操業開始が遅れた。'},
+ {l:'民間応援を手配して分担（2億円）',fx:{fund:-2,inf:2},note:'応援到着まで待機が必要だが、午後には両方の除雪が進んだ。'}]});
+reviseEvent('全国紙が「消滅可能性都市」と報じた',{
+ ch:[{l:'推計の前提と実績を公表する',fx:{clean:2},note:'人口減少の事実と、将来推計の不確かさを分けて共有した。'},
+ {l:'住民と優先施策を見直す（1億円）',fx:{fund:-1,fam:1,inf:1},note:'対話と調査に時間をかけた。成果は次の予算づくりで問われる。'}]});
+reviseEvent('山あいの小学校、数字の上の「正解」と地区の灯',{
+ desc:'全校児童12人。統合で学習の選択肢は広がるが通学は長くなる。存続には教員と設備の継続確保が要る。',
+ ch:[{l:'通学支援を付けて統合（2億円）',fx:{fund:-2,fam:3,inf:-1,supA:-2},note:'学習の選択肢は増えた。長い通学時間と跡地利用が課題に残る。'},
+ {l:'小規模校と遠隔授業を支援（毎年2億円×3年）',fx:{fam:1,dx:2},commit:{label:'小規模校連携',years:3,cost:2},note:'身近な学校を維持。専門教員の確保には引き続き工夫が必要だ。'}]});
+// Remove editorial certainty and avoid equating policy preferences with moral worth.
+YEAR_EVENTS.forEach(ev=>ev.ch.forEach(c=>{
+ if(ev.tag==='苦渋'||ev.tag==='地域'||ev.tag==='陳情'){
+   if(c.fx)delete c.fx.clean;
+ }
+ c.note=c.note.replace('財政的には正しい。','支出は減った。').replace('合理的な判断だ。','運行方式を変えた。');
+}));
+YEAR_EVENTS.push(
+ {p:.8,cond:c=>G.POP>60000&&G.INF<65,tag:'成長の壁',title:'転入は増えた。でも住む場所がない',
+ desc:'住宅探しと通勤の相談が殺到。新しい企業の求人があっても、生活の受け皿が追いつかない。',
+ ch:[{l:'空き家改修と交通を整える（4億円・2年後）',fx:{fund:-4},commit:{label:'居住・交通整備',years:2,cost:0,fx:{inf:9,fam:3}},note:'今年の混雑は続く。2年後に受け入れ余力が増す。'},
+ {l:'既存地区のサービスを優先（2億円）',fx:{fund:-2,wel:4,inf:2},note:'今住んでいる人の定着を支える。転入の急増は受け止めきれない。'}]},
+ {p:.5,cond:c=>G.year>=4&&G.IND>=60,tag:'産業転換',title:'一社への依存を、どうほどくか',
+ desc:'主要企業の受注が不安定に。雇用維持と新事業支援、どちらも成果は保証されない。',
+ ch:[{l:'雇用維持を2年間支援（毎年2億円）',fx:{ind:4},commit:{label:'雇用維持支援',years:2,cost:2,fx:{ind:-3}},note:'目先の雇用を支える。支援終了後の需要回復は別問題だ。'},
+ {l:'地元企業の事業転換へ（3億円・2年後）',fx:{fund:-3,ind:-2},commit:{label:'事業転換支援',years:2,cost:0,fx:{ind:7,dx:3}},note:'移行期は産業力が下がる。2年後に新しい仕事の基盤が育つ。'}]}
+);
 
 /* ============ 街ビュー(アイソメトリック・品質版) ============ */
 function renderCity(){
@@ -885,13 +1046,24 @@ function screenTitle(){
     <p style="font-size:13px;font-weight:700;">あなたは人口5万人の地方都市の市長。<br>
     予算をつくるのはあなた。だが<b>決めるのは議会</b>だ。<br>
     4つの会派を政策の中身で説得し、20年で人口10万人を目指せ。</p>
-    <div style="text-align:left;font-size:12px;font-weight:700;background:#F0E8D8;border-radius:12px;padding:10px 14px;margin:12px 0;">
+    <details style="text-align:left;font-size:12px;margin:12px 0;"><summary>遊び方・街の初期条件</summary>
     🏛 <b>二元代表制</b>:市長と議会はどちらも市民に選ばれた対等な代表。予算も建設も、議会の議決なしには1円も動かせません。<br>
     📌 前市長は高齢者福祉に手厚い市政でした(福祉8億円/年)。<br>
-    📌 何もしなければ人口は毎年約800人ずつ減っていきます。</div>
+    📌 雇用・子育て・生活基盤・ケア・行政サービス・信頼が転入と定着を左右します。産業だけでは成長は続きません。<br>
+    📌 子育て・行政改善には時間差があります。人口増加で生活基盤が不足し、外部の景気も変動します。学習用の架空モデルで、現実の人口予測ではありません。</details>
+    <fieldset class="player-profile"><legend>あなたについて<span class="player-profile__optional">任意回答</span></legend><div class="player-profile__fields">
+    <label>年代 <select id="research-age"><option value="na">回答しない</option>${['under20','20s','30s','40s','50s','60s','70s','80plus'].map((v,i)=>`<option value="${v}">${['10代以下','20代','30代','40代','50代','60代','70代','80代以上'][i]}</option>`).join('')}</select></label>
+    <label>性別 <select id="research-gender"><option value="na">回答しない</option><option value="woman">女性</option><option value="man">男性</option><option value="other">その他</option></select></label>
+    </div></fieldset>
+    <p style="font-size:11px;margin:8px 0;">プレイ中の選択を記録し、政策選択の傾向を集計します。${CITY_STATS_URL?'':'現在は端末内の保存のみです。'}</p>
+    <details style="text-align:left;font-size:12px;margin:8px 0;"><summary>記録について</summary>
+    <p>プレイ日時、年代・性別、予算案と実行案、イベント選択、街の状況と結果を記録します。氏名・連絡先は収集せず、支持政党の推定や広告には使いません。個別記録は非公開です。集計は1ゲームから表示し、年代と性別は掛け合わせません。サーバー記録は年度比較のため長期保存します。端末記録は直近10件を保存し、1年を過ぎたものを次回起動時に削除します。${CITY_STATS_URL?'保存先は運営者の専用データベースです。':'共有集計は準備中です。保存先の接続後も、過去の端末記録を自動送信しません。'}</p>
+    <p><a href="../privacy.html#city-game" target="_blank" rel="noopener">プライバシーポリシー</a></p>
+    <button class="act ghost" id="erase-local">この端末の記録を削除</button></details>
     <button class="act pink" id="start">市長に就任する</button>
   </div>`;
-  document.getElementById("start").onclick=screenBudget;
+  document.getElementById('erase-local').onclick=()=>{try{localStorage.removeItem(RESEARCH_KEY);document.getElementById('erase-local').textContent='端末の記録を削除しました';}catch{document.getElementById('erase-local').textContent='削除できませんでした';}};
+  document.getElementById("start").onclick=()=>{G.research=true;G.demographics={age:document.getElementById('research-age').value,gender:document.getElementById('research-gender').value};screenBudget();};
 }
 
 let alloc={},buildSel=null;
@@ -925,6 +1097,7 @@ function screenBudget(){
   <div class="card" style="padding:8px;">${renderCity()}</div>
   <h2 class="scr">${pre.yr}年目の<span class="em">予算編成</span></h2>
   <div class="sub">歳入${pre.rev.REV.toFixed(0)}億円 − 義務的経費等${pre.man.TOTAL.toFixed(0)}億円 = 政策予算 <b>${P}億円</b></div>
+  ${G.commitments.length?`<div class="card"><b>これまでに約束した事業</b><p style="font-size:12px;">以下の継続費は年度初めに基金から支払い、不足分は市債になります。政策予算とは別枠です。</p>${G.commitments.map(c=>`<p style="font-size:13px;">${c.label}：残り${c.years}年／年${c.cost}億円${c.fx?'／終了時に効果':''}</p>`).join('')}</div>`:''}
   <div class="fisc">
     <span class="chip ${kw>95?"danger":(kw>90?"warn":"")}">経常収支比率 ${kw.toFixed(1)}%</span>
     <span class="chip ${jk>18?"danger":(jk>14?"warn":"")}">実質公債費比率 ${jk.toFixed(1)}%</span>
@@ -973,6 +1146,7 @@ function screenBudget(){
     app.querySelectorAll(".bd").forEach(x=>x.classList.toggle("sel",x.dataset.b===buildSel));
   });
   document.getElementById("exec").onclick=()=>{
+    recordDecision('proposal',{allocation:{...alloc},build:buildSel,situation:{population:G.POP,fund:G.FUND,industry:G.IND,family:G.FAM,infrastructure:G.INF,welfare:G.WEL}});
     screenDeliberation({alloc:{...alloc},build:buildSel,prevWel:G.prevWelSpend,fi:pre.fi,P});
   };
 }
@@ -993,7 +1167,7 @@ function screenDeliberation(ctx){
   const t=tallyVotes(j);
   app.innerHTML=`
   <h2 class="scr">3月議会 <span class="em">予算審議</span></h2>
-  <div class="sub">各会派は「あなたとの関係」ではなく、政策の中身で是々非々を判断します。</div>
+  <div class="sub">可決には16議席が必要です。会派の要求は予算規模・高齢化・街の不足で変わります。全会派の満足ではなく、どの政策で多数をつくるかを考えます。</div>
   <div class="card">
     ${factionRows(j)}
     <div class="vote-result ${t.pass?"pass":"fail"}">賛成 ${t.yes} / ${t.total} — ${t.pass?"可決":"否決"}</div>
@@ -1001,23 +1175,38 @@ function screenDeliberation(ctx){
   ${t.pass
     ?`<button class="act green" id="go">予算成立。執行する ▶</button>`
     :`<div class="card">
-        <div class="mini-h">💬 修正協議 — 反対会派の要求から一つを受け入れ、予算案を修正します</div>
+        <div class="mini-h">💬 修正協議 — 増やす政策と、その財源を選ぶ</div>
         ${Object.keys(FACTIONS).filter(k=>!j[k].ok&&j[k].demand).map(k=>`
-          <div class="demand" data-d="${k}">${FACTIONS[k].icon} ${FACTIONS[k].name}:${j[k].demand.label}
-          <div class="d-note">受け入れると同会派は賛成に回る(超過分は他項目から自動減額)</div></div>`).join("")}
+          <div class="demand">${FACTIONS[k].icon} ${FACTIONS[k].name}:${j[k].demand.label}
+          <label style="display:block;margin-top:8px;">不足財源の調整先 <select aria-label="${FACTIONS[k].name}の財源" data-source="${k}"><option value="spread">要求対象以外から均等に減額</option>${Object.keys(ctx.alloc).filter(key=>!(key in j[k].demand.requirements)).map(key=>`<option value="${key}">${BUDGET_LABELS[key]}から減額</option>`).join('')}</select></label>
+          <p class="d-note" data-preview="${k}"></p><button class="act ghost" data-d="${k}">この修正案を採用して再審議</button></div>`).join("")}
       </div>`}
+    <button class="act ghost" id="revise-budget">予算編成へ戻って自分で組み直す</button>
   `;
+  document.getElementById('revise-budget').onclick=()=>{alloc={...ctx.alloc};screenBudget();};
   if(t.pass){
     document.getElementById("go").onclick=()=>{
       if(ctx.build)screenBuildBill(ctx);
       else execYear(ctx);
     };
   }else{
+    const updatePreview=k=>{
+      const proposed=amendmentPlan(ctx,k,app.querySelector(`[data-source="${k}"]`).value);
+      const button=app.querySelector(`[data-d="${k}"]`),out=app.querySelector(`[data-preview="${k}"]`);
+      button.disabled=!proposed;
+      if(!proposed){out.textContent='この財源だけでは要求額を確保できません。調整先を変えるか、予算編成へ戻ってください。';return;}
+      const after=judgeBudget({...ctx,alloc:proposed}),votes=tallyVotes(after);
+      const changes=Object.keys(proposed).filter(key=>proposed[key]!==ctx.alloc[key]).map(key=>`${BUDGET_LABELS[key]} ${ctx.alloc[key]}→${proposed[key]}億円`);
+      const lost=Object.keys(j).filter(key=>j[key].ok&&!after[key].ok).map(key=>FACTIONS[key].name);
+      out.textContent=changes.join('／')+`。修正後：賛成${votes.yes}/30議席`+(lost.length?`。反対へ転じる会派：${lost.join('・')}`:'')+'。未配分の予算を先に使い、不足分だけ指定分野を減らします。';
+    };
+    app.querySelectorAll('[data-source]').forEach(el=>{el.onchange=()=>updatePreview(el.dataset.source);updatePreview(el.dataset.source);});
     app.querySelectorAll("[data-d]").forEach(el=>el.onclick=()=>{
       const k=el.dataset.d;
-      j[k].demand.fix(ctx.alloc);
-      autoRebalance(ctx.alloc,ctx.P);
-      G.bias[k]=Math.max(G.bias[k],1); // 誠実な協議は心証を残す
+      const source=app.querySelector(`[data-source="${k}"]`).value,after=amendmentPlan(ctx,k,source);
+      if(!after)return;
+      recordDecision('amendment',{faction:k,source,before:{...ctx.alloc},after:{...after}});
+      ctx.alloc=after;
       screenDeliberation(ctx); // 再審議
     });
   }
@@ -1040,6 +1229,7 @@ function screenBuildBill(ctx){
     ❌ 諦めるもの:クリーン度−3/改革・地域会派はほぼ確実に反対/<b>談合疑惑の火種が残る(発生率↑)</b></span></button>
   </div>`;
   const submit=(disclosure)=>{
+    recordDecision('construction',{building:ctx.build,procedure:disclosure});
     G.CLEAN=clamp(G.CLEAN+(disclosure==="full"?2:-3));
     const j=judgeBuild(ctx.build,disclosure,ctx.fi);
     const t=tallyVotes(j);
@@ -1062,6 +1252,8 @@ function screenBuildBill(ctx){
   document.getElementById("brief").onclick=()=>submit("brief");
 }
 function execYear(ctx){
+  alloc={...ctx.alloc}; // Carry the enacted compromise, not the rejected original proposal.
+  recordDecision('execution',{allocation:{...ctx.alloc},build:ctx.build});
   const r=step(ctx.alloc,ctx.build,ctx.buildMode||"full");
   if(!G.alive){screenEnd();return;}
   screenEvents(r,ctx);
@@ -1091,8 +1283,12 @@ function screenEvents(r,ctx){
     </div>`;
     app.querySelectorAll("[data-c]").forEach(btn=>btn.onclick=()=>{
       const c=ev.ch[+btn.dataset.c];
+      if(btn.disabled)return;
+      app.querySelectorAll('[data-c]').forEach(b=>b.disabled=true);
+      recordDecision('event',{eventId:ev.id,choice:+btn.dataset.c,options:ev.ch.length,fund:G.FUND});
       if(ev.once==="hykjo")G.hykjoDone=true;
       let fxMsg=applyFx(c.fx);
+      if(c.commit){G.commitments.push({...c.commit,fx:c.commit.fx?{...c.commit.fx}:null});fxMsg+=' / 計画を翌年度から実行';}
       if(c.run){const extra=c.run();if(extra)fxMsg=(fxMsg?fxMsg+" / ":"")+extra;}
       r.events.push(`【${ev.tag}】${ev.title} → ${c.l}`);
       document.getElementById("choices").style.display="none";
@@ -1117,6 +1313,7 @@ function sparkline(){
     <polyline points="${pts}" fill="none" stroke="#3A6FF0" stroke-width="3"/></svg>`;
 }
 function screenReport(r){
+  keepResearch();
   renderHud();
   const d=G.POP-G.prevPOP;
   const arrow=(a,b)=>{const df=b-a;return df>0.5?`<span class="delta up">▲${df.toFixed(0)}</span>`:(df<-0.5?`<span class="delta down">▼${(-df).toFixed(0)}</span>`:"");};
@@ -1196,9 +1393,20 @@ function screenEnd(){
       <div style="font-size:12px;font-weight:900;">最終人口 ${fmt(G.POP)}人 ／ 当選 ${G.electionsWon}回 ／ 基金 ${G.FUND.toFixed(0)}億円 ／ クリーン度 ${G.CLEAN.toFixed(0)} ／ 高齢化率 ${G.AGED.toFixed(1)}%</div>
     </div>
     <button class="act pink" id="retry">もう一度挑戦する</button>
+    <div class="card" style="text-align:left;"><h3>みんなの政策選択</h3><p>参加ゲームの傾向です。個人の政治思想・支持政党や、市民全体の世論を示すものではありません。難易度変更前の回答とは混ぜません。</p>
+    <p id="research-status"></p><button class="act ghost" id="research-send">保存を再試行</button>
+    <label>年度 <select id="stats-year"><option value="all">全年度</option></select></label>
+    <label>年代 <select id="stats-age"><option value="all">全体</option>${['under20','20s','30s','40s','50s','60s','70s','80plus'].map((v,i)=>`<option value="${v}">${['10代以下','20代','30代','40代','50代','60代','70代','80代以上'][i]}</option>`).join('')}</select></label>
+    <label>性別 <select id="stats-gender"><option value="all">全体</option><option value="woman">女性</option><option value="man">男性</option><option value="other">その他</option></select></label>
+    <button class="act ghost" id="stats-show">グラフで比較する</button><div id="research-stats" aria-live="polite"></div><p style="font-size:12px;">年代と性別は同時に絞り込めません。端末には直近10ゲームを保存します。</p></div>
   </div>
   <p class="notice">このゲームの数値・制度は学習用に簡略化した架空のものです。</p>`;
   document.getElementById("retry").onclick=screenTitle;
+  document.getElementById('research-send').onclick=shareResearch;
+  document.getElementById('stats-show').onclick=showResearchStats;
+  document.getElementById('stats-age').onchange=()=>{document.getElementById('stats-gender').value='all';};
+  document.getElementById('stats-gender').onchange=()=>{document.getElementById('stats-age').value='all';};
+  shareResearch();
 }
 
 screenTitle();
